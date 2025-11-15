@@ -1,10 +1,10 @@
 package com.muicochay.mory.story.entity;
 
-//import com.muicochay.mory.shared.entity.BaseAuditEntity;
-//import com.muicochay.mory.shared.enums.Visibility;
-import com.muicochay.mory.story.enums.StoryScope;
-import com.muicochay.mory.story.enums.StoryType;
-//import com.muicochay.mory.user.entity.User;
+import com.fantus.mory.shared.entity.BaseAuditEntity;
+import com.fantus.mory.shared.enums.Visibility;
+import com.fantus.mory.story.enums.StoryScope;
+import com.fantus.mory.story.enums.StoryType;
+import com.fantus.mory.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,15 +21,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-//public class Story extends BaseAuditEntity {
-public class Story {
+public class Story extends BaseAuditEntity {
     @Id
     @GeneratedValue
     private UUID id;
 
-//    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-//    @JoinColumn(name = "creator_id")
-//    private User creator;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private User creator;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,9 +47,9 @@ public class Story {
     @Column(nullable = false)
     private StoryScope scope;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
-//    private Visibility visibility;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Visibility visibility;
 
     private Instant deletedAt;
 

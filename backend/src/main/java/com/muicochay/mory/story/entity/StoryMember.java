@@ -1,21 +1,25 @@
 package com.muicochay.mory.story.entity;
 
-//import com.fantus.mory.shared.entity.BaseAuditEntity;
-//import com.fantus.mory.user.entity.User;
+import com.fantus.mory.shared.entity.BaseAuditEntity;
+import com.fantus.mory.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.UUID;
 
 @Entity
-@Table(name = "story_members")
+@Table(
+        name = "story_members",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"story_id", "user_id"})
+        }
+        )
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
-//public class StoryMember extends BaseAuditEntity {
-public class StoryMember {
+public class StoryMember extends BaseAuditEntity {
     @Id
     @GeneratedValue
     private UUID id;
@@ -24,7 +28,7 @@ public class StoryMember {
     @JoinColumn(name="story_id")
     private Story story;
 
-//    @ManyToOne(optional=false)
-//    @JoinColumn(name="user_id")
-//    private User user;
+    @ManyToOne(optional=false)
+    @JoinColumn(name="user_id")
+    private User user;
 }
