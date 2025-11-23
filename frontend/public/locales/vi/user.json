@@ -1,0 +1,321 @@
+{
+  "premium": {
+    "title": "Nâng cấp Premium",
+    "subtitle": "Mở khóa toàn bộ trải nghiệm"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Chào mừng bạn",
+      "subtitle": "Chỉ còn vài bước nữa để tận hưởng trọn vẹn trải nghiệm"
+    },
+    "verify": {
+      "title": "Xác minh email",
+      "subtitle": "Mã OTP gồm 6 chữ số đã được gửi đến",
+      "enter_otp": "Nhập mã OTP"
+    },
+    "complete_profile": {
+      "title": "Hoàn thiện hồ sơ",
+      "label": {
+        "name": "Tên",
+        "name_des": "Tên này sẽ hiển thị trên hồ sơ của bạn"
+      }
+    },
+    "go_premium": {
+      "title": "Nâng cấp Premium",
+      "subtitle": "Thành viên Premium được trải nghiệm nhiều tính năng đặc biệt hơn trên {{appName}}. Bạn có thể tham gia ngay hoặc nâng cấp bất cứ lúc nào."
+    },
+    "finish": {
+      "title": "Mọi thứ đã sẵn sàng!",
+      "subtitle": "Hãy bắt đầu khám phá và tận hưởng những điều đang chờ bạn phía trước."
+    },
+    "button": {
+      "continue": "Tiếp tục",
+      "verify": "Xác minh",
+      "skip": "Để sau",
+      "finish": "Hoàn tất"
+    }
+  },
+  "home": {
+    "leftSidebar": {
+      "connections": "Kết nối",
+      "story": "Câu chuyện",
+      "challenge": "Thử thách",
+      "profile": "Hồ sơ"
+    },
+    "empty": "Chưa có khoảnh khắc nào",
+    "you": "Bạn",
+    "actions": {
+      "none": "Chưa có hoạt động",
+      "default": "Hoạt động",
+      "activity": "Hoạt động"
+    }
+  },
+  "connections": {
+    "button": {
+      "link": "Liên kết",
+      "accept": "Chấp nhận",
+      "send_request": "Gửi yêu cầu",
+      "reject": "Từ chối",
+      "cancel": "Hủy",
+      "dismiss": "Bỏ qua",
+      "unblock": "Bỏ chặn",
+      "close": "Đóng"
+    },
+    "filter": {
+      "all": "Tất cả kết nối"
+    },
+    "home": {
+      "title": "Kết nối",
+      "connect_with_me_label": "Kết nối với tôi",
+      "nav_button": {
+        "connect_with_me": "Kết nối với tôi",
+        "requests": "Yêu cầu",
+        "suggestions": "Gợi ý kết nối",
+        "blocked": "Đã chặn"
+      },
+      "mutual_one": "{{count}} kết nối chung",
+      "mutual_other": "{{count}} kết nối chung",
+      "no_mutual": "Không có kết nối chung",
+      "empty": "Chưa có kết nối nào",
+      "drawer": {
+        "block": "Chặn",
+        "remove": "Hủy kết nối",
+        "ask_to_be_partners": "Đề nghị trở thành Partner",
+        "ask_to_be_close_friends": "Đề nghị trở thành Bạn thân",
+        "ask_to_be_friends": "Gửi lời mời kết bạn",
+        "back_to_friends": "Quay về mức Bạn bè",
+        "back_to_close_friends": "Quay về mức Bạn thân"
+      }
+    },
+    "requests": {
+      "title": "Yêu cầu kết nối",
+      "drawer": {
+        "view_sent": "Xem yêu cầu đã gửi"
+      },
+      "sent": {
+        "title": "Yêu cầu đã gửi",
+        "empty": "Chưa có yêu cầu nào đã gửi"
+      },
+      "empty": "Bạn không có yêu cầu đang chờ"
+    },
+    "suggestions": {
+      "title": "Gợi ý kết nối",
+      "subtitle": "Những người bạn có thể biết",
+      "empty": "Hiện chưa có gợi ý nào"
+    },
+    "list": {
+      "title": "Tất cả kết nối"
+    },
+    "blocked": {
+      "title": "Người bị chặn",
+      "empty": "Bạn chưa chặn ai"
+    },
+    "dropdown": {
+      "all": "Tất cả bạn bè"
+    },
+    "limit": {
+      "connect": {
+        "me": "Bạn đã đạt giới hạn kết nối!",
+        "other": "{{name}} đã đạt giới hạn kết nối!"
+      },
+      "change": {
+        "me": "Bạn đã đạt giới hạn cho mối quan hệ {{type}}.",
+        "other": "{{name}} đã đạt giới hạn cho mối quan hệ {{type}}."
+      }
+    }
+  },
+  "story": {
+    "home": {
+      "title": "Câu chuyện",
+      "drawer": {
+        "edit": "Chỉnh sửa câu chuyện",
+        "dissolve": "Giải tán câu chuyện",
+        "delete": "Xóa câu chuyện",
+        "leave": "Rời khỏi câu chuyện"
+      },
+      "filter": {
+        "all": "Tất cả"
+      },
+      "leave_story_prompt": "Bạn muốn xử lý các khoảnh khắc trong câu chuyện này như thế nào?",
+      "leave_story_action": {
+        "keep_as_independent_moments": "Giữ lại dưới dạng các khoảnh khắc riêng lẻ",
+        "remove_moments": "Xóa các khoảnh khắc",
+        "create_personal_story": "Tạo câu chuyện cá nhân mới từ các khoảnh khắc"
+      }
+    },
+    "empty": "Chưa có câu chuyện nào",
+    "create_story": {
+      "title": "Tạo câu chuyện",
+      "label": {
+        "type": "Loại",
+        "title": "Tiêu đề",
+        "date": "Ngày",
+        "members": "Thành viên",
+        "duration": "Thời gian"
+      },
+      "selection": {
+        "guide": "Chọn phong cách câu chuyện của bạn",
+        "journey": {
+          "title": "Hành trình",
+          "des": "Kể một câu chuyện trải dài trong nhiều ngày"
+        },
+        "before_after": {
+          "title": "Trước & Sau",
+          "des": "Thể hiện sự thay đổi theo thời gian"
+        },
+        "challenge": {
+          "title": "Thử thách",
+          "des": "Hoàn thành thử thách hằng ngày"
+        },
+        "album": {
+          "title": "Album",
+          "des": "Tập hợp các khoảnh khắc một cách tự do"
+        }
+      },
+      "button": {
+        "create": "Tạo",
+        "update": "Cập nhật"
+      },
+      "error": {
+        "min_length": "Tiêu đề phải có ít nhất 5 ký tự"
+      },
+      "journey": {
+        "is_group": "Nhóm"
+      },
+      "add_members": {
+        "title": "Thêm thành viên",
+        "none": "Không còn thành viên nào để thêm"
+      }
+    },
+    "status": {
+      "ongoing": "Đang diễn ra",
+      "ended": "Đã kết thúc",
+      "upcoming": "Sắp diễn ra",
+      "failed": "Thất bại",
+      "completed": "Hoàn thành"
+    },
+    "moment_one": "{{count}} khoảnh khắc",
+    "moment_other": "{{count}} khoảnh khắc",
+    "no_moment": "Chưa có khoảnh khắc nào",
+    "drawer": {
+      "kick": "Xóa thành viên"
+    },
+    "details": {
+      "error": "Đã xảy ra lỗi!",
+      "button": {
+        "moments": "Khoảnh khắc",
+        "members": "Thành viên"
+      }
+    }
+  },
+  "moment": {
+    "drawer": {
+      "milestone": {
+        "set": "Đánh dấu cột mốc",
+        "unset": "Bỏ cột mốc"
+      },
+      "visibility": "Cập nhật quyền xem",
+      "download": "Tải về",
+      "delete": "Xóa"
+    },
+    "update": {
+      "visibility": {
+        "title": "Cập nhật quyền xem"
+      }
+    },
+    "button": {
+      "update": "Lưu"
+    },
+    "create": {
+      "type": {
+        "normal": "Thông thường",
+        "story": "Câu chuyện"
+      },
+      "caption_default": "Thêm lời nhắn..."
+    }
+  },
+  "drawer": {
+    "cancel": "Hủy"
+  },
+  "profile": {
+    "connection_one": "{{count}} kết nối",
+    "connection_other": "{{count}} kết nối",
+    "no_connections": "Chưa có kết nối nào",
+
+    "button": {
+      "connect_with_me": "Kết nối với tôi",
+      "moments": "Khoảnh khắc",
+      "stories": "Câu chuyện",
+      "connections": "Kết nối",
+      "send_friend_request": "Gửi lời mời kết bạn"
+    },
+    "moments": {
+      "title": "Khoảnh khắc",
+      "access_denied": "Bạn không có quyền xem khoảnh khắc của người này"
+    },
+    "connections": {
+      "title": "Kết nối",
+      "access_denied": "Bạn không có quyền xem kết nối của người này"
+    },
+    "stories": {
+      "title": "Câu chuyện",
+      "access_denied": "Bạn không có quyền xem câu chuyện của người này"
+    },
+    "challenges": {
+      "title": "Thử thách"
+    },
+    "action_menu": {
+      "edit_profile": "Chỉnh sửa hồ sơ",
+      "set_password": "Đặt mật khẩu"
+    },
+    "set_password": {
+      "title": "Đặt mật khẩu"
+    },
+    "access_denied": "Bạn không có quyền xem hồ sơ này"
+  },
+  "invite": {
+    "error": "Liên kết mời đã hết hạn hoặc không hợp lệ"
+  },
+  "user_action_menu": {
+    "label": {
+      "language": "Ngôn ngữ",
+      "theme": "Giao diện",
+      "logout": "Đăng xuất"
+    }
+  },
+  "create_moment": {
+    "title": "Tải lên hoặc chụp ngay",
+    "edit_title": "Biến nó thành của bạn",
+    "button": {
+      "select_story": "Chọn câu chuyện"
+    }
+  },
+  "visibility": {
+    "all_friends": "Tất cả bạn bè",
+    "close_friends": "Bạn thân",
+    "partner_only": "Chỉ người đặc biệt",
+    "only_me": "Chỉ mình tôi"
+  },
+  "avatar_crop": {
+    "title": "Cắt ảnh",
+    "submit": "Cắt",
+    "cancel": "Hủy"
+  },
+  "time": {
+    "just_now": "vừa xong",
+    "minutes_ago_one": "{{count}} phút trước",
+    "minutes_ago_other": "{{count}} phút trước",
+    "hours_ago_one": "{{count}} giờ trước",
+    "hours_ago_other": "{{count}} giờ trước",
+    "days_ago_one": "{{count}} ngày trước",
+    "days_ago_other": "{{count}} ngày trước"
+  },
+  "user": {
+    "connection_type": {
+      "partner": "Người đặc biệt",
+      "close_friend": "Bạn thân",
+      "friend": "Bạn bè"
+    }
+  }
+
+}

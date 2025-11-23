@@ -1,0 +1,191 @@
+{
+  "sign_in": {
+    "success": "Sign In Successful!",
+    "error": "Failed to Sign In!"
+  },
+  "forgot_password": {
+    "error": "Failed to send request!"
+  },
+  "create_password": {
+    "success": "Sign Up Successful!",
+    "error": "Failed to Sign Up!"
+  },
+  "send_otp": {
+    "success": "Otp sent!",
+    "error": "Failed to send otp!"
+  },
+  "verify_email": {
+    "success": "Email verified!",
+    "error": "Failed to verify email!"
+  },
+  "reset_password": {
+    "success": "Password updated successful!",
+    "same_password": "The new password must not be the same as the current password!",
+    "error": "Failed to update password!"
+  },
+  "complete_information": {
+    "success": "Update Information successful!",
+    "error": "Failed to update Information!"
+  },
+  "admin": {
+    "block_user": {
+      "success": "User has been blocked!",
+      "error": "Failed to block user!"
+    },
+    "unblock_user": {
+      "success": "User has been unblocked!",
+      "error": "Failed to unblock user!"
+    },
+    "create_question": {
+      "success": "Question had been created!",
+      "error": "Failed to create question!"
+    },
+    "create_topic": {
+      "success": "New topic has been added!",
+      "error": "Failed to create topic!"
+    },
+    "delete_question": {
+      "success": "Question has been deleted!",
+      "error": "Failed to delete question!"
+    },
+    "update_question": {
+      "success": "Update Question successful!",
+      "error": "Failed to update question!"
+    },
+    "update_topic": {
+      "success": "Update Topic successful!",
+      "error": "Failed to update Topic!"
+    }
+  },
+  "user": {
+    "update_info": {
+      "success": "User's information has been updated!",
+      "error" : "Failed to update information"
+    },
+    "update_avatar": {
+      "success": "Avatar has been updated!",
+      "error" : "Failed to update avatar"
+    },
+    "connection_type": {
+      "partner": "Partner",
+      "close_friend": "Close friend",
+      "friend": "Friend"
+    },
+    "connections": {
+      "request": {
+        "send": {
+          "success": "Request sent to {{name}}!",
+          "error": "Failed to send request to {{name}}!"
+        },
+        "already_pending": "You and {{name}} already have a pending connection request.",
+        "accept": {
+          "success": "You are now connected with {{name}}!",
+          "error": "Failed to accept request from {{name}}!"
+        },
+        "accept_change_type": {
+          "success": "Connection with {{name}} has been changed to {{type}}!"
+        },
+        "reject": {
+          "success": "Rejected request from {{name}}.",
+          "error": "Failed to reject request from {{name}}!"
+        },
+        "cancel": {
+          "success": "Cancelled request to {{name}}.",
+          "error": "Failed to cancel request to {{name}}!"
+        }
+      },
+      "block": {
+        "success": "Blocked {{name}}.",
+        "error": "Failed to block {{name}}!"
+      },
+      "unblock": {
+        "success": "Unblocked {{name}}.",
+        "error": "Failed to unblock {{name}}!"
+      },
+      "remove": {
+        "success": "Disconnected from {{name}}.",
+        "error": "Failed to disconnect from {{name}}!"
+      },
+      "downgrade": {
+        "success": "Your connection with {{name}} has been changed from {{from}} to {{to}}.",
+        "error": "Failed to change your connection with {{name}}."
+      },
+      "send_connect": {
+        "success": "Connection request sent to {{name}}.",
+        "error": "Failed to send connection request to {{name}}."
+      },
+      "send_change_type": {
+        "success": "Request to change connection type with {{name}} has been sent.",
+        "error": "Failed to send request to change connection type with {{name}}."
+      }
+    },
+    "story": {
+      "delete": {
+        "success": "Story '{{name}}' has been deleted!",
+        "error": "Failed to delete story '{{name}}'!"
+      },
+      "leave": {
+        "success": "You have left '{{name}}'.",
+        "error": "Failed to leave '{{name}}'!"
+      },
+      "dissolve": {
+        "success": "Story '{{name}}' has been dissolved!",
+        "error": "Failed to dissolve story '{{name}}'!"
+      },
+      "add_members": {
+        "success": "Members have been added to story '{{name}}'!",
+        "error": "Failed to add members to story '{{name}}'!"
+      },
+      "kick_member": {
+        "success": "Member '{{memberName}}' has been kicked from story '{{name}}'!",
+        "error": "Failed to kick member '{{memberName}}' from story '{{name}}'!"
+      },
+      "update": {
+        "success": "Story updated successfully!",
+        "error": "Failed to update story!"
+      }
+    },
+    "create_moment": {
+      "success": "Moment shared successfully!",
+      "error": "Failed to share moment!"
+    },
+    "create_story": {
+      "success": "Story created successfully!",
+      "error": "Failed to create story!"
+    },
+    "moment": {
+      "delete": {
+        "success": "Moment deleted successfully!",
+        "error": "Failed to delete moment"
+      },
+      "milestone": {
+        "set": {
+          "success": "Moment marked as milestone successfully!",
+          "error": "Failed to mark moment as milestone."
+        },
+        "unset": {
+          "success": "Moment unmarked as milestone successfully!",
+          "error": "Failed to remove milestone mark."
+        }
+      },
+      "visibility": {
+        "success": "Moment visibility updated successfully!",
+        "error": "Failed to update moment visibility."
+      },
+      "download": {
+        "success": "Image downloaded!",
+        "error": "Failed to download image",
+        "no_image": "No image to download"
+      }
+    }
+  },
+  "copied_to_clipboard": "Copied to clipboard!",
+  "browser_permission": {
+    "brave": "Brave: Go to Settings → Privacy and security → Site and Shield settings → Camera",
+    "edge": "Edge: Settings → Cookies and site permissions → Camera",
+    "chrome": "Chrome: Settings → Privacy and security → Site settings → Camera",
+    "ios_safari": "iOS: Settings → Safari → Camera → Allow",
+    "safari": "Safari (Mac): Safari → Settings for This Website → Camera → Allow",
+    "default": "Open your browser settings → Site permissions → Enable camera access for this site."
+  }
+}

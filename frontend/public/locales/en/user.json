@@ -1,0 +1,320 @@
+{
+  "premium": {
+    "title": "Go Premium",
+    "subtitle": "Unlock the full experience"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome",
+      "subtitle": "Just a few steps away from enjoying the full experience"
+    },
+    "verify": {
+      "title": "Verify your email",
+      "subtitle": "An 6 digit OTP has been sent to",
+      "enter_otp": "Enter OTP"
+    },
+    "complete_profile": {
+      "title": "Complete your profile",
+      "label": {
+        "name": "Name",
+        "name_des": "This will appear on your profile"
+      }
+    },
+    "go_premium": {
+      "title": "Go Premium",
+      "subtitle": "Premium members have so much more to enjoy on {{appName}}. Join today, or upgrade whenever you’re ready."
+    },
+    "finish": {
+      "title": "You’re ready to go!",
+      "subtitle": "Start exploring the app now and enjoy everything waiting for you."
+    },
+    "button": {
+      "continue": "Continue",
+      "verify": "Verify",
+      "skip": "Skip for now",
+      "finish": "Finish"
+    }
+  },
+  "home": {
+    "leftSidebar": {
+      "connections": "Connections",
+      "story": "Story",
+      "challenge": "Challenge",
+      "profile": "Profile"
+    },
+    "empty": "No moments available",
+    "you": "You",
+    "actions": {
+      "none": "No actions yet",
+      "default": "Actions",
+      "activity": "Activity"
+    }
+  },
+  "connections": {
+    "button": {
+      "link": "Link",
+      "accept": "Accept",
+      "send_request": "Send request",
+      "reject": "Reject",
+      "cancel": "Cancel",
+      "dismiss": "Dismiss",
+      "unblock": "Unblock",
+      "close": "Close"
+    },
+    "filter": {
+      "all": "All connections"
+    },
+    "home": {
+      "title": "Connections",
+      "connect_with_me_label": "Connect with me",
+      "nav_button": {
+        "connect_with_me": "Connect with me",
+        "requests": "Requests",
+        "suggestions": "People you may know",
+        "blocked": "Blocked user"
+      },
+      "mutual_one": "{{count}} mutual connection",
+      "mutual_other": "{{count}} mutual connections",
+      "no_mutual": "No mutual connections",
+      "empty": "No connections yet",
+      "drawer": {
+        "block": "Block",
+        "remove": "Disconnect",
+        "ask_to_be_partners": "Ask to be Partners",
+        "ask_to_be_close_friends": "Ask to be Close Friends",
+        "ask_to_be_friends": "Send friend request",
+        "back_to_friends": "Back to just Friends",
+        "back_to_close_friends": "Back to Close Friends"
+      }
+    },
+    "requests": {
+      "title": "Connection requests",
+      "drawer": {
+        "view_sent": "View sent requests"
+      },
+      "sent": {
+        "title": "Sent connection requests",
+        "empty": "No sent requests"
+      },
+      "empty": "You have no pending requests"
+    },
+    "suggestions": {
+      "title": "People you may know",
+      "subtitle": "People you may know",
+      "empty": "No people to suggest right now"
+    },
+    "list": {
+      "title": "All connections"
+    },
+    "blocked": {
+      "title": "Blocked user",
+      "empty": "You have not blocked anyone yet"
+    },
+    "dropdown": {
+      "all": "All friends"
+    },
+    "limit": {
+      "connect": {
+        "me": "You’ve reached your connection limit!",
+        "other": "{{name}} has reached their connection limit!"
+      },
+      "change": {
+        "me": "You have reached the {{type}} connection limit.",
+        "other": "{{name}} has reached the {{type}} connection limit."
+      }
+    }
+  },
+  "story": {
+    "home": {
+      "title": "Story",
+      "drawer": {
+        "edit": "Edit Story",
+        "dissolve": "Dissolve Story",
+        "delete": "Delete Story",
+        "leave": "Leave Story"
+      },
+      "filter": {
+        "all": "All types"
+      },
+      "leave_story_prompt": "What do you want to do with your moments in this story?",
+      "leave_story_action": {
+        "keep_as_independent_moments": "Keep as independent moments",
+        "remove_moments": "Remove moments",
+        "create_personal_story": "Add moments to new personal story"
+      }
+    },
+    "empty": "No stories available",
+    "create_story": {
+      "title": "Create story",
+      "label": {
+        "type": "Type",
+        "title": "Title",
+        "date": "Date",
+        "members": "Members",
+        "duration": "Duration"
+      },
+      "selection": {
+        "guide": "Select your story style",
+        "journey": {
+          "title": "Journey",
+          "des": "Share a story across multiple days"
+        },
+        "before_after": {
+          "title": "Before & after",
+          "des": "Show the change over time"
+        },
+        "challenge": {
+          "title": "Challenge",
+          "des": "Complete a daily challenge"
+        },
+        "album": {
+          "title": "Album",
+          "des": "Gather moments freely in one place"
+        }
+      },
+      "button": {
+        "create": "Create",
+        "update": "Update"
+      },
+      "error": {
+        "min_length": "Title must be at least 5 characters long"
+      },
+      "journey": {
+        "is_group": "Group"
+      },
+      "add_members": {
+        "title": "Add members",
+        "none": "No available members to add"
+      }
+    },
+    "status": {
+      "ongoing": "Ongoing",
+      "ended": "Ended",
+      "upcoming": "Upcoming",
+      "failed": "Failed",
+      "completed": "Completed"
+    },
+    "moment_one": "{{count}} moment",
+    "moment_other": "{{count}} moments",
+    "no_moment": "No moments yet",
+    "drawer": {
+      "kick": "Kick member"
+    },
+    "details": {
+      "error": "Somethings went wrong!",
+      "button": {
+        "moments": "Moments",
+        "members": "Members"
+      }
+    }
+  },
+  "moment": {
+    "drawer": {
+      "milestone": {
+        "set": "Mark as milestone",
+        "unset": "Remove milestone"
+      },
+      "visibility": "Update visibility",
+      "download": "Download",
+      "delete": "Delete"
+    },
+    "update": {
+      "visibility": {
+        "title": "Update visibility"
+      }
+    },
+    "button": {
+      "update": "Save"
+    },
+    "create": {
+      "type": {
+        "normal": "Normal",
+        "story": "Story"
+      },
+      "caption_default": "Write something..."
+    }
+  },
+  "drawer": {
+    "cancel": "Cancel"
+  },
+  "profile": {
+    "connection_one": "{{count}} connection",
+    "connection_other": "{{count}} connections",
+    "no_connections": "No connections yet",
+
+    "button": {
+      "connect_with_me": "Connect with me",
+      "moments": "Moments",
+      "stories": "Stories",
+      "connections": "Connections",
+      "send_friend_request": "Send friend request"
+    },
+    "moments": {
+      "title": "Moments",
+      "access_denied": "You don't have access to view this user's moments"
+    },
+    "connections": {
+      "title": "Connections",
+      "access_denied": "You don't have access to view this user's connections"
+    },
+    "stories": {
+      "title": "Stories",
+      "access_denied": "You don't have access to view this user's stories"
+    },
+    "challenges": {
+      "title": "Challenges"
+    },
+    "action_menu": {
+      "edit_profile": "Edit profile",
+      "set_password": "Set password"
+    },
+    "set_password": {
+      "title": "Set password"
+    },
+    "access_denied": "You don't have access to view this profile"
+  },
+  "invite": {
+    "error": "The invitation link has expired or is invalid"
+  },
+  "user_action_menu": {
+    "label": {
+      "language": "Language",
+      "theme": "Theme",
+      "logout": "Logout"
+    }
+  },
+  "create_moment": {
+    "title": "Upload or capture now",
+    "edit_title": "Make it your",
+    "button": {
+      "select_story": "Select a story"
+    }
+  },
+  "visibility": {
+    "all_friends": "All friends",
+    "close_friends": "Close friends",
+    "partner_only": "Partner Only",
+    "only_me": "Only Me"
+  },
+  "avatar_crop": {
+    "title": "Crop your image",
+    "submit": "Crop",
+    "cancel": "Cancel"
+  },
+  "time": {
+    "just_now": "just now",
+    "minutes_ago_one": "{{count}} minute ago",
+    "minutes_ago_other": "{{count}} minutes ago",
+    "hours_ago_one": "{{count}} hour ago",
+    "hours_ago_other": "{{count}} hours ago",
+    "days_ago_one": "{{count}} day ago",
+    "days_ago_other": "{{count}} days ago"
+  },
+  "user": {
+    "connection_type": {
+      "partner": "Partner",
+      "close_friend": "Close friend",
+      "friend": "Friend"
+    }
+  }
+}

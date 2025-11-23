@@ -1,0 +1,154 @@
+{
+  "home": {
+    "chart": {
+      "users": {
+        "title": "Người dùng đăng ký mỗi ngày",
+        "chart_type": {
+          "bar": "Cột",
+          "line": "Đường"
+        },
+        "label": "Người dùng mới"
+      }
+    }
+  },
+  "topbar": {
+    "welcome": "Chào mừng, ",
+    "subtitle": "Theo dõi tất cả dự án và công việc của bạn tại đây"
+  },
+  "stats": {
+    "active": "Người dùng đang hoạt động",
+    "total": "Tổng số người dùng",
+    "pending": "Người dùng chờ duyệt"
+  },
+  "leftSidebar": {
+    "home": "Trang chủ",
+    "users": "Người dùng",
+    "questions": "Câu hỏi"
+  },
+  "users_page": {
+    "title": "Người dùng",
+    "search_input_placeholder": "Tìm theo email hoặc tên người dùng",
+    "filter": {
+      "btn": "Bộ lọc",
+      "label": {
+        "role": "Vai trò",
+        "active_only": "Chỉ đang hoạt động",
+        "sort_by": "Sắp xếp theo:",
+        "sort_by_email": "Email",
+        "sort_by_joined_date": "Ngày tham gia",
+        "direction": "Chiều:"
+      }
+    },
+    "columns": {
+      "filter_label": "Cột hiển thị",
+      "label": {
+        "basic_information": "Tên",
+        "joined_date": "Ngày tham gia",
+        "role": "Vai trò",
+        "phone_number": "Số điện thoại",
+        "providers": "Nhà cung cấp",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      }
+    },
+    "block_user": {
+      "title": "Chặn tài khoản",
+      "duration": "Thời gian chặn",
+      "alert_1": "Tài khoản liên kết với ",
+      "alert_2": " sẽ bị chặn trong ",
+      "minute": " phút",
+      "hour": " giờ",
+      "day": " ngày",
+      "btn": "Chặn"
+    },
+    "unblock_user": {
+      "title": "Bỏ chặn tài khoản",
+      "alert_1": "Tài khoản liên kết với ",
+      "alert_2": " sẽ được bỏ chặn và có thể truy cập lại",
+      "btn": "Bỏ chặn"
+    }
+  },
+  "questions_page": {
+    "title": "Câu hỏi",
+    "filter": {
+      "btn": "Bộ lọc",
+      "label": {
+        "topic": "Chủ đề",
+        "all_topics": "Tất cả",
+        "type": "Phân loại",
+        "all_types": "Tất cả"
+      }
+    },
+    "columns": {
+      "filter_label": "Cột hiển thị",
+      "label": {
+        "contentEN": "Nội dung",
+        "contentVI": "Nội dung",
+        "topic": "Chủ Đề",
+        "difficulty": "Độ khó",
+        "type": "Phân loại",
+        "active": "Trạng thái",
+        "actions": "Thao tác"
+      }
+    },
+    "type_labels": {
+      "OPEN_ENDED": "Câu hỏi mở",
+      "YES_NO": "Có / Không",
+      "MULTIPLE_CHOICE": "Trắc nghiệm",
+      "RATING": "Đánh giá sao",
+      "SCALE": "Thang đo",
+      "IMAGE": "Hình ảnh",
+      "VIDEO": "Video",
+      "AUDIO": "Âm thanh"
+    },
+    "create_question_btn": "Tạo mới",
+    "create_topic_btn": "Tạo mới",
+    "create_question": {
+      "title": "Tạo câu hỏi",
+      "placeholder": {
+        "contentEN": "Nội dung EN",
+        "contentVI": "Nội dung VI",
+        "topic": "Chọn một chủ đề",
+        "difficulty": "Chọn mức độ khó",
+        "type": "Chọn một loại câu hỏi"
+      },
+      "submit_btn": "Tạo"
+    },
+    "edit_question": {
+      "title": "Chỉnh sửa câu hỏi",
+      "submit_btn": "Xác nhận"
+    },
+    "delete_question": {
+      "title": "Xóa câu hỏi",
+      "alert": "Câu hỏi này sẽ bị xóa vĩnh viễn. Bạn có chắc chắn muốn tiếp tục không?",
+      "submit_btn": "Xóa"
+    },
+    "topics_tab": {
+      "title": "Chủ đề",
+      "columns": {
+        "filter_label": "Cột hiển thị",
+        "label": {
+          "nameEN": "Tên",
+          "nameVI": "Tên",
+          "descriptionEN": "Mô tả",
+          "descriptionVI": "Mô tả",
+          "actions": "Thao tác"
+        }
+      },
+      "create_topic": {
+        "title": "Tạo chủ đề",
+        "placeholder": {
+          "nameEN": "Tên EN",
+          "nameVI": "Tên VI",
+          "descriptionEN": "Mô tả EN",
+          "descriptionVI": "Mô tả VI"
+        },
+        "submit_btn": "Tạo"
+      },
+      "edit_topic": {
+        "title": "Chỉnh sửa chủ đề",
+        "submit_btn": "Xác nhận"
+      }
+    }
+  }
+}

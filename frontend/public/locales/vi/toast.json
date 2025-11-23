@@ -1,0 +1,192 @@
+{
+  "sign_in": {
+    "success": "Đăng nhập thành công!",
+    "error": "Đăng nhập thất bại!"
+  },
+  "forgot_password": {
+    "error": "Gửi yêu cầu thất bại!"
+  },
+  "create_password": {
+    "success": "Đăng ký thành công!",
+    "error": "Đăng ký thất bại!"
+  },
+  "send_otp": {
+    "success": "Otp gửi thành công!",
+    "error": "Gửi Otp thất bại!"
+  },
+  "verify_email": {
+    "success": "Xác minh email thành công!",
+    "error": "Xác minh email thất bại!"
+  },
+  "reset_password": {
+    "success": "Cập nhật mật khẩu thành công!",
+    "same_password": "Mật khẩu mới không được trung với mật khẩu cũ!",
+    "error": "Cập nhật mật khẩu thất bại!"
+  },
+  "complete_information": {
+    "success": "Cập nhật thông tin thành công!",
+    "error": "Cập nhật thông tin thất bại!"
+  },
+  "admin": {
+    "block_user": {
+      "success": "Người dùng đã bị chặn!",
+      "error": "Chặn người dùng thất bại!"
+    },
+    "unblock_user": {
+      "success": "Người dùng đã được bỏ chặn!",
+      "error": "Bỏ chặn người dùng thất bại!"
+    },
+    "create_question": {
+      "success": "Tạo câu hỏi thành công!",
+      "error": "Tạo câu hỏi thất bại!"
+    },
+    "create_topic": {
+      "success": "Tạo topic thành công!",
+      "error": "Tạo topic thất bại!"
+    },
+    "delete_question": {
+      "success": "Xóa câu hỏi thành công!",
+      "error": "Xóa câu hỏi thất bại!"
+    },
+    "update_question": {
+      "success": "Cập nhật câu hỏi thành công!",
+      "error": "Cập nhật câu hỏi thất bại!"
+    },
+    "update_topic": {
+      "success": "Cập nhật chủ đề thành công!",
+      "error": "Cập nhật chủ đề thất bại!"
+    }
+
+  },
+  "user": {
+    "update_info": {
+      "success": "Cập nhật thông tin thành công!",
+      "error": "Cập nhật thông tin thất bại!"
+    },
+    "update_avatar": {
+      "success": "Cập nhật ảnh đại diện thành công!",
+      "error": "Cập nhật ảnh đại diện thất bại!"
+    },
+    "connection_type": {
+      "partner": "Người thân",
+      "close_friend": "Bạn thân",
+      "friend": "Bạn bè"
+    },
+    "connections": {
+      "request": {
+        "send": {
+          "success": "Đã gửi yêu cầu kết nối đến {{name}}!",
+          "error": "Gửi yêu cầu kết nối đến {{name}} thất bại!"
+        },
+        "already_pending": "Bạn và {{name}} đã có một yêu cầu kết nối đang chờ.",
+        "accept": {
+          "success": "Bạn đã kết nối với {{name}}!",
+          "error": "Chấp nhận yêu cầu từ {{name}} thất bại!"
+        },
+        "accept_change_type": {
+          "success": "Mối quan hệ với {{name}} đã được thay đổi thành {{type}}!"
+        },
+        "reject": {
+          "success": "Đã từ chối yêu cầu từ {{name}}.",
+          "error": "Từ chối yêu cầu từ {{name}} thất bại!"
+        },
+        "cancel": {
+          "success": "Đã hủy yêu cầu gửi đến {{name}}.",
+          "error": "Hủy yêu cầu gửi đến {{name}} thất bại!"
+        }
+      },
+      "block": {
+        "success": "Đã chặn {{name}}.",
+        "error": "Chặn {{name}} thất bại!"
+      },
+      "unblock": {
+        "success": "Đã bỏ chặn {{name}}.",
+        "error": "Bỏ chặn {{name}} thất bại!"
+      },
+      "remove": {
+        "success": "Đã hủy kết nối với {{name}}.",
+        "error": "Hủy kết nối với {{name}} thất bại!"
+      },
+      "downgrade": {
+        "success": "Kết nối với {{name}} đã được đổi từ {{from}} thành {{to}}.",
+        "error": "Thay đổi mối quan hệ với {{name}} thất bại."
+      },
+      "send_connect": {
+        "success": "Đã gửi yêu cầu kết nối đến {{name}}.",
+        "error": "Gửi yêu cầu kết nối đến {{name}} thất bại."
+      },
+      "send_change_type": {
+        "success": "Đã gửi yêu cầu thay đổi mối quan hệ với {{name}}.",
+        "error": "Gửi yêu cầu thay đổi mối quan hệ với {{name}} thất bại."
+      }
+    },
+    "story": {
+      "delete": {
+        "success": "Câu chuyện '{{name}}' đã được xóa!",
+        "error": "Xóa câu chuyện '{{name}}' thất bại!"
+      },
+      "leave": {
+        "success": "Bạn đã rời khỏi câu chuyện '{{name}}'.",
+        "error": "Rời câu chuyện '{{name}}' thất bại!"
+      },
+      "dissolve": {
+        "success": "Câu chuyện '{{name}}' đã bị giải tán!",
+        "error": "Giải tán câu chuyện '{{name}}' thất bại!"
+      },
+      "add_members": {
+        "success": "Đã thêm thành viên vào câu chuyện '{{name}}'!",
+        "error": "Thêm thành viên vào câu chuyện '{{name}}' thất bại!"
+      },
+      "kick_member": {
+        "success": "Thành viên '{{memberName}}' đã bị loại khỏi câu chuyện '{{name}}'!",
+        "error": "Loại thành viên '{{memberName}}' khỏi câu chuyện '{{name}}' thất bại!"
+      },
+      "update": {
+        "success": "Cập nhật câu chuyện thành công!",
+        "error": "Cập nhật câu chuyện thất bại!"
+      }
+    },
+    "create_moment": {
+      "success": "Chia sẻ khoảnh khắc thành công!",
+      "error": "Chia sẻ khoảnh khắc thất bại!"
+    },
+    "create_story": {
+      "success": "Tạo câu chuyện thành công!",
+      "error": "Tạo câu chuyện thất bại!"
+    },
+    "moment": {
+      "delete": {
+        "success": "Xóa khoảnh khắc thành công!",
+        "error": "Xóa khoảnh khắc thất bại!"
+      },
+      "milestone": {
+        "set": {
+          "success": "Đã đánh dấu khoảnh khắc là cột mốc!",
+          "error": "Đánh dấu cột mốc thất bại!"
+        },
+        "unset": {
+          "success": "Đã bỏ đánh dấu cột mốc!",
+          "error": "Bỏ đánh dấu cột mốc thất bại!"
+        }
+      },
+      "visibility": {
+        "success": "Cập nhật quyền riêng tư khoảnh khắc thành công!",
+        "error": "Cập nhật quyền riêng tư khoảnh khắc thất bại!"
+      },
+      "download": {
+        "success": "Đã tải hình ảnh xuống!",
+        "error": "Tải hình ảnh xuống thất bại!",
+        "no_image": "Không có hình ảnh để tải xuống!"
+      }
+    }
+  },
+  "copied_to_clipboard": "Đã sao chép vào clipboard!",
+  "browser_permission": {
+    "brave": "Brave: Cài đặt → Quyền riêng tư và bảo mật → Cài đặt trang và Shield → Camera",
+    "edge": "Edge: Cài đặt → Cookie và quyền trang web → Camera",
+    "chrome": "Chrome: Cài đặt → Quyền riêng tư và bảo mật → Cài đặt trang web → Camera",
+    "ios_safari": "iOS: Cài đặt → Safari → Camera → Cho phép",
+    "safari": "Safari (Mac): Safari → Settings for This Website → Camera → Allow",
+    "default": "Mở cài đặt trình duyệt → Quyền trang web → Bật quyền truy cập camera cho trang này."
+  }
+}

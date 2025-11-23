@@ -1,0 +1,154 @@
+{
+  "home": {
+    "chart": {
+      "users": {
+        "title": "User Registrations Per Day",
+        "chart_type": {
+          "bar": "Bar",
+          "line": "Line"
+        },
+        "label": "New users"
+      }
+    }
+  },
+  "topbar": {
+    "welcome": "Welcome, ",
+    "subtitle": "Monitor all of your projects and tasks here"
+  },
+  "stats": {
+    "active": "Active Users",
+    "total": "Total Users",
+    "pending": "Pending Users"
+  },
+  "leftSidebar": {
+    "home": "Home",
+    "users": "Users",
+    "questions": "Questions"
+  },
+  "users_page": {
+    "title": "Users",
+    "search_input_placeholder": "Search by email or username",
+    "filter": {
+      "btn": "Filters",
+      "label": {
+        "role": "Role",
+        "active_only": "Active only",
+        "sort_by": "Sort by:",
+        "sort_by_email": "Email",
+        "sort_by_joined_date": "Joined Date",
+        "direction": "Direction:"
+      }
+    },
+    "columns": {
+      "filter_label": "Columns",
+      "label": {
+        "basic_information": "Name",
+        "joined_date": "Date joined",
+        "role": "Role",
+        "phone_number": "Phone Number",
+        "providers": "Providers",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "block_user": {
+      "title": "Block Account",
+      "duration": "Duration",
+      "alert_1": "The account associated with ",
+      "alert_2": " will be blocked for ",
+      "minute": " minutes",
+      "hour": " hours",
+      "day": " days",
+      "btn": "Block"
+    },
+    "unblock_user": {
+      "title": "Unblock Account",
+      "alert_1": "The account associated with ",
+      "alert_2": " will be unblocked and will regain access",
+      "btn": "Unblock"
+    }
+  },
+  "questions_page": {
+    "title": "Questions",
+    "filter": {
+      "btn": "Filters",
+      "label": {
+        "topic": "Topic",
+        "all_topics": "All Topics",
+        "type": "Type",
+        "all_types": "All Types"
+      }
+    },
+    "columns": {
+      "filter_label": "Columns",
+      "label": {
+        "contentEN": "Content",
+        "contentVI": "Content",
+        "topic": "Topic",
+        "difficulty": "Difficulty",
+        "type": "Type",
+        "active": "Status",
+        "actions": "Actions"
+      }
+    },
+    "create_question_btn": "New",
+    "create_topic_btn": "New",
+    "create_question": {
+      "title": "New Question",
+      "placeholder": {
+        "contentEN": "Content EN",
+        "contentVI": "Content VI",
+        "topic": "Select a topic",
+        "difficulty": "Select difficulty",
+        "type": "Select a type"
+      },
+      "submit_btn": "Create"
+    },
+    "edit_question": {
+      "title": "Edit Question",
+      "submit_btn": "Submit"
+    },
+    "delete_question": {
+      "title": "Delete Question",
+      "alert": "This question will be permanently deleted. Are you sure you want to proceed?",
+      "submit_btn": "Delete"
+    },
+    "type_labels": {
+      "OPEN_ENDED": "Open Ended",
+      "YES_NO": "Yes / No",
+      "MULTIPLE_CHOICE": "Multiple Choice",
+      "RATING": "Rating",
+      "SCALE": "Scale",
+      "IMAGE": "Image",
+      "VIDEO": "Video",
+      "AUDIO": "Audio"
+    },
+    "topics_tab": {
+      "title": "Topics",
+      "columns": {
+        "filter_label": "Columns",
+        "label": {
+          "nameEN": "Name",
+          "nameVI": "Name",
+          "descriptionEN": "Description",
+          "descriptionVI": "Description",
+          "actions": "Actions"
+        }
+      },
+      "create_topic": {
+        "title": "New Topic",
+        "placeholder": {
+          "nameEN": "Name EN",
+          "nameVI": "Name VI",
+          "descriptionEN": "Description EN",
+          "descriptionVI": "Description VI"
+        },
+        "submit_btn": "Create"
+      },
+      "edit_topic": {
+        "title": "Edit Topic",
+        "submit_btn": "Submit"
+      }
+    }
+  }
+}

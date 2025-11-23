@@ -1,0 +1,12 @@
+{
+  "app_name": "Mory",
+
+  "landing_tagline": "Real connections.\nReal memories.",
+  "landing_cta": "Begin your journey.",
+  "landing_prompt": "Enter your email to create meaningful connections and share memorable moments together.",
+
+  "get_started": "Get Started",
+  "button": {
+    "reload": "Reload"
+  }
+}

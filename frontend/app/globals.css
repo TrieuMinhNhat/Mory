@@ -1,26 +1,641 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  /* ===================== */
+  /* BASE COLORS */
+  /* ===================== */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-brand: 205 93 103;
+    --color-error: 232 72 85;
+    --color-love: 205 93 103;
+
+    --color-close-friend: 72 126 119;
+
+    --color-greenee-100: 76 123 98;
+    --color-greenee-200: 178 251 165;
+
+    --color-bg-light-100: 240 240 240;
+    --color-bg-light-200: 227 227 227;
+    --color-bg-light-300: 207 207 207;
+    --color-bg-light-m: 187 187 187;
+
+    --color-fg-light-100: 240 240 240;
+    --color-fg-light-200: 200 200 200;
+
+    --color-bg-dark-100: 35 35 35;
+    --color-bg-dark-200: 44 44 44;
+    --color-bg-dark-300: 60 60 60;
+    --color-bg-dark-m: 69 69 69;
+
+    --color-fg-dark-100: 51 51 51;
+    --color-fg-dark-200: 116 116 116;
+
+    --color-loader-static: rgb(240 240 240);
+    --spinner-color: rgb(240 240 240)
+  }
+
+  /* ===================== */
+  /* LIGHT THEME */
+  /* ===================== */
+  :root {
+    --background-100: var(--color-bg-light-100);
+    --background-200: var(--color-bg-light-200);
+    --background-300: var(--color-bg-light-300);
+    --background-m: var(--color-bg-light-m);
+    --foreground-100: var(--color-fg-dark-100);
+    --foreground-200: var(--color-fg-dark-200);
+
+    --banner: var(--color-brand);
+    --banner-foreground: var(--color-fg-light-100);
+
+    --primary: var(--color-brand);
+    --primary-foreground: var(--color-fg-light-100);
+
+    --error: var(--color-error);
+    --error-foreground: var(--color-fg-light-100);
+
+    --love: var(--color-love);
+    --love--foreground: var(--color-fg-light-100);
+
+    --close-friend: var(--color-close-friend);
+    --color-close-friend-foreground: var(--color-fg-light-100);
+
+    --loader: rgb(var(--color-fg-dark-100));
+
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+  }
+
+  /* ===================== */
+  /* DARK THEME */
+  /* ===================== */
+  .dark {
+    --background-100: var(--color-bg-dark-100);
+    --background-200: var(--color-bg-dark-200);
+    --background-300: var(--color-bg-dark-300);
+    --background-m: var(--color-bg-dark-m);
+    --foreground-100: var(--color-fg-light-100);
+    --foreground-200: var(--color-fg-light-200);
+
+    --banner: var(--color-brand);
+    --banner-foreground: var(--color-fg-light-100);
+
+    --primary: var(--color-brand);
+    --primary-foreground: var(--color-fg-light-100);
+
+    --error: var(--color-error);
+    --error-foreground: var(--color-fg-light-100);
+
+    --love: var(--color-love);
+    --love--foreground: var(--color-fg-light-100);
+
+    --close-friend: var(--color-close-friend);
+    --color-close-friend-foreground: var(--color-fg-light-100);
+
+    --loader: rgb(var(--color-fg-light-100));
+
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+
+  * {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background-200 text-foreground min-h-screen;
+  }
+
+  .scrollbar-thumb-only {
+  }
+
+  /* Chrome, Edge, Safari */
+  .scrollbar-thumb-only::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thumb-only::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thumb-only::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--background-m));
+    border-radius: 4px;
+  }
+
+
+
+
+  /* Remove scrollbar */
+  .remove-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    border-radius: 0;
+  }
+
+  .remove-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .remove-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .remove-scrollbar::-webkit-scrollbar-thumb:hover {
+    /* background: #1e2238; */
+    background: transparent;
+  }
+
+  .recharts-responsive-container {
+    height: initial !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+
+  .outline-input {
+    @apply shadow-none ring-1 ring-transparent focus:ring-primary/50 text-base font-normal px-5 py-5 text-foreground border-background-m bg-background-100 placeholder:text-foreground-200 !important;
+  }
+
+  .outline-input[data-invalid="true"] {
+    @apply focus:!ring-error !text-error placeholder:!text-error;
+  }
+
+  .outline-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--background-100)) inset !important;
+    -webkit-text-fill-color: rgb(var(--foreground-100)) !important;
+    caret-color: rgb(var(--foreground-100));
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .outline-input-icon-right{
+    @apply shadow-none ring-1 ring-transparent focus:ring-primary/50 text-base font-normal px-5 pl-5 pr-10 text-foreground border-background-m bg-background-100 placeholder:text-foreground-200 !important;
+  }
+
+
+  .outline-input-icon-right[data-invalid="true"] {
+    @apply focus:!ring-error !text-error placeholder:!text-error;
+  }
+
+  /* AUTH */
+  .auth-form-container {
+    @apply flex flex-col w-full md:max-w-[600px] px-4 gap-4 text-foreground py-4 bg-background border border-background-m rounded-3xl;
+  }
+
+  .auth-form {
+    @apply flex flex-col w-full gap-2 text-fg-light-100;
+  }
+
+  .auth-form-header {
+    @apply flex flex-row items-center gap-2 w-full;
+  }
+
+  .auth-form-title {
+    @apply text-2xl font-bold;
+  }
+
+  .auth-form-subtitle {
+    @apply text-base font-normal;
+  }
+
+  .auth-form-button {
+    @apply text-base font-medium text-primary-foreground flex items-center justify-center bg-opacity-100 hover:bg-opacity-80;
+  }
+
+  .auth-form-button-outline {
+    @apply text-base font-medium text-foreground flex items-center justify-center bg-transparent border border-background-m hover:bg-background-m;
+  }
+
+  .button-filled {
+    @apply text-base font-medium flex items-center justify-center bg-opacity-100 hover:bg-opacity-80;
+  }
+
+
+  .auth-input-label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .signup-page-title {
+    @apply text-3xl font-bold lg:text-4xl text-foreground text-center;
+  }
+
+  .signup-page-subtitle {
+    @apply text-base font-normal lg:text-lg text-foreground whitespace-pre-line md:whitespace-normal text-center;
+  }
+
+  /*Main*/
+
+  .main-header-title {
+    @apply text-2xl font-semibold;
+  }
+
+  .main-header-button{
+    @apply text-foreground-200 h-8 w-8 hover:bg-background-300 rounded-full hover:text-foreground;
+  }
+
+  .nav-container {
+    @apply flex flex-row w-full mt-2 gap-2 overflow-x-auto scrollbar-thumb-only;
+  }
+
+  .nav-button {
+    @apply py-2 leading-none line-clamp-1 flex-shrink-0 bg-background-200 hover:bg-background-300 px-3 rounded-full;
+  }
+
+  /*Drawer*/
+  .drawer-content {
+    @apply mx-auto w-full py-4 px-4 flex flex-col lg:max-w-[650px] md:max-w-[650px];
+  }
+
+  .drawer-button {
+    @apply button-filled w-full h-10 md:h-12 rounded-xl hover:bg-background-200;
+  }
+
+  .h1 {
+    @apply text-[34px] leading-[42px] font-bold;
+  }
+
+  .h2 {
+    @apply text-[24px] leading-[36px] font-bold;
+  }
+
+  .h3 {
+    @apply text-[20px] leading-[28px] font-semibold;
+  }
+
+  .h4 {
+    @apply text-[18px] leading-[20px] font-medium;
+  }
+
+  .h5 {
+    @apply text-[16px] leading-[24px] font-semibold;
+  }
+
+  .subtitle-1 {
+    @apply text-[16px] leading-[24px] font-medium;
+  }
+
+  .subtitle-2 {
+    @apply text-[14px] leading-[20px] font-semibold;
+  }
+
+  .body-1 {
+    @apply text-[16px] leading-[24px] font-normal;
+  }
+
+  .body-2 {
+    @apply text-[14px] leading-[20px] font-normal;
+  }
+
+  .button {
+    @apply text-[14px] leading-[20px] font-medium;
+  }
+
+  .caption {
+    @apply text-[12px] leading-[16px] font-normal;
+  }
+
+  .overline {
+    @apply text-[10px] leading-[14px] font-normal;
+  }
+
+
+  .otp-group{
+    @apply w-full flex gap-1 justify-between;
+  }
+
+  .otp-slot {
+    @apply text-3xl md:text-4xl font-normal ring-primary text-primary flex items-center justify-center border border-background-m gap-5;
+  }
+
+  /* ===== BUTTON */
+
+
+  .signup-button-default {
+    @apply text-[16px] font-medium py-6 pl-3 w-full hover:bg-opacity-90;
+  }
+
+  .icon-button {
+    @apply bg-transparent hover:cursor-pointer hover:bg-background-300 rounded-full !important;
+  }
+
+  .outline-button {
+    @apply text-base font-medium text-foreground flex items-center justify-center bg-transparent border border-background-m hover:bg-background-m;
+  }
+
+  .show-password-button {
+    @apply absolute right-3 top-1/2 -translate-y-1/2 text-foreground;
+  }
+
+  .show-password-button[data-invalid="true"] {
+    @apply !text-error
+  }
+
+  /* Get Started*/
+  .get-started-button {
+    @apply border-none h-[50px] md:h-[55px] w-[160px] md:w-[200px] text-fg-light-100 text-lg md:text-xl font-semibold pl-[24px] pr-[12px] hover:scale-105 hover:opacity-95;
+  }
+
+  .get-started-form {
+    @apply flex w-full mt-4 md:mt-10 flex-col max-md:items-center md:flex-row gap-4 md:gap-2;
+  }
+
+
+  .signup-input {
+    @apply outline-input px-[20px] py-[20px] border-foreground bg-transparent placeholder:text-foreground/50 text-foreground;
+  }
+
+  .signup-input:-webkit-autofill {
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-text-fill-color: rgb(var(--foreground-100)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .signup-input[data-invalid="true"] {
+    @apply !border-error focus:!border-error focus:!ring-error !text-error placeholder:!text-error;
+  }
+
+  .signup-input-password {
+    @apply outline-input py-[20px] pl-[20px] pr-[40px] border-foreground bg-transparent placeholder:text-foreground/50 text-foreground;
+  }
+
+  .signup-input-password[data-invalid="true"] {
+    @apply !border-error focus:!border-error focus:!ring-error !text-error placeholder:!text-error;
+  }
+
+  .signup-input:-webkit-autofill {
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-text-fill-color: rgb(var(--foreground-100)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .search-bar-input {
+    @apply outline-input py-[20px] pl-[40px] pr-[20px] text-foreground border-foreground bg-transparent placeholder:text-foreground/50;
+  }
+
+  .update-information-input {
+    @apply w-full shadow-none ring-1 ring-transparent focus:border-primary focus:ring-primary text-[16px] leading-[28px] font-normal h-[40px] px-[10px] py-[10px] border-foreground bg-transparent placeholder:text-foreground/50 text-foreground !important;
+  }
+
+  /* ===== CHECKBOX */
+  .check-box {
+    @apply border-background-m data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-fg-light-100 size-5;
+  }
+
+  .check-box-label {
+    @apply text-sm font-normal leading-none
+  }
+
+  /* =====  STYLE CLASSES */
+  .signup-main-container {
+    @apply flex min-h-screen flex-1 flex-col items-center bg-background-200 px-6 pb-10 pt-28 sm:px-10;
+  }
+
+  .signup-topbar {
+    @apply fixed top-0 z-30 flex flex-row justify-center bg-background-100 text-foreground items-center px-[16px] md:px-[50px] py-2 w-full border-b-[1.5px] border-background-m;
+  }
+
+  .signup-leftsidebar {
+    @apply sticky left-0 top-0 z-20 flex h-screen w-[10%] flex-col justify-center items-end overflow-auto bg-background-200 pb-5 pt-28 max-md:hidden;
+  }
+
+  /* ===== ACCOUNT PROFILE */
+
+  .info-form_image-label {
+    @apply flex h-24 w-24 items-center justify-center rounded-full bg-primary bg-opacity-20;
+  }
+
+  .info-form_image-input {
+    @apply cursor-pointer border-foreground pt-[5px] bg-transparent shadow-none outline-none;
+  }
+
+  /* ===== HELPER CLASSES */
+  .container {
+    @apply mx-auto max-w-7xl px-5;
+  }
+
+  .primary-btn {
+    @apply bg-primary hover:bg-primary transition-all rounded-full button !important;
+  }
+
+  /* =====  SHADCN OVERRIDES */
+  .shad-no-focus {
+    @apply outline-none ring-offset-transparent focus:ring-transparent focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
+  }
+
+  .shad-input {
+    @apply border-none shadow-none p-0 shad-no-focus bg-background-200 placeholder:text-primary-500 body-2 !important;
+  }
+
+  .shad-form-item {
+    @apply flex h-[78px] flex-col justify-center rounded-xl border bg-background-200 bordbg-background-200 px-4 shadow-drop-1;
+  }
+
+  .shad-form-label {
+    @apply text-container-foreground pt-2 body-2 w-full !important;
+  }
+
+  .shad-form-message {
+    @apply text-error body-2 ml-4 !important;
+  }
+
+  .shad-alert-dialog {
+    @apply space-y-4 max-w-[95%] sm:w-fit rounded-xl md:rounded-[30px] px-4 md:px-8 py-10 bg-background-200 outline-none !important;
+  }
+
+  .shad-submit-btn {
+    @apply bg-primary button hover:bg-primary transition-all rounded-full !important;
+  }
+
+  .shad-otp {
+    @apply w-full flex gap-1 sm:gap-2 justify-between !important;
+  }
+
+  .shad-otp-slot {
+    @apply text-[40px] font-medium rounded-xl ring-primary shadow-drop-1 text-primary justify-center flex border-2 border-background-m size-12 md:size-16 gap-5 !important;
+  }
+
+  .shad-dialog button {
+    @apply focus:ring-0 focus:ring-offset-0 focus-visible:border-none outline-none focus-visible:outline-none focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
+  }
+
+  .shad-dropdown-item {
+    @apply cursor-pointer !important;
+  }
+
+  .shad-dialog {
+    @apply rounded-[26px] w-[90%] max-w-[400px] px-6 py-8   !important;
+  }
+
+  /* Button */
+
+
+
+  /* Account Profile  */
+  .account-form_image-label {
+    @apply flex h-24 w-24 items-center justify-center rounded-full bg-background-200 shadow-drop-1 !important;
+  }
+
+  .account-form_image-input {
+    @apply cursor-pointer border-none bg-transparent shadow-none outline-none file:text-primary !important;
+  }
+
+  /* =====  STYLE CLASSES */
+
+  .bottombar {
+    @apply fixed bottom-0 z-10 w-full rounded-t-3xl bg-container-100 p-4 backdrop-blur-lg xs:px-7 md:hidden !important;
+  }
+
+  .bottombar_container {
+    @apply flex items-center justify-between gap-3 xs:gap-5 !important;
+  }
+
+  .bottombar_link {
+    @apply relative flex flex-col items-center gap-2 rounded-lg p-2 sm:flex-1 sm:px-2 sm:py-2.5 !important;
+  }
+
+
+  .rightsidebar {
+    @apply sticky right-0 top-0 z-20 flex h-screen w-fit flex-col justify-between gap-12 overflow-auto bg-background-200 px-10 pb-6 pt-28 max-xl:hidden !important;
+  }
+
+  /* Root Layout */
+  .main-content {
+    @apply remove-scrollbar h-full flex-1 overflow-auto bg-background-200 px-5 py-7 sm:mr-7 sm:rounded-[30px] md:mb-7 md:px-9 md:py-10 !important;
+  }
+
+
+  .form-title {
+    @apply h1 text-center text-foreground md:text-left !important;
+  }
+
+  .form-submit-button {
+    @apply primary-btn h-[66px] !important;
+  }
+
+  .error-message {
+    @apply body-2 mx-auto w-fit rounded-xl bg-error px-8 py-4 text-center text-error !important;
+  }
+
+  /* OTP Modal */
+  .otp-close-button {
+    @apply absolute -right-1 -top-7 cursor-pointer sm:-right-2 sm:-top-4  !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 16px;   /* vertical scrollbar */
+  height: 16px;  /* horizontal scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--background-100));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--background-m));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+* {
+  scrollbar-width: auto;               /* auto | thin | none */
+  scrollbar-color: rgb(var(--background-m)) transparent;
+}
+
+@media (max-width: 640px) {
+  /* Width of scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;   /* vertical scrollbar */
+    height: 8px;  /* horizontal scrollbar */
+  }
+
+  * {
+    scrollbar-width: thin;               /* auto | thin | none */
+    scrollbar-color: rgb(var(--background-m)) transparent;
+  }
+}
+
+/* Tùy chỉnh thanh scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--background-m));
+  border-radius: 4px;
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-color: rgb(var(--background-m)) transparent;
+  scrollbar-width: thin;
+}
+
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background-200 text-foreground;
+  }
+
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none !important;
+  }
+
+  html,
+  body,
+  button,
+  input,
+  textarea,
+  select,
+  [class*="bg-"],
+  [class*="text-"],
+  [class*="border-"],
+  [class*="fill-"],
+  [class*="stroke-"] {
+    transition:
+            background-color 0.3s ease,
+            color 0.3s ease,
+            border-color 0.3s ease;
+  }
+
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-2px); }
+  40%, 80% { transform: translateX(2px); }
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
 }

@@ -1,0 +1,12 @@
+{
+  "app_name": "Mory",
+
+  "landing_tagline": "Kết nối thật.\nKỷ niệm thật.",
+  "landing_cta": "Bắt đầu hành trình của bạn.",
+  "landing_prompt": "Nhập email của bạn để tạo dựng những kết nối ý nghĩa và chia sẻ những khoảnh khắc đáng nhớ cùng nhau.",
+
+  "get_started": "Bắt đầu",
+  "button": {
+    "reload": "Tải lại"
+  }
+}
