@@ -1,8 +1,8 @@
 package com.muicochay.mory.connection.dto;
 
-import com.fantus.mory.connection.enums.ConnectionType;
-import com.fantus.mory.connection.enums.RequestStatus;
-import com.fantus.mory.user.dto.UserPreviewResponse;
+import com.muicochay.mory.connection.enums.ConnectionType;
+import com.muicochay.mory.connection.enums.RequestStatus;
+import com.muicochay.mory.user.dto.UserPreviewResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class ConnectionRequestResponse {
+
     private UUID id;
     private ConnectionType newConnectionType;
     private ConnectionType oldConnectionType;

@@ -1,6 +1,6 @@
 package com.muicochay.mory.connection.dto;
 
-import com.fantus.mory.user.dto.UserPreviewWithMutualConnectionResponse;
+import com.muicochay.mory.user.dto.UserPreviewWithMutualConnectionResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class SuggestedConnectionsPageResponse {
+
     private List<UserPreviewWithMutualConnectionResponse> suggestions;
     private boolean hasNext;
     private Instant nextCursorCreatedAt;

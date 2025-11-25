@@ -1,6 +1,6 @@
 package com.muicochay.mory.connection.dto;
 
-import com.fantus.mory.connection.enums.ConnectionType;
+import com.muicochay.mory.connection.enums.ConnectionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class ChangeConnectionTypeRequestDto {
+
     private UUID recipientId;
     private ConnectionType newType;
     private String message;
