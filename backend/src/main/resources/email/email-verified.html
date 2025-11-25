@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Email Verified</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .email-container {
+            max-width: 480px;
+            margin: auto;
+            background-color: #F0F0F0;
+            border-radius: 0.5rem;
+        }
+
+        .header {
+            background-color: #E3E3E3;
+            padding: 16px;
+            border-radius: 0.5rem 0.5rem 0 0;
+            text-align: center;
+        }
+
+        .header table {
+            margin: auto;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .otp {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #CD5D67;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        .footer {
+            font-size: 0.8rem;
+            color: #888888;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        @media only screen and (max-width: 600px) {
+
+            .title {
+                font-size: 1rem;
+            }
+
+            .content {
+                padding: 1.3rem;
+            }
+
+            .otp {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 0.75rem;
+            }
+
+            .footer {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <!-- Header -->
+    <div class="header">
+        <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td style="vertical-align:middle;">
+                    <img src="cid:logoImage" alt="Olyne" width="30" height="30" style="display:block;" />
+                </td>
+                <td style="vertical-align:middle; padding-left:6px; font-size:20px; font-weight:bold; color:#CD5D67;">
+                    [[${appName}]]
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <p class="title">
+            Hello [[${email}]],
+        </p>
+
+        <p>
+            We're happy to let you know that your email has been successfully verified. You now have full access to all the features of <strong>[[${appName}]]</strong>.
+        </p>
+
+        <p>
+            Enjoy your experience.
+        </p>
+
+        <div class="footer">
+            &copy; [[${year}]] [[${appName}]]. All rights reserved.
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
