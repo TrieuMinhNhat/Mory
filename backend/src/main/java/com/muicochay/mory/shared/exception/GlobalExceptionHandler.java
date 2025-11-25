@@ -1,6 +1,6 @@
 package com.muicochay.mory.shared.exception;
 
-import com.fantus.mory.shared.dto.ApiResponse;
+import com.muicochay.mory.shared.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

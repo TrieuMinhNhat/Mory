@@ -1,6 +1,6 @@
 package com.muicochay.mory.story.dto;
 
-import com.fantus.mory.shared.enums.Visibility;
+import com.muicochay.mory.shared.enums.Visibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package com.muicochay.mory.question.dto;
 
-import com.fantus.mory.question.enums.QuestionType;
+import com.muicochay.mory.question.enums.QuestionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
