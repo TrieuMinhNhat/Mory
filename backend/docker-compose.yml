@@ -1,0 +1,118 @@
+services:
+  postgres:
+    container_name: postgres_mory
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_mory:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - mory
+    restart: unless-stopped
+  pgadmin:
+    container_name: pgadmin_mory
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - mory
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_mory:/var/lib/pgadmin
+    restart: unless-stopped
+  mongodb:
+    container_name: mongo_mory
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_NAME}
+    networks:
+      - mory
+    volumes:
+      - mongo_mory:/data/db
+    restart: unless-stopped
+  mongo_express:
+    container_name: mongo_express_mory
+    image: mongo-express:latest
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_NAME}?authSource=admin"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: adminpassword
+    depends_on:
+      - mongodb
+    volumes:
+      - mongo_express_mory:/config
+    networks:
+      - mory
+    restart: unless-stopped
+
+  redis:
+    container_name: redis_mory
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mory
+    volumes:
+      - redis_mory:/data
+    command: [ "redis-server", "--requirepass", "Xgbshw231a@4qls79483Zda" ]
+    restart: unless-stopped
+  redisinsight:
+    container_name: redisinsight_mory
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    networks:
+      - mory
+    volumes:
+      - redisinsight_mory:/db
+    restart: unless-stopped
+
+  rabbitmq:
+    container_name: rabbitmq_mory
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS}
+    networks:
+      - mory
+    volumes:
+      - rabbitmq_mory:/var/lib/rabbitmq
+    restart: unless-stopped
+
+networks:
+  mory:
+    driver: bridge
+
+volumes:
+  postgres_mory:
+    driver: local
+  pgadmin_mory:
+    driver: local
+  redisinsight_mory:
+    driver: local
+  redis_mory:
+    driver: local
+  mongo_mory:
+    driver: local
+  mongo_express_mory:
+    driver: local
+  rabbitmq_mory:
+    driver: local
