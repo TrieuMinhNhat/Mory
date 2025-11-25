@@ -1,8 +1,8 @@
 package com.muicochay.mory.moment.repository;
 
-import com.fantus.mory.moment.document.Moment;
-import com.fantus.mory.shared.enums.Visibility;
-import com.fantus.mory.story.dto.StoryMomentStats;
+import com.muicochay.mory.moment.document.Moment;
+import com.muicochay.mory.shared.enums.Visibility;
+import com.muicochay.mory.story.dto.StoryMomentStats;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;

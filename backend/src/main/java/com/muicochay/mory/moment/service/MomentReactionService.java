@@ -1,8 +1,8 @@
 package com.muicochay.mory.moment.service;
 
-import com.fantus.mory.moment.document.MomentReaction;
-import com.fantus.mory.moment.repository.MomentReactionRepository;
-import com.fantus.mory.shared.enums.ReactionType;
+import com.muicochay.mory.moment.document.MomentReaction;
+import com.muicochay.mory.moment.repository.MomentReactionRepository;
+import com.muicochay.mory.shared.enums.ReactionType;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
