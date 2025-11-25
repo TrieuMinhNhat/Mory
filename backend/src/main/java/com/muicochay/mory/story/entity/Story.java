@@ -1,12 +1,13 @@
 package com.muicochay.mory.story.entity;
 
-import com.fantus.mory.shared.entity.BaseAuditEntity;
-import com.fantus.mory.shared.enums.Visibility;
-import com.fantus.mory.story.enums.StoryScope;
-import com.fantus.mory.story.enums.StoryType;
-import com.fantus.mory.user.entity.User;
+import com.muicochay.mory.shared.entity.BaseAuditEntity;
+import com.muicochay.mory.shared.enums.Visibility;
+import com.muicochay.mory.story.enums.StoryScope;
+import com.muicochay.mory.story.enums.StoryType;
+import com.muicochay.mory.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.bson.types.ObjectId;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -61,5 +62,8 @@ public class Story extends BaseAuditEntity {
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoryMember> members = new ArrayList<>();
+
+    private Instant latestMomentCreatedAt;
+    private ObjectId latestMomentId;
 
 }

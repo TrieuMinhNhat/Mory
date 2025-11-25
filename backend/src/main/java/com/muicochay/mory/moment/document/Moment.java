@@ -1,6 +1,6 @@
 package com.muicochay.mory.moment.document;
 
-import com.fantus.mory.shared.enums.Visibility;
+import com.muicochay.mory.shared.enums.Visibility;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;

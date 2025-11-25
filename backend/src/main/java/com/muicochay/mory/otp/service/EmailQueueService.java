@@ -1,8 +1,8 @@
 package com.muicochay.mory.otp.service;
 
 
-import com.fantus.mory.otp.config.RabbitMQConfig;
-import com.fantus.mory.otp.dto.EmailJob;
+import com.muicochay.mory.otp.config.RabbitMQConfig;
+import com.muicochay.mory.otp.dto.EmailJob;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;

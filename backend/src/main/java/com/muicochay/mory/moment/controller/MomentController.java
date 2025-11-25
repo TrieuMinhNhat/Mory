@@ -1,12 +1,12 @@
 package com.muicochay.mory.moment.controller;
 
-import com.fantus.mory.auth.model.AuthUserPrincipal;
-import com.fantus.mory.moment.dto.*;
-import com.fantus.mory.moment.service.MomentService;
-import com.fantus.mory.shared.dto.ApiResponse;
-import com.fantus.mory.shared.dto.UpdateVisibilityRequest;
-import com.fantus.mory.shared.ratelimit.RateLimit;
-import com.fantus.mory.shared.ratelimit.RateLimitKeyStrategy;
+import com.muicochay.mory.auth.model.AuthUserPrincipal;
+import com.muicochay.mory.moment.dto.*;
+import com.muicochay.mory.moment.service.MomentService;
+import com.muicochay.mory.shared.dto.ApiResponse;
+import com.muicochay.mory.shared.dto.UpdateVisibilityRequest;
+import com.muicochay.mory.shared.ratelimit.RateLimit;
+import com.muicochay.mory.shared.ratelimit.RateLimitKeyStrategy;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package com.muicochay.mory.story.dto;
 
-import com.fantus.mory.story.enums.LeaveStoryAction;
+import com.muicochay.mory.story.enums.LeaveStoryAction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

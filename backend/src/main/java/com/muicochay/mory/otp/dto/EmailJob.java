@@ -1,6 +1,6 @@
 package com.muicochay.mory.otp.dto;
 
-import com.fantus.mory.otp.enums.EmailTemplateType;
+import com.muicochay.mory.otp.enums.EmailTemplateType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

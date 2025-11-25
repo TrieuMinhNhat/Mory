@@ -1,6 +1,6 @@
 package com.muicochay.mory.shared.ratelimit;
 
-import com.fantus.mory.shared.exception.ratelimit.RateLimitEx;
+import com.muicochay.mory.shared.exception.ratelimit.RateLimitEx;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

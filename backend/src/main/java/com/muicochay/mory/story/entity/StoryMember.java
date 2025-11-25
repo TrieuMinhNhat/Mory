@@ -1,7 +1,7 @@
 package com.muicochay.mory.story.entity;
 
-import com.fantus.mory.shared.entity.BaseAuditEntity;
-import com.fantus.mory.user.entity.User;
+import com.muicochay.mory.shared.entity.BaseAuditEntity;
+import com.muicochay.mory.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 

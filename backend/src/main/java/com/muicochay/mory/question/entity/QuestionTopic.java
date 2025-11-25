@@ -1,7 +1,7 @@
 package com.muicochay.mory.question.entity;
 
-import com.fantus.mory.shared.entity.BaseAuditEntity;
-import com.fantus.mory.shared.enums.Locale;
+import com.muicochay.mory.shared.entity.BaseAuditEntity;
+import com.muicochay.mory.shared.enums.Locale;
 import jakarta.persistence.*;
 import lombok.*;
 

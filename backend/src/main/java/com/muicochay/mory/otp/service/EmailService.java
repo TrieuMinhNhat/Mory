@@ -1,8 +1,8 @@
 package com.muicochay.mory.otp.service;
 
-import com.fantus.mory.otp.enums.EmailTemplateType;
-import com.fantus.mory.shared.exception.otp.EmailEx;
-import com.fantus.mory.shared.exception.otp.MissingEmailVariablesEx;
+import com.muicochay.mory.otp.enums.EmailTemplateType;
+import com.muicochay.mory.shared.exception.otp.EmailEx;
+import com.muicochay.mory.shared.exception.otp.MissingEmailVariablesEx;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;

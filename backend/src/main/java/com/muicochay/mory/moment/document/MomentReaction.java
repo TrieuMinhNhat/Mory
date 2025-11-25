@@ -1,6 +1,6 @@
 package com.muicochay.mory.moment.document;
 
-import com.fantus.mory.shared.enums.ReactionType;
+import com.muicochay.mory.shared.enums.ReactionType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

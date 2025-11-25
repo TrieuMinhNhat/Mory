@@ -1,6 +1,6 @@
 package com.muicochay.mory.moment.repository;
 
-import com.fantus.mory.moment.document.Moment;
+import com.muicochay.mory.moment.document.Moment;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

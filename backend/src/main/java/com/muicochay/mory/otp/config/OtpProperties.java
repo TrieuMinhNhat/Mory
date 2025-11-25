@@ -1,7 +1,7 @@
 package com.muicochay.mory.otp.config;
 
 
-import com.fantus.mory.otp.enums.OtpType;
+import com.muicochay.mory.otp.enums.OtpType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

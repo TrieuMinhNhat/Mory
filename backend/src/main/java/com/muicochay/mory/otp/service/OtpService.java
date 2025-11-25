@@ -1,9 +1,9 @@
 package com.muicochay.mory.otp.service;
 
-import com.fantus.mory.otp.config.OtpProperties;
-import com.fantus.mory.otp.enums.OtpType;
-import com.fantus.mory.shared.exception.otp.OtpExpiredEx;
-import com.fantus.mory.shared.exception.otp.OtpInvalidEx;
+import com.muicochay.mory.otp.config.OtpProperties;
+import com.muicochay.mory.otp.enums.OtpType;
+import com.muicochay.mory.shared.exception.otp.OtpExpiredEx;
+import com.muicochay.mory.shared.exception.otp.OtpInvalidEx;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;

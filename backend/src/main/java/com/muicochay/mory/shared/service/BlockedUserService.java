@@ -1,7 +1,7 @@
 package com.muicochay.mory.shared.service;
 
-import com.fantus.mory.shared.dto.BlockInfoResponse;
-import com.fantus.mory.shared.enums.BlockLevel;
+import com.muicochay.mory.shared.dto.BlockInfoResponse;
+import com.muicochay.mory.shared.enums.BlockLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;

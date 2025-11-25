@@ -1,8 +1,8 @@
 package com.muicochay.mory.moment.dto;
 
 
-import com.fantus.mory.story.enums.StoryScope;
-import com.fantus.mory.story.enums.StoryType;
+import com.muicochay.mory.story.enums.StoryScope;
+import com.muicochay.mory.story.enums.StoryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

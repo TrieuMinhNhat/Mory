@@ -1,15 +1,15 @@
 package com.muicochay.mory.moment.repository;
 
-import com.fantus.mory.connection.enums.ConnectionStatus;
-import com.fantus.mory.connection.enums.ConnectionType;
-import com.fantus.mory.connection.interfaces.ConnectedUserProjection;
-import com.fantus.mory.connection.repository.ConnectionRepository;
-import com.fantus.mory.connection.utils.ConnectionUtils;
-import com.fantus.mory.moment.document.Moment;
-import com.fantus.mory.shared.enums.Visibility;
-import com.fantus.mory.shared.exception.global.ResourcesAccessDeniedEx;
-import com.fantus.mory.story.dto.StoryMomentStats;
-import com.fantus.mory.story.repository.StoryRepository;
+import com.muicochay.mory.connection.enums.ConnectionStatus;
+import com.muicochay.mory.connection.enums.ConnectionType;
+import com.muicochay.mory.connection.interfaces.ConnectedUserProjection;
+import com.muicochay.mory.connection.repository.ConnectionRepository;
+import com.muicochay.mory.connection.utils.ConnectionUtils;
+import com.muicochay.mory.moment.document.Moment;
+import com.muicochay.mory.shared.enums.Visibility;
+import com.muicochay.mory.shared.exception.global.ResourcesAccessDeniedEx;
+import com.muicochay.mory.story.dto.StoryMomentStats;
+import com.muicochay.mory.story.repository.StoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Sort;
