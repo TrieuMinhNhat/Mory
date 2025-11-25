@@ -1,4 +1,4 @@
-package com.muicochay.mory.cache.config;
+package com.fantus.mory.cache.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,11 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Binds custom TTL (time-to-live) settings for each cache name from application
- * properties.
+ * Binds custom TTL (time-to-live) settings for each cache name from application properties.
  *
- * <p>
- * Example usage in <code>application.yml</code>:</p>
+ * <p>Example usage in <code>application.yml</code>:</p>
  *
  * <pre>{@code
  * custom:

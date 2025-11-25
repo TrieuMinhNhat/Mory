@@ -1,4 +1,4 @@
-package com.muicochay.mory.cache.config;
+package com.fantus.mory.cache.config;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,18 +15,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Configures Redis-based caching with custom TTLs per cache and JSON
- * serialization.
+ * Configures Redis-based caching with custom TTLs per cache and JSON serialization.
  */
 @Configuration
 @EnableConfigurationProperties(CacheTtlProperties.class)
 public class CacheConfig {
+    private static final RedisSerializationContext.SerializationPair<Object> JSON_SERIALIZER =
+            RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer());
 
-    private static final RedisSerializationContext.SerializationPair<Object> JSON_SERIALIZER
-            = RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer());
-
-    private static final RedisSerializationContext.SerializationPair<String> STRING_SERIALIZER
-            = RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer());
+    private static final RedisSerializationContext.SerializationPair<String> STRING_SERIALIZER =
+            RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer());
 
     private RedisCacheConfiguration ttlConfig(Duration ttl) {
         return RedisCacheConfiguration.defaultCacheConfig()
@@ -39,8 +37,8 @@ public class CacheConfig {
     public RedisCacheManager cacheManager(RedisConnectionFactory factory, CacheTtlProperties cacheTtlProperties) {
         Map<String, RedisCacheConfiguration> configurationMap = new HashMap<>();
 
-        cacheTtlProperties.getTtl().forEach((cacheName, ttl)
-                -> configurationMap.put(cacheName, ttlConfig(ttl))
+        cacheTtlProperties.getTtl().forEach((cacheName, ttl) ->
+                configurationMap.put(cacheName, ttlConfig(ttl))
         );
 
         Duration defaultTtl = cacheTtlProperties.getTtlFor("default", Duration.ofMinutes(10));
