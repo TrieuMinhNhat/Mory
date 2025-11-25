@@ -1,10 +1,10 @@
-package com.fantus.mory.auth.config;
+package com.muicochay.mory.auth.config;
 
-import com.fantus.mory.auth.handler.CustomOAuth2SuccessHandler;
-import com.fantus.mory.auth.service.EmailPasswordUserDetailsService;
-import com.fantus.mory.user.enums.RoleCode;
-import com.fantus.mory.shared.config.AppProperties;
-import com.fantus.mory.shared.dto.ApiResponse;
+import com.muicochay.mory.auth.handler.CustomOAuth2SuccessHandler;
+import com.muicochay.mory.auth.service.EmailPasswordUserDetailsService;
+import com.muicochay.mory.user.enums.RoleCode;
+import com.muicochay.mory.shared.config.AppProperties;
+import com.muicochay.mory.shared.dto.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -34,6 +34,7 @@ import java.util.Objects;
 @EnableWebSecurity
 @AllArgsConstructor
 public class WebSecurityConfig {
+
     private final EmailPasswordUserDetailsService emailPasswordUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final EmailVerifiedAuthorizationManager emailVerifiedAuthorizationManager;
@@ -44,8 +45,8 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authorize) ->
-                    authorize
+                .authorizeHttpRequests((authorize)
+                        -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger.html").permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -54,20 +55,16 @@ public class WebSecurityConfig {
                                 "/api/auth/forgot-password",
                                 "/api/auth/reset-password",
                                 "/api/auth/check-email",
-
                                 "/api/auth/email-otp/send-otp",
                                 "/api/auth/email-otp/sign-in",
-
                                 "/api/auth/email-password/sign-in",
                                 "/api/auth/email-password/sign-up"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/auth/me",
-
                                 "/api/auth/email-password/verify-email",
                                 "/api/auth/email-password/send-verification-message"
-
                         ).authenticated()
                         .requestMatchers(
                                 HttpMethod.PUT,
@@ -77,28 +74,28 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/admin/**").hasAuthority(String.valueOf(RoleCode.ADMIN))
                         .anyRequest().access(emailVerifiedAuthorizationManager)
                 )
-                .oauth2Login(oauth2 ->
-                        oauth2.successHandler(customOAuth2SuccessHandler)
+                .oauth2Login(oauth2
+                        -> oauth2.successHandler(customOAuth2SuccessHandler)
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
-                        .defaultAuthenticationEntryPointFor(
-                                restAuthenticationEntryPoint(),
-                                request -> request.getRequestURI().startsWith("/api/")
-                        )
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setContentType("application/json");
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                .defaultAuthenticationEntryPointFor(
+                        restAuthenticationEntryPoint(),
+                        request -> request.getRequestURI().startsWith("/api/")
+                )
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setContentType("application/json");
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
-                            ApiResponse<Object> apiResponse = ApiResponse.fail("You are not authorized to access this resource");
+                    ApiResponse<Object> apiResponse = ApiResponse.fail("You are not authorized to access this resource");
 
-                            String json = new ObjectMapper().writeValueAsString(apiResponse);
+                    String json = new ObjectMapper().writeValueAsString(apiResponse);
 
-                            response.getWriter().write(json);
-                        })
+                    response.getWriter().write(json);
+                })
                 );
         return http.build();
     }
@@ -122,7 +119,7 @@ public class WebSecurityConfig {
         corsConfiguration.setAllowedOrigins(List.of(
                 appProperties.getFrontendUrl(),
                 "http://192.168.1.167:3000"
-                ));
+        ));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfiguration.setAllowedHeaders(List.of(
                 "Origin", "Content-Type", "Accept", "responseType",
