@@ -1,32 +1,40 @@
 package com.muicochay.mory.user.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.muicochay.mory.auth.enums.AuthProvider;
+import com.muicochay.mory.cache.constants.CacheNames;
 import com.muicochay.mory.connection.dto.ConnectionResponse;
 import com.muicochay.mory.connection.entity.Connection;
 import com.muicochay.mory.connection.enums.ConnectionStatus;
 import com.muicochay.mory.connection.repository.ConnectionRepository;
 import com.muicochay.mory.connection.utils.ConnectionUtils;
 import com.muicochay.mory.media.service.MediaService;
-import com.muicochay.mory.shared.exception.global.ResourcesAccessDeniedEx;
-import com.muicochay.mory.user.dto.*;
 import com.muicochay.mory.shared.exception.auth.AccountAlreadyOnboardedEx;
 import com.muicochay.mory.shared.exception.global.InvalidArgumentEx;
+import com.muicochay.mory.shared.exception.global.ResourcesAccessDeniedEx;
 import com.muicochay.mory.shared.exception.global.ResourcesNotFoundEx;
+import com.muicochay.mory.user.dto.OnboardingRequest;
+import com.muicochay.mory.user.dto.OnboardingResponse;
+import com.muicochay.mory.user.dto.UpdateUserProfileRequest;
+import com.muicochay.mory.user.dto.UpdateUserProfileResponse;
+import com.muicochay.mory.user.dto.UserPreviewResponse;
+import com.muicochay.mory.user.dto.UserProfileResponse;
 import com.muicochay.mory.user.entity.User;
 import com.muicochay.mory.user.entity.UserProfile;
 import com.muicochay.mory.user.interfaces.UserConnectionAndProviderProjection;
 import com.muicochay.mory.user.interfaces.UserProfileAndConnectionProjection;
 import com.muicochay.mory.user.repositoriy.UserProfileRepository;
 import com.muicochay.mory.user.repositoriy.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +47,7 @@ public class UserProfileService {
     private final MediaService mediaService;
 
     @Transactional
-    @CacheEvict(value = "authUserCache", key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
+    @CacheEvict(value = CacheNames.AUTH_USER_CACHE, key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
     public OnboardingResponse onboarding(OnboardingRequest request, UUID userId) {
         if (request.getDisplayName() == null || request.getDisplayName().isBlank()) {
             throw new InvalidArgumentEx("DisplayName must not be blank");
@@ -125,7 +133,7 @@ public class UserProfileService {
     }
 
     @Transactional
-    @CacheEvict(value = "authUserCache", key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
+    @CacheEvict(value = CacheNames.AUTH_USER_CACHE, key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
     public UpdateUserProfileResponse updateInfo(UUID userId, UpdateUserProfileRequest request) {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("UserInfo not found with userId: " + userId));

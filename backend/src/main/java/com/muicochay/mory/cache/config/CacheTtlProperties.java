@@ -1,18 +1,21 @@
-package com.fantus.mory.cache.config;
-
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+package com.muicochay.mory.cache.config;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /**
- * Binds custom TTL (time-to-live) settings for each cache name from application properties.
+ * Binds custom TTL (time-to-live) settings for each cache name from application
+ * properties.
  *
- * <p>Example usage in <code>application.yml</code>:</p>
+ * <p>
+ * Example usage in <code>application.yml</code>:</p>
  *
  * <pre>{@code
  * custom:

@@ -1,17 +1,35 @@
 package com.muicochay.mory.auth.service;
 
+import java.time.Instant;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.muicochay.mory.auth.config.JwtTokenHelper;
 import com.muicochay.mory.auth.dto.AuthUserResponse;
 import com.muicochay.mory.auth.dto.CookiePair;
+import com.muicochay.mory.auth.dto.TokenPair;
 import com.muicochay.mory.auth.dto.signin.SignInResponse;
 import com.muicochay.mory.auth.dto.signup.RegistrationRequest;
-import com.muicochay.mory.auth.dto.TokenPair;
 import com.muicochay.mory.auth.dto.signup.VerifyEmailResponse;
 import com.muicochay.mory.auth.enums.AuthProvider;
+import com.muicochay.mory.auth.helper.AuthHelper;
 import com.muicochay.mory.auth.helper.CookieBuilder;
 import com.muicochay.mory.auth.model.EmailPasswordUserDetails;
-import com.muicochay.mory.auth.helper.AuthHelper;
 import com.muicochay.mory.auth.repository.AuthUserRepository;
+import com.muicochay.mory.cache.constants.CacheNames;
 import com.muicochay.mory.otp.dto.EmailJob;
 import com.muicochay.mory.otp.enums.EmailTemplateType;
 import com.muicochay.mory.otp.enums.OtpType;
@@ -29,19 +47,8 @@ import com.muicochay.mory.user.entity.User;
 import com.muicochay.mory.user.entity.UserProfile;
 import com.muicochay.mory.user.enums.RoleCode;
 import com.muicochay.mory.user.mapper.UserProfileMapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Service responsible for handling authentication and user registration using
@@ -153,7 +160,7 @@ public class EmailPasswordAuthService {
     }
 
     @Transactional
-    @CacheEvict(value = "authUserCache", key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
+    @CacheEvict(value = CacheNames.AUTH_USER_CACHE, key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
     public VerifyEmailResponse verifyEmail(UUID userId, String inputOtp) {
         otpService.verifyOtp(
                 OtpType.REGISTRATION,

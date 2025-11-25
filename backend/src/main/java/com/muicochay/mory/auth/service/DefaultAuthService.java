@@ -1,5 +1,15 @@
 package com.muicochay.mory.auth.service;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.muicochay.mory.auth.config.JwtTokenHelper;
 import com.muicochay.mory.auth.dto.AuthUserResponse;
 import com.muicochay.mory.auth.dto.CreatePasswordRequest;
@@ -9,6 +19,7 @@ import com.muicochay.mory.auth.enums.AuthProvider;
 import com.muicochay.mory.auth.enums.TokenType;
 import com.muicochay.mory.auth.helper.AuthHelper;
 import com.muicochay.mory.auth.repository.AuthUserRepository;
+import com.muicochay.mory.cache.constants.CacheNames;
 import com.muicochay.mory.otp.dto.EmailJob;
 import com.muicochay.mory.otp.enums.EmailTemplateType;
 import com.muicochay.mory.otp.service.EmailQueueService;
@@ -21,17 +32,9 @@ import com.muicochay.mory.shared.exception.global.InvalidResourceStateEx;
 import com.muicochay.mory.shared.exception.global.ResourcesNotFoundEx;
 import com.muicochay.mory.user.entity.User;
 import com.muicochay.mory.user.mapper.UserProfileMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +53,7 @@ public class DefaultAuthService {
 
     private final AppProperties appProperties;
 
-    @Cacheable(value = "authUserCache", key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
+    @Cacheable(value = CacheNames.AUTH_USER_CACHE, key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
     public AuthUserResponse checkAuth(UUID userId, AuthProvider authProvider) {
         User user = authUserRepository.findById(userId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("User not found with Id: " + userId));
