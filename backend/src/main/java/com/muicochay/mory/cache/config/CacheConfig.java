@@ -28,12 +28,15 @@ public class CacheConfig {
     private static final RedisSerializationContext.SerializationPair<String> STRING_SERIALIZER
             = RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer());
 
+
     private RedisCacheConfiguration ttlConfig(Duration ttl) {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(ttl)
                 .serializeKeysWith(STRING_SERIALIZER)
                 .serializeValuesWith(JSON_SERIALIZER);
     }
+
+    
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory, CacheTtlProperties cacheTtlProperties) {

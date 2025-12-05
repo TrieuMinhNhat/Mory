@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+
 /**
  * Represents the user information returned after a successful authentication
  * request. This DTO is typically used to populate the frontend user profile
@@ -19,7 +20,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class AuthUserResponse {
-
     private UUID id;
     private String email;
     private boolean isVerified;

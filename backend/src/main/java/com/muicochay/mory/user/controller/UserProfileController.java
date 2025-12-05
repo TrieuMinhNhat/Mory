@@ -25,6 +25,8 @@ import com.muicochay.mory.user.service.UserProfileService;
 
 import lombok.RequiredArgsConstructor;
 
+
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -57,6 +59,8 @@ public class UserProfileController {
             windowSeconds = 60,
             strategy = RateLimitKeyStrategy.PER_USER_ID
     )
+
+
     public ResponseEntity<ApiResponse<UpdateUserProfileResponse>> updateUserInfo(
             @AuthenticationPrincipal AuthUserPrincipal principal,
             @RequestBody UpdateUserProfileRequest request
@@ -65,6 +69,8 @@ public class UserProfileController {
         return ResponseEntity.ok(ApiResponse.success(updated, "User info updated successfully"));
     }
 
+
+
     @GetMapping("/{id}/profile")
     @RateLimit(
             prefix = "user::profile::get-user-profile:",
@@ -72,6 +78,8 @@ public class UserProfileController {
             windowSeconds = 60,
             strategy = RateLimitKeyStrategy.PER_USER_ID
     )
+
+    
     public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
             @PathVariable(name = "id") UUID userId,
             @AuthenticationPrincipal AuthUserPrincipal principal
