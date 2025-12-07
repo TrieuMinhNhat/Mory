@@ -31,6 +31,7 @@ const OnboardingLayout = ({
             hasRedirected.current = true;
             router.replace(ROUTES.PREMIUM);
         } else if (!user && !hasRedirected.current) {
+            
             hasRedirected.current = true;
             router.replace(ROUTES.AUTH.SIGN_IN);
         }

@@ -22,11 +22,13 @@ const AuthLayout = ({
     useEffect(() => {
         if (shouldRedirect && !hasRedirected.current) {
             hasRedirected.current = true;
+            
             router.replace(ROUTES.HOME);
         }
     }, [user, router, shouldRedirect]);
 
     if (shouldRedirect) return <LoadingScreen/>;
+
     return (
         <div
             className={"flex relative flex-col items-center min-h-screen bg-background"}
@@ -34,6 +36,7 @@ const AuthLayout = ({
             <AuthTopbar/>
             <div className={"relative pt-16 z-10 flex w-full items-center"}>
                 {children}
+
             </div>
         </div>
     )

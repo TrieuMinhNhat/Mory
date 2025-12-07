@@ -13,6 +13,7 @@ const PremiumPage = () => {
                 return <GoPremiumView onSkip={setView}/>;
             case PremiumView.FINISH:
                 return <FinishView/>;
+                
             default:
                 return <GoPremiumView onSkip={setView}/>;
         }

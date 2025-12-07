@@ -13,7 +13,9 @@ const PasswordPage = () => {
 
     return (
         <div className={"flex flex-col w-full items-center"}>
+
             <div className={"auth-form-container"}>
+                
                 <h1 className={"auth-form-title mx-auto"}>{a("sign_in.reset_password.title")}</h1>
                 <ResetPasswordForm/>
 

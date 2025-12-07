@@ -19,8 +19,11 @@ const SignUpPage = () => {
     const isLoading = useAuthStore((state) => state.isLoading);
     const { login, loading } = useOAuthPopupManager();
     const handleGoogleLogin = () => {
+        
         login(signInGooglePopup)
     }
+
+
     const router = useRouter();
 
     return (

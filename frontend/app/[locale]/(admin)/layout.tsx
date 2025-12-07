@@ -11,6 +11,7 @@ const AdminCheckAuthLayout = ({
     return (
         <AuthCheck>
             {children}
+            
         </AuthCheck>
     )
 }
