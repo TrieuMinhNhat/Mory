@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Security Alert</title>
+  <style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .email-container {
+        max-width: 480px;
+        margin: auto;
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1.2rem;
+    }
+
+    .otp {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c7be5;
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+
+    p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #333333;
+    }
+
+    .footer {
+        font-size: 0.8rem;
+        color: #888888;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .email-container {
+            padding: 1.5rem;
+        }
+
+        .title {
+            font-size: 1rem;
+        }
+
+        .otp {
+            font-size: 1.5rem;
+        }
+
+        p {
+            font-size: 0.75rem;
+        }
+
+        .footer {
+            font-size: 0.65rem;
+        }
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="title">Security Alert for [[${email}]]</div>
+
+  <p>
+    We noticed some activity on your <strong>[[${appName}]]</strong> account:
+  </p>
+
+  <p>
+    <strong>Activity:</strong> [[${activity}]]
+  </p>
+
+  <p>
+    If this was not you, please reset your password immediately or contact our support team.
+  </p>
+
+  <div class="footer">
+    &copy; [[${year}]] [[${appName}]]. All rights reserved.
+  </div>
+</div>
+</body>
+</html>

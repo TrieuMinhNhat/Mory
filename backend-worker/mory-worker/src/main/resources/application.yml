@@ -1,0 +1,69 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mory
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  application:
+    name: Mory
+    link:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: Xgbshw231a@4qls79483Zda
+      timeout: 2000
+    mongodb:
+      host: localhost
+      port: 27017
+      username: ${MONGO_USER}
+      password: ${MONGO_PASSWORD}
+      database: mory_mongo
+      authentication-database: admin
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBIT_USER}
+    password: ${RABBIT_PASS}
+
+async:
+  email:
+    core-pool-size: 5
+    max-pool-size: 10
+    queue-capacity: 50
+
+app:
+  frontend-url: http://localhost:3000
+  backend-url: https://localhost:8080
+  reset-password-path: /password
+  app-name: Mory
+
+sync:
+  batch:
+    flush:
+      interval:
+        ms: 300000
+    chunk:
+      size: 200
