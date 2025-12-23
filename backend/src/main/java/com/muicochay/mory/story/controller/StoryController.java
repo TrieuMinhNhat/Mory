@@ -158,6 +158,7 @@ public class StoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Members removed successfully"));
     }
 
+
     @PostMapping("/{storyId}/leave")
     @RateLimit(
             prefix = "story::leave:",
@@ -174,6 +175,7 @@ public class StoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "You left the story"));
     }
 
+
     @DeleteMapping("/{storyId}")
     @RateLimit(
             prefix = "story::delete:",
@@ -188,6 +190,7 @@ public class StoryController {
         DeletedStoryResponse response = storyService.deleteStory(principal.getId(), storyId);
         return ResponseEntity.ok(ApiResponse.success(response, "Story deleted"));
     }
+
 
     @PostMapping("/{storyId}/dissolve")
     @RateLimit(

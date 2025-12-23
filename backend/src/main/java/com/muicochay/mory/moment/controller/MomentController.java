@@ -30,6 +30,7 @@ public class MomentController {
             windowSeconds = 60,
             strategy = RateLimitKeyStrategy.PER_USER_ID
     )
+
     public ResponseEntity<ApiResponse<MomentResponse>> createStandalone(
             @AuthenticationPrincipal AuthUserPrincipal principal,
             @RequestBody StandaloneMomentRequest request
@@ -71,6 +72,7 @@ public class MomentController {
         return ResponseEntity.ok(ApiResponse.success(null, "Moment deleted successfully"));
     }
 
+
     @PatchMapping("/moments/{id}/milestone")
     @RateLimit(
             prefix = "moment::update-milestone:",
@@ -86,6 +88,7 @@ public class MomentController {
         MomentResponse updatedMoment = momentService.updateMomentMilestone(principal.getId(), momentId, request.isMilestone());
         return ResponseEntity.ok(ApiResponse.success(updatedMoment, "Moment milestone updated successfully"));
     }
+
 
     @PatchMapping("/moments/{id}/visibility")
     @RateLimit(
@@ -103,6 +106,7 @@ public class MomentController {
         return ResponseEntity.ok(ApiResponse.success(updatedMoment, "Moment visibility updated successfully"));
     }
 
+
     @PatchMapping("/moments/{id}/add-tags")
     @RateLimit(
             prefix = "moment::add-tags:",
@@ -118,6 +122,7 @@ public class MomentController {
         MomentResponse updatedMoment = momentService.addTags(principal.getId(), momentId, request.getTaggedUserIds());
         return ResponseEntity.ok(ApiResponse.success(updatedMoment, "Moment tags added successfully"));
     }
+
 
     @PatchMapping("/moments/{id}/remove-tags")
     @RateLimit(

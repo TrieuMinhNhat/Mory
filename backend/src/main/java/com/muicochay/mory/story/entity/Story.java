@@ -39,6 +39,7 @@ public class Story extends BaseAuditEntity {
 
     //JOURNEY && CHALLENGE
     private LocalDate startDate;
+
     private LocalDate endDate;
 
     //CHALLENGE
@@ -57,6 +58,7 @@ public class Story extends BaseAuditEntity {
     //BEFORE_AFTER
     @Column(name = "has_before")
     private boolean hasBefore = false;
+
     @Column(name = "has_after")
     private boolean hasAfter = false;
 
@@ -64,6 +66,6 @@ public class Story extends BaseAuditEntity {
     private List<StoryMember> members = new ArrayList<>();
 
     private Instant latestMomentCreatedAt;
-    private ObjectId latestMomentId;
 
+    private ObjectId latestMomentId;
 }

@@ -54,18 +54,23 @@ public class StoryService {
         if (request.getType() == null) {
             throw new InvalidArgumentEx("Story type is missing.");
         }
+
         if (request.getTitle() == null || request.getTitle().trim().isBlank()) {
             throw new InvalidArgumentEx("Story title is missing");
         }
+
         if (request.getTitle().trim().length() > 25) {
             throw new InvalidArgumentEx("Story title cannot exceed 25 characters");
         }
+
         if (request.getType() == StoryType.BEFORE_AFTER && request.getScope() != null && request.getScope() != StoryScope.PERSONAL) {
             throw new InvalidArgumentEx("BEFORE_AFTER stories can only have PERSONAL scope.");
         }
+
         if (request.getType() == StoryType.CHALLENGE && request.getScope() != null && request.getScope() != StoryScope.PERSONAL) {
             throw new InvalidArgumentEx("CHALLENGE stories can only have PERSONAL scope.");
         }
+
         if (request.getType() == StoryType.JOURNEY && request.getStartDate() == null && request.getEndDate() == null) {
             throw new InvalidArgumentEx("JOURNEY stories must have startDate and endDate.");
         }

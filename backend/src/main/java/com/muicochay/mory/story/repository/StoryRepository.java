@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface StoryRepository extends JpaRepository<Story, UUID> {
-
     @Query(value = """
             SELECT s.id
             FROM stories s
@@ -50,6 +49,8 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
             @Param("asc") boolean asc,
             @Param("limit") int limit
     );
+
+
 
     @Query(value = """
         SELECT s.latest_moment_id
@@ -89,6 +90,8 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
             @Param("limit") int limit
     );
 
+
+
     @Query(value = """
         SELECT s.latest_moment_id
         FROM stories s
@@ -126,6 +129,7 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
             @Param("asc") boolean asc,
             @Param("limit") int limit
     );
+
 
 
     @Query("""
@@ -172,21 +176,26 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
             @Param("limit") int limit
     );
 
+
     @EntityGraph(attributePaths = {"creator", "creator.profile", "members", "members.user"})
     @Query("SELECT s FROM Story s WHERE s.id IN :ids AND s.deletedAt IS NULL")
     List<Story> findAllByIdInWithGraph(@Param("ids") Collection<UUID> ids);
+
 
     @EntityGraph(attributePaths = {"creator", "creator.profile", "members", "members.user", "members.user.profile"})
     @Query("SELECT s FROM Story s WHERE s.id = :storyId AND s.deletedAt IS NULL")
     Optional<Story> findByIdWithMembers(@Param("storyId") UUID storyId);
 
+
     @EntityGraph(attributePaths = {"creator", "creator.profile"})
     @Query("SELECT s FROM Story s WHERE s.id = :storyId AND s.deletedAt IS NULL")
     Optional<Story> findByIdWithCreatorAndProfile(@Param("storyId") UUID storyId);
 
+
     @EntityGraph(attributePaths = {"creator"})
     @Query("SELECT s FROM Story s WHERE s.id = :storyId AND s.deletedAt IS NULL")
     Optional<Story> findByIdWithCreator(@Param("storyId") UUID storyId);
+
 
     @Query(value = """
             SELECT s.id

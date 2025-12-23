@@ -12,5 +12,4 @@ public interface StoryMomentProjection {
     Long getTotal();
     Instant getFirstCreatedAt();
     Instant getLastCreatedAt();
-
 }
