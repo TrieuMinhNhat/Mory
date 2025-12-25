@@ -11,6 +11,7 @@ interface LeaveStoryDialogState {
     action: (() => void) | null
 }
 
+
 export const useLeaveStoryDialogStore = create<LeaveStoryDialogState>((set) => ({
     open: false,
     selectedStory: null,

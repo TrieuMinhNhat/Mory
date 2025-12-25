@@ -10,6 +10,7 @@ interface AddNewMembersDialogStore {
     closeDialog: () => void
 }
 
+
 export const useAddNewMembersDialogStore = create<AddNewMembersDialogStore>((set) => ({
     open: false,
     selectedStory: null,

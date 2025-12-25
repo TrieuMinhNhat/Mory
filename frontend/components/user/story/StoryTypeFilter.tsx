@@ -1,5 +1,6 @@
 "use client"
 
+
 import React, { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
@@ -12,6 +13,7 @@ import { StoryType } from "@/types/moment"
 import { useTranslation } from "next-i18next"
 import {getStoryTypeIcon, toStoryType} from "@/utils/story"
 import Filters from "@/components/shared/icons/Filters"
+
 
 const storyTypeOptions = (u: (key: string) => string) => [
     { value: undefined, label: u("story.home.filter.all") },
@@ -50,6 +52,8 @@ export default function StoryTypeFilter() {
 
         router.replace(`?${params.toString()}`)
     }
+
+    
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>

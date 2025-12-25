@@ -26,7 +26,10 @@ import {shallow} from "zustand/vanilla/shallow";
 import {useAuthStore} from "@/store/useAuthStore";
 import {getStatusElement} from "@/components/user/story/StoryCard";
 
+
+
 const SCROLL_THRESHOLD = 80;
+
 
 const StoryDetailsPage = () => {
     const {t: u} = useTranslation("user");
@@ -37,6 +40,7 @@ const StoryDetailsPage = () => {
     const user = useAuthStore((state) => state.user);
 
     const { openCarousel, appendMomentsAndUpdateHasNext } = useMomentCarouselStore()
+
     const { open: addNewMembersDialogOpen } = useAddNewMembersDialogStore();
 
     const { 
@@ -54,6 +58,7 @@ const StoryDetailsPage = () => {
         momentsHasNext,
         momentsHasFetchedOnce
     } = useStoryDetailsStore(
+
         (state) => ({
             story: state.story,
             error: state.error,
@@ -102,15 +107,18 @@ const StoryDetailsPage = () => {
         void fetchStory(storyId);
     }, [fetchStory, isFetchingStory, story, storyId]);
 
+
     useEffect(() => {
         void handleFetchStory();
     }, [handleFetchStory, story]);
     
+
     useEffect(() => {
         if (isFetchingConnections || !story || connectionsHasFetchedOnce) return;
         if (story.members.length > 0) 
             void fetchConnections(story.members.map((m) => m.id))
     }, [connectionsHasFetchedOnce, fetchConnections, isFetchingConnections, story]);
+
 
     useEffect(() => {
         if (momentsHasFetchedOnce || isFetchingMoments || !story) return;
@@ -129,6 +137,7 @@ const StoryDetailsPage = () => {
         }
     }, [appendMomentsAndUpdateHasNext, fetchStoryMoments, isFetchingMoments, momentsHasNext, story])
 
+
     const handleScrollMoments = useCallback(() => {
         if (!isMomentTab || isFetchingMoments || !momentsHasNext) return;
 
@@ -142,10 +151,12 @@ const StoryDetailsPage = () => {
         }
     }, [isMomentTab, isFetchingMoments, momentsHasNext, handleFetchMoreMoments]);
 
+
     useEffect(() => {
         window.addEventListener("scroll", handleScrollMoments, { passive: true });
         return () => window.removeEventListener("scroll", handleScrollMoments);
     }, [handleScrollMoments]);
+
 
     if (error) {
         return (
@@ -159,6 +170,7 @@ const StoryDetailsPage = () => {
 
     return (
         <div className={"h-full px-2 md:px-6 pt-2 w-full"}>
+
             <div className={"w-full flex flex-row items-center md:mt-2 h-10 justify-between"}>
                 <button
                     onClick={() => router.back()}
@@ -173,10 +185,12 @@ const StoryDetailsPage = () => {
                 >
                     <OMenuDot className={"size-7 mx-auto"}/>
                 </button>
+
             </div>
             {/*Story details*/}
             {isFetchingStory ? (
                 <div className={"flex flex-col w-full h-fit items-center gap-2"}>
+
                     <div className={"w-fit flex flex-row items-center gap-1"}>
                         <Skeleton className={"w-24 h-6 rounded-full"}/>
                         <Skeleton className={"h-6 w-6 rounded-full"}/>
@@ -194,11 +208,13 @@ const StoryDetailsPage = () => {
                     {story && (
                         <>
                             <div className={"flex flex-col w-full h-fit items-center gap-2"}>
+
                                 <div className={"w-fit flex flex-row items-center gap-1"}>
                                     <h3 className={"text-2xl font-semibold"}>{story.title}</h3>
                                     <div className={"shrink-0"}>
                                         {getVisibilityElement(story.visibility)}
                                     </div>
+
                                 </div>
 
                                 <div className={"w-fit flex flex-row items-center gap-1"}>
@@ -228,12 +244,14 @@ const StoryDetailsPage = () => {
                                     >
                                         {u("story.details.button.moments")}
                                     </button>
+
                                     <button
                                         onClick={() => setIsMomentTab(false)}
                                         className={`nav-button ${!isMomentTab && "!bg-primary !text-fg-light-100"}`}
                                     >
                                         {u("story.details.button.members")}
                                     </button>
+                                    
                                 </div>
                             ) : (
                                 <div className={"w-full flex flex-row gap-2 pt-4 pb-2 items-center justify-center"}>

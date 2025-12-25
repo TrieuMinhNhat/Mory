@@ -12,7 +12,9 @@ interface Props {
     story: Story;
 }
 
+
 const TOOLTIP_MAX = 6
+
 
 const StoryAvatars = ({story}: Props) => {
     const {t: u} = useTranslation("user")
@@ -121,6 +123,7 @@ const StoryAvatars = ({story}: Props) => {
                                             />
                                         </div>
                                     </div>
+
                                     <div className={"w-7 h-7 absolute bottom-0 right-0 rounded-full"}>
                                         <div className={"w-7 h-7 relative"}>
                                             <Image
@@ -132,6 +135,7 @@ const StoryAvatars = ({story}: Props) => {
                                             />
                                         </div>
                                     </div>
+
                                 </>
                             )}
                             {story.members.length > 4 && (
@@ -147,6 +151,7 @@ const StoryAvatars = ({story}: Props) => {
                                             />
                                         </div>
                                     </div>
+
                                     <div className={"w-7 h-7 absolute bottom-0 left-0 rounded-full"}>
                                         <div className={"w-7 h-7 relative"}>
                                             <Image
@@ -158,6 +163,7 @@ const StoryAvatars = ({story}: Props) => {
                                             />
                                         </div>
                                     </div>
+
                                     <div className={"w-7 h-7 absolute top-0 right-0 rounded-full"}>
                                         <div className={"w-7 h-7 relative"}>
                                             <Image
@@ -169,6 +175,7 @@ const StoryAvatars = ({story}: Props) => {
                                             />
                                         </div>
                                     </div>
+                                    
                                     <div className={"w-7 h-7 absolute bottom-0 right-0 rounded-full"}>
                                         <div className={"w-7 h-7 relative"}>
                                             <Image

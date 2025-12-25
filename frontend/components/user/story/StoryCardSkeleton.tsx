@@ -4,6 +4,7 @@ import {Skeleton} from "@/components/ui/skeleton";
 
 const StoryCardSkeleton = () => {
     const random = Math.random() < 0.5;
+    
     return (
         <div className={"w-full p-2 flex rounded-xl hover:bg-background-200 flex-row items-center gap-2"}>
             {random

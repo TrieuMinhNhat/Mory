@@ -1,12 +1,14 @@
 import React, {ElementType} from "react";
 import QuestionMark from "@/components/shared/icons/QuestionMark";
 
+
 interface Props {
     title: string;
     description: string;
     icon: ElementType;
     onClick: () => void;
 }
+
 
 const StoryTypeButton = ({title, description, icon: Icon, onClick}: Props) => {
     return (

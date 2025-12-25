@@ -14,6 +14,7 @@ import StoryAvatars from "@/components/user/story/StoryAvatars";
 import {useTranslation} from "next-i18next";
 import {TFunction} from "i18next";
 
+
 interface StoryCardProps {
     story: Story;
 }
@@ -26,6 +27,7 @@ const StoryCard = ({story}: StoryCardProps) => {
 
     const { openDrawer } = useStoryDrawerStore();
     const setStory = useStoryDetailsStore((s) => s.setStory)
+
 
     return (
         <div
@@ -69,6 +71,7 @@ const StoryCard = ({story}: StoryCardProps) => {
                     }
                 </div>
             </div>
+
             <button
                 className={"p-2 rounded-full bg-transparent hover:bg-background-300 shrink-0"}
                 disabled={processingStoryIds.has(story.id)}
@@ -81,6 +84,7 @@ const StoryCard = ({story}: StoryCardProps) => {
                     <OMenuDotHorizontal className={"size-6"}/>
                 </ContentWithLoader>
             </button>
+            
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import {Moment, Story, StoryPreview} from "@/types/moment"
-import {create} from "zustand";
+import { create } from "zustand";
 import {ConnectionStatus, ConnectionType, ConnectionTypeStatus} from "@/types/connections";
 import {fetchConnections} from "@/lib/services/connections.service";
 import {UserPreview} from "@/types/user";
@@ -7,6 +7,7 @@ import {ApiResult} from "@/types/auth";
 import {fetchMomentsByStoryId} from "@/lib/services/moments.service";
 import {useStoreWithEqualityFn} from "zustand/traditional";
 import {fetchStory} from "@/lib/services/stories.service";
+
 
 interface StoryDetailsState {
     setStory: (story: Story | StoryPreview) => void,
