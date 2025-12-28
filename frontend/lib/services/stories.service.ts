@@ -11,12 +11,14 @@ interface StoryKeysetParams {
     order?: "ASC" | "DESC";
 }
 
+
 export const fetchStory = async (storyId: string) => {
     const response = await axiosInstance.get(
         API_ENDPOINTS.USER.STORIES.FETCH_STORY(storyId)
     );
     return response.data;
 }
+
 
 export const fetchStoriesByUser = async (
     userId: string,
@@ -31,6 +33,7 @@ export const fetchStoriesByUser = async (
     return response.data;
 };
 
+
 export const fetchAvailableStories = async (
     { cursorCreatedAt, cursorId, size = 20, type, order = "DESC" }: StoryKeysetParams = {}
 ) => {
@@ -43,6 +46,7 @@ export const fetchAvailableStories = async (
     return response.data;
 }
 
+
 export interface CreateJourneyStoryRequestBody {
     type: string,
     title: string,
@@ -52,6 +56,7 @@ export interface CreateJourneyStoryRequestBody {
     endDate: string,
     memberIds?: string[],
 }
+
 
 export const createJourneyStory = async (data: CreateJourneyStoryRequestBody) => {
     const requestBody = {
@@ -70,11 +75,13 @@ export const createJourneyStory = async (data: CreateJourneyStoryRequestBody) =>
     return response.data;
 }
 
+
 export interface CreateBeforeAfterStoryRequestBody {
     type: string,
     title: string,
     visibility: string,
 }
+
 
 export const createBeforeAfterStory = async (data: CreateBeforeAfterStoryRequestBody) => {
     const requestBody = {
@@ -88,6 +95,7 @@ export const createBeforeAfterStory = async (data: CreateBeforeAfterStoryRequest
     )
     return response.data;
 }
+
 
 export interface CreateChallengeStoryRequestBody {
     type: string,
@@ -114,6 +122,7 @@ export const createChallengeStory = async (data: CreateChallengeStoryRequestBody
     return response.data;
 }
 
+
 export interface CreateAlbumStoryRequestBody {
     type: string,
     title: string,
@@ -121,6 +130,7 @@ export interface CreateAlbumStoryRequestBody {
     visibility: string,
     memberIds?: string[],
 }
+
 
 export const createAlbumStory = async (data: CreateAlbumStoryRequestBody) => {
     const requestBody = {
@@ -137,6 +147,7 @@ export const createAlbumStory = async (data: CreateAlbumStoryRequestBody) => {
     return response.data;
 }
 
+
 export const dissolveStory = async (storyId: string) => {
     const response = await axiosInstance.post(API_ENDPOINTS.USER.STORIES.DISSOLVE(storyId));
     return response.data;
@@ -147,12 +158,14 @@ export const deleteStory = async (storyId: string) => {
     return response.data;
 }
 
+
 export interface UpdateStoryRequestBody {
     title: string,
     visibility?: Visibility,
     startDate?: string,
     endDate?: string,
 }
+
 
 export const updateStory = async (storyId: string, data: UpdateStoryRequestBody) => {
     const requestBody = {
@@ -168,6 +181,7 @@ export const updateStory = async (storyId: string, data: UpdateStoryRequestBody)
     return response.data;
 }
 
+
 export const leaveStory = async (storyId: string, leaveStoryAction: LeaveStoryAction) => {
     const requestBody = {
         action: leaveStoryAction,
@@ -179,18 +193,23 @@ export const leaveStory = async (storyId: string, leaveStoryAction: LeaveStoryAc
     return response.data;
 }
 
+
 export interface AddStoryMembersRequestBody {
     newMemberIds: string[],
 }
 
+
 export const addStoryMembers = async (storyId: string, data: AddStoryMembersRequestBody) => {
+
     const requestBody = {
         newMemberIds: data.newMemberIds,
     }
+
     const response = await axiosInstance.post(
         API_ENDPOINTS.USER.STORIES.MEMBERS.ADD(storyId),
         requestBody
     );
+
     return response.data;
 }
 
@@ -198,10 +217,13 @@ export interface KickStoryMembersRequestBody {
     memberIds: string[],
 }
 
+
+
 export const kickStoryMembers = async (storyId: string, data: KickStoryMembersRequestBody) => {
     const requestBody = {
         memberIds: data.memberIds,
     }
+
     const response = await axiosInstance.post(
         API_ENDPOINTS.USER.STORIES.MEMBERS.KICK(storyId),
         requestBody

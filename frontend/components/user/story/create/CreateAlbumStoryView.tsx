@@ -15,13 +15,16 @@ import Cancel from "@/components/user/moment/icons/Cancel";
 import ContentWithLoader from "@/components/shared/ContentWithLoader";
 import AddMembersDialog from "@/components/user/story/create/AddMembersDialog";
 
+
 interface Props {
     closeDialog: () => void;
 }
 
+
 const CreateAlbumStoryView = ({closeDialog}: Props) => {
     const {t: u} = useTranslation("user");
     const {t: ts} = useTranslation("toast");
+
 
     const [isGroup, setIsGroup] = useState(false);
     const [visibility, setVisibility] = useState<Visibility>(Visibility.ALL_FRIENDS);
@@ -36,12 +39,14 @@ const CreateAlbumStoryView = ({closeDialog}: Props) => {
         setMembers(newMembers);
     }
 
+
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     useEffect(() => {
         if (isGroup) {
             setVisibility(Visibility.ALL_FRIENDS);
         }
     }, [isGroup]);
+
 
     const {
         isCreatingStory,
@@ -53,6 +58,7 @@ const CreateAlbumStoryView = ({closeDialog}: Props) => {
         }),
         shallow
     );
+
 
     const handleCreateAlbumStory = async () => {
         if (isCreatingStory) return;
@@ -75,6 +81,7 @@ const CreateAlbumStoryView = ({closeDialog}: Props) => {
             toast.success(ts("user.create_story.error"));
         }
     }
+    
 
     return (
         <form

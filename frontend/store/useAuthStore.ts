@@ -82,6 +82,7 @@ const authStore = createStore<AuthState>()((set) => ({
             return {success: response.success, message: response.message, data: response.data}
         }, "Failed to sign in");
     },
+
     sendSignInOtp: async (data): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await sendSignInOtp(data);
@@ -91,6 +92,7 @@ const authStore = createStore<AuthState>()((set) => ({
             return {success: response.success, message: response.message, data: response.data}
         }, "Failed to send otp!")
     },
+
     signInEmailOtp: (data): Promise<ApiResult> =>  {
         return withLoading(set, async () => {
             const response = await signInEmailOtp(data);
@@ -104,6 +106,7 @@ const authStore = createStore<AuthState>()((set) => ({
             return {success: response.success, message: response.message, data: response.data}
         }, "Failed to sign in");
     },
+
     checkEmailExists: async (data: CheckEmailProps): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await checkEmail(data);
@@ -121,12 +124,14 @@ const authStore = createStore<AuthState>()((set) => ({
             return {success: response.success, message: response.message}
         },"Failed to sign up");
     },
+
     sendVerifyEmailOtp: async (): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await sendRegistrationOtp();
             return {success: response.success, message: response.message}
         }, "Failed to send otp")
     },
+
     verifyEmail: async (data): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await verifyEmail(data);
@@ -147,6 +152,7 @@ const authStore = createStore<AuthState>()((set) => ({
             return {success: response.success, message: response.message}
         }, "Failed to verify otp")
     },
+
     checkAuth: async (): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await checkAuth();
@@ -159,18 +165,21 @@ const authStore = createStore<AuthState>()((set) => ({
             return {success: response.success, message: response.message}
         }, "Failed to check auth", true)
     },
+
     forgotPassword: async (data): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await forgotPassword(data);
             return {success: response.success, message: response.message}
         }, "Failed to send request")
     },
+
     resetPassword: async (data): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await resetPassword(data);
             return {success: response.success, message: response.message, data: response.data}
         }, "Failed to reset password");
     },
+
     setPassword: async (password): Promise<ApiResult> => {
         return withLoading(set, async () => {
             const response = await setPassword(password);
@@ -187,6 +196,7 @@ const authStore = createStore<AuthState>()((set) => ({
         if (!user.profile.onboarded) return 2;
         return 3;
     },
+
     signOut: async () => {
         try {
             await signOut();
@@ -199,7 +209,9 @@ const authStore = createStore<AuthState>()((set) => ({
             }
         }
     },
+
     setUser: (user) => set({ user: user }),
+    
     setCurrentGetStartedEmail: (startedEmail) => set({currentGetStartedEmail: startedEmail}),
 }))
 

@@ -102,6 +102,7 @@ const storiesStore = createStore<StoriesState>()((set, get) => ({
         const targetUserId = userId || user?.id;
         if (!targetUserId) return { success: false, message: "User not authenticated" };
 
+        
         return runWithLoadingFlag(set, "isFetchingStories", async () => {
             const response = await fetchStoriesByUser(targetUserId, {
                 cursorCreatedAt: storiesCursorCreatedAt,
@@ -112,7 +113,6 @@ const storiesStore = createStore<StoriesState>()((set, get) => ({
             });
 
             await new Promise((r) => setTimeout(r, 1000));
-
             if (response.success) {
                 set((state) => {
                     const existingIds = new Set(state.stories.map((s) => s.id));

@@ -42,6 +42,7 @@ interface StoryDetailsState {
 const storyDetailsStore = create<StoryDetailsState>((set, get) => ({
     story: null,
     error: null,
+
     setStory: async (story) => {
         const currentStory = get().story;
         if (currentStory?.id !== story.id && "members" in story) {
@@ -58,6 +59,7 @@ const storyDetailsStore = create<StoryDetailsState>((set, get) => ({
                 void get().fetchConnections(fetchedStory.members.map((m) => m.id))
         }
     },
+
     isFetchingStory: false,
     
     fetchStory: async (storyId) => {
@@ -86,6 +88,7 @@ const storyDetailsStore = create<StoryDetailsState>((set, get) => ({
 
     moments: [],
     isFetchingMoments: false,
+    
     fetchStoryMoments: async (
         storyId,
         {

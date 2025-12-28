@@ -23,9 +23,11 @@ import {CreateJourneyStoryRequestBody} from "@/lib/services/stories.service";
 import {toast} from "sonner";
 import ContentWithLoader from "@/components/shared/ContentWithLoader";
 
+
 interface Props {
     closeDialog: () => void;
 }
+
 
 const CreateJourneyStoryView = ({closeDialog}: Props) => {
     const {t: u} = useTranslation("user");
@@ -60,6 +62,7 @@ const CreateJourneyStoryView = ({closeDialog}: Props) => {
         }
     }, [isGroup]);
 
+
     const {
         isCreatingStory,
         createJourneyStory
@@ -70,6 +73,7 @@ const CreateJourneyStoryView = ({closeDialog}: Props) => {
         }),
         shallow
     );
+
 
     const handleCreateJourneyStory = async () => {
         if (isCreatingStory) return;
@@ -94,6 +98,7 @@ const CreateJourneyStoryView = ({closeDialog}: Props) => {
             toast.success(ts("user.create_story.error"));
         }
     }
+    
 
     return (
         <form

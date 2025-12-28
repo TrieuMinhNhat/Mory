@@ -16,8 +16,10 @@ interface Props {
 }
 
 const CreateBeforeAfterStoryView = ({closeDialog}: Props) => {
+
     const {t: u} = useTranslation("user");
     const {t: ts} = useTranslation("toast");
+
 
     const [visibility, setVisibility] = useState<Visibility>(Visibility.ALL_FRIENDS);
     const [title, setTitle] = useState("");
@@ -34,17 +36,21 @@ const CreateBeforeAfterStoryView = ({closeDialog}: Props) => {
         shallow
     );
 
+
     const handleCreateBeforeAfterStory = async () => {
         if (isCreatingStory) return;
+
         if (title.trim().length < 5) {
             setEmptyTitleError(u("story.create_story.error.min_length"))
             return;
         }
+
         const data: CreateBeforeAfterStoryRequestBody = {
             type: StoryType.BEFORE_AFTER,
             title: title,
             visibility: visibility,
         }
+
         const result = await createBeforeAfterStory(data);
         if (result.success) {
             toast.success(ts("user.create_story.success"));
@@ -52,6 +58,7 @@ const CreateBeforeAfterStoryView = ({closeDialog}: Props) => {
         } else {
             toast.success(ts("user.create_story.error"));
         }
+        
     }
 
     return (

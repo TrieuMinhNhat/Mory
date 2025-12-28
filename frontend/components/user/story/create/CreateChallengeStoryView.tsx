@@ -16,9 +16,11 @@ import {addDays, format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
 import ContentWithLoader from "@/components/shared/ContentWithLoader";
 
+
 interface Props {
     closeDialog: () => void;
 }
+
 
 const CreateChallengeStoryView = ({closeDialog}: Props) => {
     const {t: u} = useTranslation("user");
@@ -39,6 +41,7 @@ const CreateChallengeStoryView = ({closeDialog}: Props) => {
     const [startOpen, setStartOpen] = useState(false)
     const [endOpen, setEndOpen] = useState(false)
 
+
     const {
         isCreatingStory,
         createChallengeStory,
@@ -49,6 +52,7 @@ const CreateChallengeStoryView = ({closeDialog}: Props) => {
         }),
         shallow
     );
+
 
     const handleCreateChallengeStory = async () => {
         if (isCreatingStory) return;
@@ -78,6 +82,7 @@ const CreateChallengeStoryView = ({closeDialog}: Props) => {
             toast.success(ts("user.create_story.error"));
         }
     }
+    
 
     return (
         <form
