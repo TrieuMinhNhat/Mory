@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UpdateTopicRequest {
-
     private String nameEN;
     private String nameVI;
     private String descriptionEN;

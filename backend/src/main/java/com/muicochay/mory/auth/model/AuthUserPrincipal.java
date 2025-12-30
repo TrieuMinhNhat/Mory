@@ -14,24 +14,20 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A custom implementation of {@link UserDetails} representing an authenticated
- * user in JWT-based OAuth2 authentication flow.
+ * A custom implementation of {@link UserDetails} representing an authenticated user
+ * in JWT-based OAuth2 authentication flow.
  *
- * <p>
- * This class is used internally in JWT authentication context and does not
- * store a password. Instead, it holds minimal metadata extracted from the
- * token, such as user ID, current login provider, and basic account status.</p>
+ * <p>This class is used internally in JWT authentication context and does not store a password.
+ * Instead, it holds minimal metadata extracted from the token, such as user ID,
+ * current login provider, and basic account status.</p>
  *
- * <p>
- * This is typically created when decoding a JWT token for stateless
- * authentication.</p>
+ * <p>This is typically created when decoding a JWT token for stateless authentication.</p>
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class AuthUserPrincipal implements UserDetails {
-
     private UUID id;
     private boolean verified;
     private boolean deleted;

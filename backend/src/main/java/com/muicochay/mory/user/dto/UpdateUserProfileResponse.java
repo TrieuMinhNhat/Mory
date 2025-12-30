@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UpdateUserProfileResponse {
-
     private String displayName;
     private String avatarUrl;
 }

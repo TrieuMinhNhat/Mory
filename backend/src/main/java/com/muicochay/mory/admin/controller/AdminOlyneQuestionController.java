@@ -19,7 +19,6 @@ import java.util.List;
 @RequestMapping("/api/admin/olyne-questions")
 @RequiredArgsConstructor
 public class AdminOlyneQuestionController {
-
     private final AdminQuestionService adminQuestionService;
 
     @PostMapping

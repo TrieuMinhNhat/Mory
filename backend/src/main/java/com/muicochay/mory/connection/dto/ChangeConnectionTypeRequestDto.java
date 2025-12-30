@@ -13,7 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class ChangeConnectionTypeRequestDto {
-
     private UUID recipientId;
     private ConnectionType newType;
     private String message;

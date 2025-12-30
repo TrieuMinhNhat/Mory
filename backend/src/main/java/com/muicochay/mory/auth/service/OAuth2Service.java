@@ -24,32 +24,28 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Service responsible for handling authentication and registration using OAuth2
- * providers.
+ * Service responsible for handling authentication and registration using OAuth2 providers.
  *
- * <p>
- * Responsibilities:</p>
+ * <p>Responsibilities:</p>
  * <ul>
- * <li>Authenticate user via OAuth2 provider (e.g., GOOGLE, GITHUB)</li>
- * <li>Link provider to existing user if needed</li>
- * <li>Replace unverified EMAIL_PASSWORD provider with OAuth2 if applicable</li>
- * <li>Create a new user if not found</li>
- * <li>Generate JWT token pair (access + refresh)</li>
- * <li>Persist session metadata in Redis</li>
+ *   <li>Authenticate user via OAuth2 provider (e.g., GOOGLE, GITHUB)</li>
+ *   <li>Link provider to existing user if needed</li>
+ *   <li>Replace unverified EMAIL_PASSWORD provider with OAuth2 if applicable</li>
+ *   <li>Create a new user if not found</li>
+ *   <li>Generate JWT token pair (access + refresh)</li>
+ *   <li>Persist session metadata in Redis</li>
  * </ul>
  *
- * <p>
- * Important behavior:</p>
+ * <p>Important behavior:</p>
  * <ul>
- * <li>If a user exists but has an unverified EMAIL_PASSWORD provider, that
- * provider is removed and replaced with the OAuth2 one.</li>
- * <li>If the OAuth2 provider is blocked by the user, login is rejected.</li>
+ *   <li>If a user exists but has an unverified EMAIL_PASSWORD provider,
+ *       that provider is removed and replaced with the OAuth2 one.</li>
+ *   <li>If the OAuth2 provider is blocked by the user, login is rejected.</li>
  * </ul>
  */
 @Service
 @RequiredArgsConstructor
 public class OAuth2Service {
-
     private final AuthUserRepository authUserRepository;
     private final JwtTokenHelper jwtTokenHelper;
 
@@ -58,17 +54,14 @@ public class OAuth2Service {
     private final BlockedUserService blockedUserService;
 
     /**
-     * Handles sign-in or registration for a user authenticated via an OAuth2
-     * provider.
+     * Handles sign-in or registration for a user authenticated via an OAuth2 provider.
      *
-     * <p>
-     * If a user with the given email already exists:
+     * <p>If a user with the given email already exists:
      * <ul>
-     * <li>Checks for blocked OAuth2 providers.</li>
-     * <li>Checks if the user account is blocked and prevents access if so.</li>
-     * <li>Handles unverified EMAIL_PASSWORD accounts by replacing
-     * provider.</li>
-     * <li>Links the OAuth2 provider if not already linked</li>
+     *   <li>Checks for blocked OAuth2 providers.</li>
+     *   <li>Checks if the user account is blocked and prevents access if so.</li>
+     *   <li>Handles unverified EMAIL_PASSWORD accounts by replacing provider.</li>
+     *   <li>Links the OAuth2 provider if not already linked</li>
      * </ul>
      *
      * If the user does not exist, a new account is created.
@@ -104,7 +97,7 @@ public class OAuth2Service {
             }
 
             return Oauth2SignInOrRegisterResult.builder()
-                    .tokenPair(handleUserExisted(existingUser, provider, ip, userAgent))
+                    .tokenPair(handleUserExisted(existingUser,provider,ip, userAgent))
                     .build();
         }
 

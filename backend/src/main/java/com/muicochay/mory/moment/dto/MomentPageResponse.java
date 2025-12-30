@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -17,5 +17,5 @@ public class MomentPageResponse {
     private List<MomentResponse> moments;
     private boolean hasNext;
     private Instant nextCursorCreatedAt;
-    private ObjectId nextCursorId;
+    private UUID nextCursorId;
 }

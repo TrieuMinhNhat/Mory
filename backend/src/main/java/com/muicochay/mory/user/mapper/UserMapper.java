@@ -11,11 +11,8 @@ import java.util.Objects;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
     default UserPreviewResponse toProfilePreview(User user) {
-        if (user == null || user.getProfile() == null) {
-            return null;
-        }
+        if (user == null || user.getProfile() == null) return null;
         return UserPreviewResponse.builder()
                 .id(user.getId())
                 .displayName(user.getProfile().getDisplayName())
@@ -24,12 +21,11 @@ public interface UserMapper {
     }
 
     default List<UserPreviewResponse> toProfilePreviewList(Collection<User> users) {
-        if (users == null) {
-            return Collections.emptyList();
-        }
+        if (users == null) return Collections.emptyList();
         return users.stream()
                 .map(this::toProfilePreview)
                 .filter(Objects::nonNull)
                 .toList();
     }
 }
+

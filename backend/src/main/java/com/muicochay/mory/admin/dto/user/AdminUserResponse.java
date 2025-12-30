@@ -18,7 +18,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class AdminUserResponse {
-
     private UUID id;
     private String email;
     private UserProfileDto profile;

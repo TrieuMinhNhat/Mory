@@ -1,9 +1,7 @@
 package com.muicochay.mory.conversation.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -12,13 +10,14 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChatMessageResponse {
-    private String id;
+    private UUID id;
     private UUID conversationId;
     private UUID senderId;
     private String text;
-    private String replyToMessageId;
-    private UUID replyToMomentId;
+    private RepliedMomentDto repliedMoment;
+    private RepliedMessageDto repliedMessage;
     private Instant createdAt;
-    private Instant updatedAt;
+    private Instant lastModifiedAt;
 }

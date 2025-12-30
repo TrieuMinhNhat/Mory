@@ -12,17 +12,13 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Service responsible for generating, validating, and deleting password reset
- * tokens, using Redis as a temporary token store. Tokens are time-limited and
- * mapped to user emails.
- * <p>
- * The generated token is used in a reset password link that is sent to the
- * user's email.</p>
+ * Service responsible for generating, validating, and deleting password reset tokens,
+ * using Redis as a temporary token store. Tokens are time-limited and mapped to user emails.
+ * <p>The generated token is used in a reset password link that is sent to the user's email.</p>
  */
 @Service
 @RequiredArgsConstructor
 public class ResetPasswordRedisService {
-
     private final RedisTemplate<String, Object> redisTemplate;
 
     private final AppProperties appProperties;
@@ -31,20 +27,17 @@ public class ResetPasswordRedisService {
     private static final long TOKEN_EXPIRY_MINUTES = 15;
 
     /**
-     * Generates a reset password token, stores it in Redis with an expiration
-     * time, and returns a frontend URL that includes the token as a query
-     * parameter.
+     * Generates a reset password token, stores it in Redis with an expiration time,
+     * and returns a frontend URL that includes the token as a query parameter.
      * <p>
      * This link is intended to be sent to the user's email, and when clicked,
      * it will navigate the user to the password reset page on the frontend,
      * where the token will be used for validation.
      * </p>
-     * Example returned URL:
-     * {@code https://your-frontend-domain/reset-password?token=abc123?email=example@gmail.com}
+     * Example returned URL: {@code https://your-frontend-domain/reset-password?token=abc123?email=example@gmail.com}
      *
      * @param email the email of the user requesting password reset
-     * @return a full frontend URL with the reset token and email as query
-     * parameters
+     * @return a full frontend URL with the reset token and email as query parameters
      */
     public String generateTokenAndLink(String email) {
         String token = UUID.randomUUID().toString();
@@ -65,13 +58,11 @@ public class ResetPasswordRedisService {
     }
 
     /**
-     * Validates that the given token exists in Redis and matches the expected
-     * email.
+     * Validates that the given token exists in Redis and matches the expected email.
      *
      * @param token the token to validate
      * @param email the email to match against the stored token data
-     * @throws InvalidResetPasswordTokenEx if the token is missing, expired, or
-     * email doesn't match
+     * @throws InvalidResetPasswordTokenEx if the token is missing, expired, or email doesn't match
      */
     public void validateToken(String token, String email) {
         String key = getKey(token);

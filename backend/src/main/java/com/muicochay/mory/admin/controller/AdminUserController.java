@@ -18,7 +18,6 @@ import java.util.UUID;
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
 public class AdminUserController {
-
     private final AdminUserService adminUserService;
 
     @GetMapping
@@ -66,7 +65,6 @@ public class AdminUserController {
         UserStatsSummary stats = adminUserService.getUserStatistics();
         return ResponseEntity.ok(ApiResponse.success(stats, "Fetched user statistics"));
     }
-
     @GetMapping("/stats/daily")
     public ResponseEntity<ApiResponse<List<UserDailyCount>>> getUserCountByDateRange(
             @RequestParam LocalDate startDate,
@@ -75,5 +73,6 @@ public class AdminUserController {
         List<UserDailyCount> stats = adminUserService.getUserCountByDateRange(startDate, endDate);
         return ResponseEntity.ok(ApiResponse.success(stats, "Fetched daily user count"));
     }
+
 
 }

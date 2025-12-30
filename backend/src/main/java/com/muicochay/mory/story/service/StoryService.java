@@ -4,19 +4,23 @@ import com.muicochay.mory.connection.enums.ConnectionStatus;
 import com.muicochay.mory.connection.enums.ConnectionType;
 import com.muicochay.mory.connection.repository.ConnectionRepository;
 import com.muicochay.mory.connection.utils.ConnectionUtils;
-import com.muicochay.mory.moment.document.Moment;
+import com.muicochay.mory.conversation.service.ConversationService;
+import com.muicochay.mory.moment.entity.Moment;
 import com.muicochay.mory.moment.repository.MomentRepository;
 import com.muicochay.mory.shared.enums.Visibility;
 import com.muicochay.mory.shared.exception.global.InvalidArgumentEx;
 import com.muicochay.mory.shared.exception.global.InvalidResourceStateEx;
 import com.muicochay.mory.shared.exception.global.ResourcesAccessDeniedEx;
 import com.muicochay.mory.shared.exception.global.ResourcesNotFoundEx;
+import com.muicochay.mory.story.config.StoryProperties;
 import com.muicochay.mory.story.dto.*;
 import com.muicochay.mory.story.entity.Story;
 import com.muicochay.mory.story.entity.StoryMember;
 import com.muicochay.mory.story.enums.LeaveStoryAction;
+import com.muicochay.mory.story.enums.StoryMomentHandling;
 import com.muicochay.mory.story.enums.StoryScope;
 import com.muicochay.mory.story.enums.StoryType;
+import com.muicochay.mory.story.interfaces.StoryMomentCountProjection;
 import com.muicochay.mory.story.repository.StoryMemberRepository;
 import com.muicochay.mory.story.repository.StoryRepository;
 import com.muicochay.mory.user.dto.UserPreviewResponse;
@@ -28,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -40,6 +43,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+
 public class StoryService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
@@ -48,75 +52,35 @@ public class StoryService {
     private final MomentRepository momentRepository;
     private final ConnectionRepository connectionRepository;
     private final StoryMemberRepository storyMemberRepository;
+    private final ConversationService conversationService;
+
+    private final StoryProperties storyProperties;
 
     @Transactional
     public StoryResponse createStory(UUID creatorId, StoryRequest request) {
         if (request.getType() == null) {
             throw new InvalidArgumentEx("Story type is missing.");
         }
-
         if (request.getTitle() == null || request.getTitle().trim().isBlank()) {
             throw new InvalidArgumentEx("Story title is missing");
         }
-
         if (request.getTitle().trim().length() > 25) {
             throw new InvalidArgumentEx("Story title cannot exceed 25 characters");
         }
 
-        if (request.getType() == StoryType.BEFORE_AFTER && request.getScope() != null && request.getScope() != StoryScope.PERSONAL) {
-            throw new InvalidArgumentEx("BEFORE_AFTER stories can only have PERSONAL scope.");
-        }
+        Story story = switch (request.getType()) {
+            case BEFORE_AFTER -> buildBeforeAfterStory(creatorId, request);
+            case JOURNEY      -> buildJourneyStory(creatorId, request);
+            case CHALLENGE    -> buildChallengeStory(creatorId, request);
+            case ALBUM        -> buildAlbumStory(creatorId, request);
+        };
 
-        if (request.getType() == StoryType.CHALLENGE && request.getScope() != null && request.getScope() != StoryScope.PERSONAL) {
-            throw new InvalidArgumentEx("CHALLENGE stories can only have PERSONAL scope.");
-        }
+        Story savedStory = storyRepository.save(story);
+        return buildStoryResponse(savedStory, true);
+    }
 
-        if (request.getType() == StoryType.JOURNEY && request.getStartDate() == null && request.getEndDate() == null) {
-            throw new InvalidArgumentEx("JOURNEY stories must have startDate and endDate.");
-        }
-
+    private Story buildAlbumStory(UUID creatorId, StoryRequest request) {
         User creator = userRepository.getReferenceById(creatorId);
-        LocalDate today = LocalDate.now(ZoneId.of(creator.getProfile().getTimezone()));
-
-        if (request.getType() == StoryType.JOURNEY) {
-            LocalDate start = request.getStartDate();
-            LocalDate end   = request.getEndDate();
-
-            if (start == null) {
-                throw new InvalidArgumentEx("CHALLENGE stories must have startDate");
-            }
-
-            if (end != null && start.isAfter(end)) {
-                throw new InvalidArgumentEx("Start date cannot be after end date");
-            }
-
-            if (start.isBefore(today)) {
-                throw new InvalidArgumentEx("Start date cannot be before today");
-            }
-        }
-
-        if (request.getType() == StoryType.CHALLENGE) {
-            if (request.getDuration() == null || request.getDuration() <= 2) {
-                throw new InvalidArgumentEx("Duration must be greater than 2 for CHALLENGE stories.");
-            }
-            LocalDate start = request.getStartDate();
-            LocalDate end   = request.getEndDate();
-            Integer duration = request.getDuration();
-
-            if (start == null || end == null) {
-                throw new InvalidArgumentEx("CHALLENGE stories must have startDate and endDate.");
-            }
-            if (start.isBefore(today)) {
-                throw new InvalidArgumentEx("Start date cannot be before today");
-            }
-            if (!end.isAfter(start)) {
-                throw new InvalidArgumentEx("End date must be after start date");
-            }
-            long days = ChronoUnit.DAYS.between(start, end) + 1;
-            if (days < duration) {
-                throw new InvalidArgumentEx("The number of days between startDate and endDate must be at least the challenge duration.");
-            }
-        }
 
         Story story = Story.builder()
                 .creator(creator)
@@ -130,7 +94,10 @@ public class StoryService {
                 .build();
 
         if (request.getScope() == StoryScope.PERSONAL) {
-            story.setVisibility(request.getVisibility());
+            story.setVisibility(
+                    request.getVisibility() == null
+                            ? Visibility.ALL_FRIENDS
+                            : request.getVisibility());
         } else {
             story.setVisibility(Visibility.ALL_FRIENDS);
         }
@@ -150,6 +117,10 @@ public class StoryService {
             );
 
             if (!connectedUserIds.isEmpty()) {
+                if (connectedUserIds.size() > storyProperties.getMaxMembers() - 1) {
+                    throw new InvalidArgumentEx("Number of members exceeds the maximum allowed: " + storyProperties.getMaxMembers());
+                }
+
                 List<User> members = userRepository.findAllById(connectedUserIds);
 
                 List<StoryMember> storyMembers = members.stream()
@@ -164,7 +135,162 @@ public class StoryService {
             }
         }
 
-        return buildStoryResponse(savedStory, true);
+        if (savedStory.getScope() == StoryScope.GROUP) {
+            conversationService.createStoryConversation(savedStory);
+        }
+
+        return savedStory;
+    }
+
+    private Story buildChallengeStory(UUID creatorId, StoryRequest request) {
+        if (request.getScope() != null && request.getScope() != StoryScope.PERSONAL) {
+            throw new InvalidArgumentEx("CHALLENGE stories can only have PERSONAL scope.");
+        }
+        if (request.getDuration() == null || request.getDuration() <= 2) {
+            throw new InvalidArgumentEx("Duration must be greater than 2 for CHALLENGE stories.");
+        }
+
+        User creator = userRepository.findWithProfileById(creatorId)
+                .orElseThrow(() -> new ResourcesNotFoundEx("User not found with id: " + creatorId));
+        LocalDate today = LocalDate.now(ZoneId.of(creator.getProfile().getTimezone()));
+
+
+
+        LocalDate start = request.getStartDate();
+        LocalDate end   = request.getEndDate();
+        Integer duration = request.getDuration();
+
+        if (start == null || end == null) {
+            throw new InvalidArgumentEx("CHALLENGE stories must have startDate and endDate.");
+        }
+        if (start.isBefore(today)) {
+            throw new InvalidArgumentEx("Start date cannot be before today");
+        }
+        if (!end.isAfter(start)) {
+            throw new InvalidArgumentEx("End date must be after start date");
+        }
+        long days = ChronoUnit.DAYS.between(start, end) + 1;
+        if (days < duration) {
+            throw new InvalidArgumentEx("The number of days between startDate and endDate must be at least the challenge duration.");
+        }
+
+        Story story = Story.builder()
+                .creator(creator)
+                .type(request.getType())
+                .title(request.getTitle())
+                .scope(StoryScope.PERSONAL)
+                .duration(request.getDuration())
+                .startDate(request.getStartDate())
+                .visibility(
+                        request.getVisibility() == null
+                                ? Visibility.ALL_FRIENDS
+                                : request.getVisibility()
+                )
+                .endDate(request.getEndDate())
+                .build();
+
+        return storyRepository.save(story);
+    }
+
+    private Story buildBeforeAfterStory(UUID creatorId, StoryRequest request) {
+        User creator = userRepository.getReferenceById(creatorId);
+
+        Story story = Story.builder()
+                .creator(creator)
+                .type(request.getType())
+                .title(request.getTitle())
+                .scope(StoryScope.PERSONAL)
+                .visibility(
+                        request.getVisibility() == null
+                                ? Visibility.ALL_FRIENDS
+                                : request.getVisibility())
+                .build();
+
+        return storyRepository.save(story);
+    }
+
+    private Story buildJourneyStory(UUID creatorId, StoryRequest request) {
+        if (request.getType() == StoryType.JOURNEY
+                && request.getStartDate() == null && request.getEndDate() == null) {
+            throw new InvalidArgumentEx("JOURNEY stories must have startDate and endDate.");
+        }
+
+        User creator = userRepository.findWithProfileById(creatorId)
+                .orElseThrow(() -> new ResourcesNotFoundEx("User not found with id: " + creatorId));
+        LocalDate today = LocalDate.now(ZoneId.of(creator.getProfile().getTimezone()));
+
+        LocalDate start = request.getStartDate();
+        LocalDate end   = request.getEndDate();
+
+        if (start == null) {
+            throw new InvalidArgumentEx("CHALLENGE stories must have startDate");
+        }
+
+        if (end != null && start.isAfter(end)) {
+            throw new InvalidArgumentEx("Start date cannot be after end date");
+        }
+
+        if (start.isBefore(today)) {
+            throw new InvalidArgumentEx("Start date cannot be before today");
+        }
+
+        Story story = Story.builder()
+                .creator(creator)
+                .type(request.getType())
+                .title(request.getTitle())
+                .scope(request.getScope() != null ? request.getScope() : StoryScope.PERSONAL)
+                .duration(request.getDuration())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .members(new ArrayList<>())
+                .build();
+
+        if (request.getScope() == StoryScope.PERSONAL) {
+            story.setVisibility(
+                    request.getVisibility() == null
+                            ? Visibility.ALL_FRIENDS
+                            : request.getVisibility());
+        } else {
+            story.setVisibility(Visibility.ALL_FRIENDS);
+        }
+
+        Story savedStory = storyRepository.save(story);
+
+        if (canAddMembers(request.getScope(), request.getType())) {
+            List<UUID> distinctMemberIds = request.getMemberIds().stream()
+                    .distinct()
+                    .filter(r -> !r.equals(creatorId))
+                    .toList();
+
+            Set<UUID> connectedUserIds = connectionRepository.findConnectedUserIds(
+                    creatorId,
+                    distinctMemberIds,
+                    List.of(ConnectionStatus.CONNECTED)
+            );
+
+            if (!connectedUserIds.isEmpty()) {
+                if (connectedUserIds.size() > storyProperties.getMaxMembers() - 1) {
+                    throw new InvalidArgumentEx("Number of members exceeds the maximum allowed: " + storyProperties.getMaxMembers());
+                }
+
+                List<User> members = userRepository.findAllById(connectedUserIds);
+
+                List<StoryMember> storyMembers = members.stream()
+                        .map(user -> StoryMember.builder()
+                                .story(savedStory)
+                                .user(user)
+                                .build())
+                        .toList();
+
+                storyMembers.forEach(m -> m.setStory(savedStory));
+                savedStory.getMembers().addAll(storyMembers);
+            }
+        }
+
+        if (savedStory.getScope() == StoryScope.GROUP) {
+            conversationService.createStoryConversation(savedStory);
+        }
+        return savedStory;
     }
 
 
@@ -173,10 +299,12 @@ public class StoryService {
         if (memberIds == null || memberIds.isEmpty()) {
             throw new InvalidArgumentEx("memberIds cannot be empty");
         }
+
         Story story = storyRepository.findByIdWithMembers(storyId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Story not found with Id: " + storyId));
 
         LocalDate today = LocalDate.now(ZoneId.of(story.getCreator().getProfile().getTimezone()));
+
         if (story.getType() == StoryType.JOURNEY && story.getEndDate() != null && !story.getEndDate().isAfter(today)) {
             throw new InvalidResourceStateEx("Cannot add members to a journey that has already ended");
         }
@@ -198,10 +326,16 @@ public class StoryService {
         List<UUID> candidateIds = memberIds.stream()
                 .distinct()
                 .filter(id -> !existingMemberIds.contains(id))
+                .filter(id -> !id.equals(story.getCreator().getId()))
                 .toList();
 
         if (candidateIds.isEmpty()) {
             return buildStoryResponse(story, true);
+        }
+
+        int totalAfterAdd = existingMemberIds.size() + candidateIds.size() + 1;
+        if (totalAfterAdd > storyProperties.getMaxMembers()) {
+            throw new InvalidArgumentEx("Number of members exceeds the maximum allowed: " + storyProperties.getMaxMembers());
         }
 
         Set<UUID> connectedUserIds = connectionRepository.findConnectedUserIds(
@@ -210,24 +344,47 @@ public class StoryService {
                 List.of(ConnectionStatus.CONNECTED)
         );
 
-        List<User> newMembers = userRepository.findAllById(connectedUserIds);
+        List<UUID> newMemberIds = userRepository.findExistingUserIdsByIds(connectedUserIds);
 
-        newMembers.forEach(u -> story.getMembers().add(
-                StoryMember.builder().story(story).user(u).build()
-        ));
+        List<StoryMemberCreateRequest> newStoryMembers = newMemberIds.stream()
+                .map(id -> StoryMemberCreateRequest.builder()
+                        .storyId(story.getId())
+                        .userId(id)
+                        .build())
+                .toList();
 
-        return buildStoryResponse(story, true);
+        storyMemberRepository.saveAllIgnoreDuplicates(newStoryMembers);
+
+        conversationService.addMembersToStoryConversation(
+                story.getId(),
+                newMemberIds
+        );
+
+
+        List<StoryMember> latestMembers = storyMemberRepository.findByStoryId(storyId);
+
+        List<UserPreviewResponse> memberInfos = new ArrayList<>();
+        memberInfos.add(userMapper.toProfilePreview(story.getCreator()));
+        memberInfos.addAll(
+                latestMembers.stream()
+                        .map(m -> userMapper.toProfilePreview(m.getUser()))
+                        .toList()
+        );
+        return StoryResponse.builder()
+                .id(story.getId())
+                .members(memberInfos)
+                .build();
     }
 
     @Transactional
-    public StoryResponse kickMember(UUID creatorId, UUID storyId, List<UUID> memberIds) {
+    public StoryResponse kickMember(UUID requesterId, UUID storyId, List<UUID> memberIds) {
         Story story = storyRepository.findByIdWithMembers(storyId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Story not found with Id: " + storyId));
 
-        if (!story.getType().equals(StoryType.JOURNEY)) {
+        if ((story.getType() != StoryType.JOURNEY && story.getType() != StoryType.ALBUM) || story.getScope() != StoryScope.GROUP) {
             throw new InvalidResourceStateEx("Cannot remove members from personal story");
         }
-        if (!story.getCreator().getId().equals(creatorId)) {
+        if (!story.getCreator().getId().equals(requesterId)) {
             throw new ResourcesAccessDeniedEx("Only creator can remove members");
         }
 
@@ -236,27 +393,35 @@ public class StoryService {
             throw new InvalidResourceStateEx("Cannot kick members from a journey that has already ended");
         }
 
-        UUID storyCreatorId = story.getCreator().getId();
-
-        Set<UUID> currentMemberIds = story.getMembers().stream()
-                .map(m -> m.getUser().getId())
-                .filter(id -> !id.equals(storyCreatorId))
-                .collect(Collectors.toSet());
-
-        List<UUID> validMemberIds = memberIds.stream()
-                .filter(currentMemberIds::contains)
+        List<UUID> filteredMemberIds = memberIds.stream()
+                .filter(id -> !id.equals(requesterId))
                 .toList();
 
-        if (validMemberIds.isEmpty()) {
-            throw new ResourcesNotFoundEx("No valid members to remove");
-        }
+        int deletedCount = storyMemberRepository.deleteByStoryIdAndUserIdIn(
+                storyId,
+                filteredMemberIds
+        );
 
-        story.getMembers().removeIf(m -> validMemberIds.contains(m.getUser().getId()));
+        conversationService.kickMembersFromStoryConversation(
+                story.getId(),
+                filteredMemberIds
+        );
 
-        int total = momentRepository.unlinkByStoryIdAndUserIds(storyId, validMemberIds);
+        int total = momentRepository.unlinkByStoryIdAndUserIds(storyId, filteredMemberIds);
 
+        List<StoryMember> latestMembers = storyMemberRepository.findByStoryId(storyId);
 
-        return buildStoryResponse(story, true);
+        List<UserPreviewResponse> memberInfos = new ArrayList<>();
+        memberInfos.add(userMapper.toProfilePreview(story.getCreator()));
+        memberInfos.addAll(
+                latestMembers.stream()
+                        .map(m -> userMapper.toProfilePreview(m.getUser()))
+                        .toList()
+        );
+        return StoryResponse.builder()
+                .id(story.getId())
+                .members(memberInfos)
+                .build();
     }
 
     @Transactional
@@ -286,13 +451,16 @@ public class StoryService {
                     .build();
         }
         int affectedMoments = momentRepository.softDeleteByStoryIdAndUserId(storyId, userId, Instant.now());
+
+        conversationService.leaveGroupConversation(story.getId(), userId);
+
         return LeaveStoryResponse.builder()
                 .affectedMomentCount(affectedMoments)
                 .build();
     }
 
     private Story createNewPersonalStoryFromExisting(Story originalStory, UUID userId) {
-        Moment latestUserMoment = momentRepository.findLatestMomentByUserIdAndStoryId(
+        Moment latestUserMoment = momentRepository.findFirstByUserIdAndStoryIdAndDeletedAtIsNullOrderByCreatedAtDescIdDesc(
                 userId,
                 originalStory.getId()
         ).orElse(null);
@@ -309,7 +477,7 @@ public class StoryService {
                 .build();
         storyRepository.saveAndFlush(newStory);
 
-        Moment latestStoryMoment = momentRepository.findLatestMomentByStoryIdExcludeUserId(
+        Moment latestStoryMoment = momentRepository.findFirstByStoryIdAndUserIdNotAndDeletedAtIsNullOrderByCreatedAtDescIdDesc(
                 originalStory.getId(),
                 userId
         ).orElse(null);
@@ -340,8 +508,12 @@ public class StoryService {
             throw new ResourcesAccessDeniedEx("Only creator can update story");
         }
 
-        if (StringUtils.hasText(request.getTitle())) {
+        if (StringUtils.hasText(request.getTitle()) && !request.getTitle().equals(story.getTitle())) {
             story.setTitle(request.getTitle().trim());
+            conversationService.updateTitleForStoryConversation(
+                    story.getId(),
+                    request.getTitle().trim()
+            );
         }
 
         if (story.getType() == StoryType.JOURNEY) {
@@ -387,33 +559,40 @@ public class StoryService {
                 .build();
     }
 
-    @Transactional
-    public DeletedStoryResponse deleteStory(UUID requesterId, UUID storyId) {
-        Story story = storyRepository.findByIdWithCreator(storyId)
-                .orElseThrow(() -> new ResourcesNotFoundEx("Story not found with Id: " + storyId));
-        UUID creatorId = story.getCreator().getId();
-        if (!requesterId.equals(creatorId)) {
-            throw new ResourcesAccessDeniedEx("You are not allowed to delete this story");
-        }
-        Instant now = Instant.now();
-        story.setDeletedAt(now);
-        int deletedMomentCount = momentRepository.softDeleteByStoryId(storyId, now);
-        return DeletedStoryResponse.builder()
-                .deletedMomentCount(deletedMomentCount)
-                .build();
-    }
 
     @Transactional
-    public DissolvedStoryResponse dissolveStory(UUID requesterId, UUID storyId) {
+    public DeleteStoryResponse deleteStory(
+            UUID requesterId,
+            UUID storyId,
+            StoryMomentHandling momentHandling
+    ) {
         Story story = storyRepository.findByIdWithCreator(storyId)
-                .orElseThrow(() -> new ResourcesNotFoundEx("Story not found with Id: " + storyId));
+                .orElseThrow(() ->
+                        new ResourcesNotFoundEx("Story not found with Id: " + storyId)
+                );
+
         UUID creatorId = story.getCreator().getId();
         if (!requesterId.equals(creatorId)) {
             throw new ResourcesAccessDeniedEx("You are not allowed to delete this story");
         }
-        story.setDeletedAt(Instant.now());
-        int affectedMomentCount = momentRepository.unlinkByStoryId(storyId);
-        return DissolvedStoryResponse.builder()
+
+        Instant now = Instant.now();
+        story.setDeletedAt(now);
+
+        if (story.getScope() == StoryScope.GROUP) {
+            conversationService.removeConversation(story.getId());
+        }
+
+        int affectedMomentCount;
+
+        if (momentHandling == StoryMomentHandling.DELETE) {
+            affectedMomentCount = momentRepository.softDeleteByStoryId(storyId, now);
+        } else {
+            affectedMomentCount = momentRepository.unlinkByStoryId(storyId);
+        }
+
+        return DeleteStoryResponse.builder()
+                .momentHandling(momentHandling)
                 .affectedMomentCount(affectedMomentCount)
                 .build();
     }
@@ -453,15 +632,15 @@ public class StoryService {
 
         StoryResponse response = buildStoryResponse(story, true);
 
-        StoryMomentStats result = momentRepository.getMomentStatsByStoryId(storyId)
+        StoryMomentCountProjection result = momentRepository.countMomentsByStoryId(storyId)
                 .orElse(null);
 
-        long total = result == null ? 0 : result.totalMoments();
+        long total = result == null ? 0 : result.getTotal();
 
         response.setTotalMoments(total);
         if (story.getType() == StoryType.ALBUM || story.getType() == StoryType.BEFORE_AFTER) {
-            Instant first = result == null ? null : result.firstCreatedAt();
-            Instant last = result == null ? null : result.lastCreatedAt();
+            Instant first = story.getCreatedAt();
+            Instant last = story.getLatestMomentCreatedAt();
 
             String tz = Optional.ofNullable(requester)
                     .map(User::getProfile)
@@ -483,7 +662,7 @@ public class StoryService {
     }
 
     @Transactional(readOnly = true)
-    public StoryPageResponse getStoriesByUser(UUID requesterId, UUID userId, StoryType type, Instant cursorCreatedAt, UUID cursorId, String order, int size, String timezone) {
+    public StoryPageResponse getStoriesByUser(UUID requesterId, UUID userId, StoryType type, Instant cursorCreatedAt, UUID cursorId, String order, int size) {
         boolean asc = "ASC".equalsIgnoreCase(order);
         List<UUID> storyIds;
 
@@ -536,23 +715,24 @@ public class StoryService {
         Instant nextCursorCreatedAt = hasNext ? stories.getLast().getCreatedAt() : null;
         UUID nextCursorId = hasNext ? stories.getLast().getId() : null;
 
-        List<StoryMomentStats> results = momentRepository.getMomentStatsByStoryIds(storyIds);
-        System.out.println(results);
+        User requester = userRepository.findWithProfileById(requesterId)
+                .orElseThrow(() -> new ResourcesNotFoundEx("User not found with Id: " + requesterId));
+        String timezone = requester.getProfile().getTimezone();
 
-        Map<UUID, Long> totalMap = results.stream()
-                .collect(Collectors.toMap(StoryMomentStats::storyId, StoryMomentStats::totalMoments));
-        Map<UUID, Instant> firstCreatedAtMap = results.stream()
-                .collect(Collectors.toMap(StoryMomentStats::storyId, StoryMomentStats::firstCreatedAt));
-        Map<UUID, Instant> lastCreatedAtMap = results.stream()
-                .collect(Collectors.toMap(StoryMomentStats::storyId, StoryMomentStats::lastCreatedAt));
+        List<StoryMomentCountProjection> results = momentRepository.countMomentsByStoryIds(storyIds);
+
+        Map<UUID, Long> momentCountMap = results.stream()
+                .collect(Collectors.toMap(
+                        StoryMomentCountProjection::getStoryId,
+                        StoryMomentCountProjection::getTotal));
 
         List<StoryResponse> storyWithPreviewMomentResponse = stories.stream()
                 .map(story -> {
                     StoryResponse resp = buildStoryResponse(story, true);
-                    resp.setTotalMoments(totalMap.getOrDefault(story.getId(), 0L));
+                    resp.setTotalMoments(momentCountMap.getOrDefault(story.getId(), 0L));
                     if (story.getType() == StoryType.ALBUM || story.getType() == StoryType.BEFORE_AFTER) {
-                        Instant first = firstCreatedAtMap.get(story.getId());
-                        Instant last = lastCreatedAtMap.get(story.getId());
+                        Instant first = story.getCreatedAt();
+                        Instant last = story.getLatestMomentCreatedAt();
 
                         ZoneId zoneId;
                         try {
@@ -582,16 +762,21 @@ public class StoryService {
             UUID userId,
             Instant cursorCreatedAt,
             UUID cursorId,
-            String order,
             int size,
             StoryType type
     ) {
-        boolean asc = "ASC".equalsIgnoreCase(order);
+        User user = userRepository.findWithProfileById(userId)
+                .orElseThrow(() -> new ResourcesNotFoundEx("User not found with Id: " + userId));
+        String timezone = user.getProfile().getTimezone();
+
+        ZoneId zoneId = ZoneId.of(timezone);
+        LocalDate today = LocalDate.now(zoneId);
+
         List<UUID> storyIds = storyRepository.findAvailableIdsForAddMomentKeysetOptimized(
                 userId,
+                today,
                 cursorCreatedAt,
                 cursorId,
-                asc,
                 size + 1,
                 type != null ? type.name() : null
         );
@@ -619,7 +804,6 @@ public class StoryService {
         }
         Instant nextCursorCreatedAt = hasNext ? stories.getLast().getCreatedAt() : null;
         UUID nextCursorId = hasNext ? stories.getLast().getId() : null;
-
         return StoryPageResponse.builder()
                 .stories(storyResponses)
                 .hasNext(hasNext)

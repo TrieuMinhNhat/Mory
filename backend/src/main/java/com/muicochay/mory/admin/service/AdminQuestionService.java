@@ -19,7 +19,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AdminQuestionService {
-
     private final OlyneQuestionRepository questionRepository;
     private final QuestionTopicRepository topicRepository;
 

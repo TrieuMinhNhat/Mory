@@ -1,7 +1,6 @@
 package com.muicochay.mory.admin.dto.question;
 
 import com.muicochay.mory.question.enums.QuestionType;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class OlyneQuestionRequest {
-
     private String contentEN;
     private String contentVI;
     private Integer topicId;

@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 @Component
 public class EmailVerifiedAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
-
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
         Authentication auth = authentication.get();

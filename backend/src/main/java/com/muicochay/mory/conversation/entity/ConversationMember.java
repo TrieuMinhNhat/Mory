@@ -34,12 +34,11 @@ public class ConversationMember {
     @Column(nullable = false)
     private ConversationMemberRole role = ConversationMemberRole.MEMBER;
 
-    @Column(length = 40)
-    private String lastReadMessageId;
+    private UUID lastReadMessageId;
 
     private Instant lastReadAt;
 
-    @Column(nullable = false)
-    private int unreadCount = 0;
+    @Column(name = "cleared_at")
+    private Instant clearedAt;
 }
 

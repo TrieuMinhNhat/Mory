@@ -11,16 +11,16 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+
 /**
  * <h4>Service responsible for managing Refresh Tokens in Redis.</h4>
- *
- * <p>
- * It supports:</p>
+
+ * <p>It supports:</p>
  * <ul>
- * <li>Storing token session metadata (IP, User-Agent, etc.)</li>
- * <li>Limiting maximum concurrent sessions per user</li>
- * <li>Revoking tokens</li>
- * <li>Detecting reuse of revoked tokens (token theft/replay protection)</li>
+ *      <li>Storing token session metadata (IP, User-Agent, etc.)</li>
+ *      <li>Limiting maximum concurrent sessions per user</li>
+ *      <li>Revoking tokens</li>
+ *      <li>Detecting reuse of revoked tokens (token theft/replay protection)</li>
  * </ul>
  *
  */
@@ -28,7 +28,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenRedisService {
-
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${jwt.auth.refresh_expires_in}")
@@ -72,17 +71,13 @@ public class RefreshTokenRedisService {
     }
 
     /**
-     * <p>
-     * Saves a refresh token session for the user.</p>
-     * <p>
-     * Applies a lock to prevent concurrent modifications.</p>
-     * <p>
-     * If number of active sessions exceeds max allowed, old sessions will be
-     * revoked.</p>
+     * <p>Saves a refresh token session for the user.</p>
+     * <p>Applies a lock to prevent concurrent modifications.</p>
+     * <p>If number of active sessions exceeds max allowed, old sessions will be revoked.</p>
      *
-     * @param userId The UUID of the user
-     * @param tokenId The refresh token ID
-     * @param ip IP address of the client
+     * @param userId    The UUID of the user
+     * @param tokenId   The refresh token ID
+     * @param ip        IP address of the client
      * @param userAgent User-Agent header from the client
      */
     public void saveSession(UUID userId, String tokenId, String ip, String userAgent) {
@@ -103,8 +98,7 @@ public class RefreshTokenRedisService {
     }
 
     /**
-     * Internal logic to persist the token session and handle max session
-     * limits.
+     * Internal logic to persist the token session and handle max session limits.
      */
     private void doSaveSession(UUID userId, String tokenId, String ip, String userAgent) {
         String userKey = userSessionKey(userId);
@@ -133,7 +127,7 @@ public class RefreshTokenRedisService {
     /**
      * Removes oldest sessions if user exceeds allowed session count.
      *
-     * @param userId The UUID of the user
+     * @param userId         The UUID of the user
      * @param numberToRemove How many sessions to remove
      */
     private void trimOldSessions(UUID userId, long numberToRemove) {
@@ -142,25 +136,23 @@ public class RefreshTokenRedisService {
         Set<Object> oldestTokens = redisTemplate.opsForZSet()
                 .range(userKey, 0, numberToRemove - 1);
 
-        if (oldestTokens == null) {
-            return;
-        }
+        if (oldestTokens == null) return;
 
         for (Object tokenObj : oldestTokens) {
             String tokenId = tokenObj.toString();
-            revokeToken(userId, tokenId);
+            revokeToken(userId ,tokenId);
             log.info("Trim old token {} for user {}", tokenId, userId);
         }
     }
 
     /**
-     * Revokes a refresh token by marking it as revoked and storing it with a
-     * shorter TTL to detect reuse.
+     * Revokes a refresh token by marking it as revoked and
+     * storing it with a shorter TTL to detect reuse.
      *
      * @param userId The UUID of the user
      * @param tokenId The refresh token ID
      */
-    public void revokeToken(UUID userId, String tokenId) {
+    public void revokeToken(UUID userId ,String tokenId) {
         String tokenKey = tokenDataKey(tokenId);
         Object data = redisTemplate.opsForValue().get(tokenKey);
         if (data instanceof RefreshTokenRedisData tokenData) {
@@ -171,13 +163,31 @@ public class RefreshTokenRedisService {
         }
     }
 
+    public void revokeAllTokens(UUID userId) {
+        String userKey = userSessionKey(userId);
+
+        Set<Object> allTokens = redisTemplate.opsForZSet().range(userKey, 0, -1);
+        if (allTokens == null || allTokens.isEmpty()) {
+            return;
+        }
+
+        for (Object tokenObj : allTokens) {
+            String tokenId = tokenObj.toString();
+            revokeToken(userId, tokenId);
+        }
+
+        // Cleanup user session set
+        redisTemplate.delete(userKey);
+
+        log.info("Revoked all refresh tokens for user {}", userId);
+    }
+
     /**
-     * Validate whether a refresh token is still valid (not revoked, not
-     * expired, still linked to user).
+     * Validate whether a refresh token is still valid (not revoked, not expired, still linked to user).
      *
-     * @param userId The UUID of the user
+     * @param userId  The UUID of the user
      * @param tokenId The refresh token ID
-     * @return true if valid, false otherwise
+     * @return        true if valid, false otherwise
      */
     public boolean validateRefreshToken(UUID userId, String tokenId) {
         if (isTokenRevoked(tokenId)) {
@@ -192,8 +202,7 @@ public class RefreshTokenRedisService {
 
     /**
      * Revokes all tokens for a user in case of suspicious activity.
-     * <p>
-     * This is used to mitigate reuse token attacks.</p>
+     * <p>This is used to mitigate reuse token attacks.</p>
      *
      * @param userId The UUID of the user
      */
@@ -212,7 +221,7 @@ public class RefreshTokenRedisService {
     /**
      * Checks if the token is valid (not revoked, still linked to user).
      *
-     * @param userId The UUID of the user
+     * @param userId  The UUID of the user
      * @param tokenId The refresh token ID
      * @return true if the token is valid, false otherwise
      */
@@ -221,18 +230,12 @@ public class RefreshTokenRedisService {
         String userKey = userSessionKey(userId);
 
         Object data = redisTemplate.opsForValue().get(tokenKey);
-        if (!(data instanceof RefreshTokenRedisData tokenData)) {
-            return false;
-        }
+        if (!(data instanceof RefreshTokenRedisData tokenData)) return false;
 
-        if (!tokenData.getUserId().equals(userId)) {
-            return false;
-        }
+        if (!tokenData.getUserId().equals(userId)) return false;
 
         Double score = redisTemplate.opsForZSet().score(userKey, tokenId);
-        if (score == null) {
-            return false;
-        }
+        if (score == null) return false;
 
         return !tokenData.isRevoked();
     }
@@ -243,6 +246,7 @@ public class RefreshTokenRedisService {
      * @param tokenId The refresh token ID
      * @return true if the token is revoked, false otherwise
      */
+
     public boolean isTokenRevoked(String tokenId) {
         String tokenKey = tokenDataKey(tokenId);
         Object data = redisTemplate.opsForValue().get(tokenKey);

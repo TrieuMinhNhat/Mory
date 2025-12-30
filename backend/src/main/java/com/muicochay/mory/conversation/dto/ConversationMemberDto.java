@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -16,7 +17,7 @@ import java.time.Instant;
 public class ConversationMemberDto {
     private UserPreviewResponse user;
     private ConversationMemberRole role;
-    private String lastReadMessageId;
+    private UUID lastReadMessageId;
     private Instant lastReadAt;
-    private int unreadCount = 0;
+    private long unreadCount = 0;
 }

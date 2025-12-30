@@ -7,7 +7,6 @@ import com.muicochay.mory.story.enums.StoryType;
 import com.muicochay.mory.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.bson.types.ObjectId;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -39,7 +38,6 @@ public class Story extends BaseAuditEntity {
 
     //JOURNEY && CHALLENGE
     private LocalDate startDate;
-
     private LocalDate endDate;
 
     //CHALLENGE
@@ -58,7 +56,6 @@ public class Story extends BaseAuditEntity {
     //BEFORE_AFTER
     @Column(name = "has_before")
     private boolean hasBefore = false;
-
     @Column(name = "has_after")
     private boolean hasAfter = false;
 
@@ -66,6 +63,6 @@ public class Story extends BaseAuditEntity {
     private List<StoryMember> members = new ArrayList<>();
 
     private Instant latestMomentCreatedAt;
+    private UUID latestMomentId;
 
-    private ObjectId latestMomentId;
 }

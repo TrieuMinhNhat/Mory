@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class AdminQuestionResponse {
-
     private Integer id;
     private String contentEN;
     private String contentVI;

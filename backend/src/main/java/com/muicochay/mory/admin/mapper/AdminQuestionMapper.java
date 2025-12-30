@@ -8,7 +8,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {AdminTopicMapper.class})
 public interface AdminQuestionMapper {
-
     AdminQuestionResponse toDto(OlyneQuestion olyneQuestion);
 
     List<AdminQuestionResponse> toDtoList(List<OlyneQuestion> olyneQuestions);

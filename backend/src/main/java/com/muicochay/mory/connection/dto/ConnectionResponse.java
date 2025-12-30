@@ -17,7 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class ConnectionResponse {
-
     private UUID id;
     private UserPreviewResponse user1;
     private UserPreviewResponse user2;

@@ -26,7 +26,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
     private final JwtTokenHelper jwtTokenHelper;
 
     private static final List<String> WHITE_LIST = List.of(
@@ -35,18 +34,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/forgot-password",
             "/api/auth/reset-password",
             "/api/auth/check-email",
+
             "/api/auth/email-otp/send-otp",
             "/api/auth/email-otp/sign-in",
+
             "/api/auth/email-password/sign-in",
             "/api/auth/email-password/sign-up"
-    );
+            );
 
     @Override
     protected void doFilterInternal(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable FilterChain filterChain) {
         try {
             String path = Objects.requireNonNull(request).getRequestURI();
             HttpMethod method = HttpMethod.valueOf(request.getMethod());
-            if (isWhitelisted(path) && method == HttpMethod.POST) {
+            if (isWhitelisted(path)) {
                 if (filterChain != null) {
                     filterChain.doFilter(request, response);
                 }
@@ -59,8 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String roleCode = jwtTokenHelper.getRoleCodeFromToken(authToken);
                 AuthProvider currentProvider = jwtTokenHelper.getProviderFromToken(authToken);
 
-                if (userId != null && currentProvider != null
-                        && isVerified != null && roleCode != null) {
+                if (userId != null && currentProvider != null &&
+                        isVerified != null && roleCode != null
+                ) {
                     if (jwtTokenHelper.validateToken(authToken, TokenType.ACCESS)) {
                         UserDetails userDetails = AuthUserPrincipal.builder()
                                 .id(userId)
@@ -69,8 +71,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 .currentProvider(currentProvider)
                                 .build();
                         if (userDetails != null) {
-                            UsernamePasswordAuthenticationToken authenticationToken
-                                    = new UsernamePasswordAuthenticationToken(
+                            UsernamePasswordAuthenticationToken authenticationToken =
+                                    new UsernamePasswordAuthenticationToken(
                                             userDetails,
                                             null,
                                             userDetails.getAuthorities());
@@ -83,8 +85,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     log.info("Token's info is missing");
                 }
-            } else {
-                log.info("Token is missing");
             }
             if (filterChain != null) {
                 filterChain.doFilter(request, response);

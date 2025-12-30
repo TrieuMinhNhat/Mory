@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/email-password")
 public class EmailPasswordAuthController {
-
     private final EmailPasswordAuthService emailPasswordAuthService;
     private final CookieBuilder cookieBuilder;
 

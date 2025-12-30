@@ -18,20 +18,23 @@ import com.muicochay.mory.shared.ratelimit.RateLimitKeyStrategy;
 import com.muicochay.mory.shared.service.BlockedUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class DefaultAuthController {
-
     private final DefaultAuthService defaultAuthService;
     private final CookieBuilder cookieBuilder;
 
@@ -76,6 +79,7 @@ public class DefaultAuthController {
             @CookieValue(value = "refresh_token", required = false) String refreshTokenFromCookie,
             @RequestBody(required = false) SignOutRequest request,
             @AuthenticationPrincipal AuthUserPrincipal principal,
+            HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse
     ) {
         String refreshToken = refreshTokenFromCookie;
@@ -90,6 +94,22 @@ public class DefaultAuthController {
         if (principal != null) {
             defaultAuthService.signOut(principal.getId(), refreshToken);
         }
+
+        HttpSession session = httpServletRequest.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        SecurityContextHolder.clearContext();
+
+        ResponseCookie jsession = ResponseCookie.from("JSESSIONID", "")
+                .path("/")
+                .maxAge(0)
+                .httpOnly(true)
+                .build();
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, jsession.toString());
+
+
         CookiePair cookiePair = cookieBuilder.getZeroMaxAgeCookiePair();
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookiePair.getRefreshCookie().toString());
@@ -192,5 +212,23 @@ public class DefaultAuthController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(null, "Token refreshed"));
     }
+
+    @PostMapping("/change-password")
+    @RateLimit(
+            prefix = "auth::change-password:",
+            limit = 5,
+            windowSeconds = 60 * 60,
+            strategy = RateLimitKeyStrategy.PER_USER_ID
+    )
+    public ResponseEntity<ApiResponse<Object>> changePassword(
+            @AuthenticationPrincipal AuthUserPrincipal principal,
+            @RequestBody @Valid ChangePasswordRequest request
+    ) {
+        defaultAuthService.changePassword(principal.getId(), request);
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Password changed successfully")
+        );
+    }
+
 
 }

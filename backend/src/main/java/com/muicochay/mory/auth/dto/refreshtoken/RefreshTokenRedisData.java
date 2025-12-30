@@ -12,7 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class RefreshTokenRedisData {
-
     private UUID userId;
     private Long createAt;
     private String ip;

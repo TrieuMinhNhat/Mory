@@ -12,7 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class UserPreviewResponse {
-
     private UUID id;
     private String displayName;
     private String avatarUrl;

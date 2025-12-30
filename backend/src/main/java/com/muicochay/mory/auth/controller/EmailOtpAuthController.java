@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth/email-otp")
 @RequiredArgsConstructor
 public class EmailOtpAuthController {
-
     private final EmailOtpAuthService emailOtpAuthService;
     private final CookieBuilder cookieBuilder;
 

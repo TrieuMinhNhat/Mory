@@ -6,6 +6,8 @@ import com.muicochay.mory.shared.entity.BaseAuditEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 import java.util.*;
@@ -18,7 +20,6 @@ import java.util.*;
 @Getter
 @Setter
 public class User extends BaseAuditEntity {
-
     @Id
     @GeneratedValue
     private UUID id;
@@ -52,5 +53,6 @@ public class User extends BaseAuditEntity {
     private RoleCode roleCode;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserProfile profile;
 }

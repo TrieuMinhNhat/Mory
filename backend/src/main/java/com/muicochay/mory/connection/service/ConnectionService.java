@@ -1,5 +1,7 @@
 package com.muicochay.mory.connection.service;
 
+import com.muicochay.mory.cache.constants.CacheNames;
+import com.muicochay.mory.cache.util.CacheKeys;
 import com.muicochay.mory.connection.dto.*;
 import com.muicochay.mory.connection.entity.Connection;
 import com.muicochay.mory.connection.entity.ConnectionRequest;
@@ -13,28 +15,32 @@ import com.muicochay.mory.connection.repository.ConnectionRequestRepository;
 import com.muicochay.mory.connection.utils.ConnectionUtils;
 import com.muicochay.mory.conversation.enums.ConversationStatus;
 import com.muicochay.mory.conversation.service.ConversationService;
+
+import com.muicochay.mory.notification.service.connection.ConnectionNotificationService;
 import com.muicochay.mory.shared.dto.ConnectionRequestAlreadyExistsExResponse;
 import com.muicochay.mory.shared.dto.MaxRelationshipLimitResponse;
 import com.muicochay.mory.shared.exception.connection.ConnectionRequestAlreadyExistsEx;
 import com.muicochay.mory.shared.exception.connection.InvalidConnectionRequestEx;
 import com.muicochay.mory.shared.exception.connection.MaxConnectionLimitEx;
 import com.muicochay.mory.shared.exception.global.*;
+
+import com.muicochay.mory.user.dto.UserPreviewResponse;
 import com.muicochay.mory.user.dto.UserPreviewWithMutualConnectionResponse;
 import com.muicochay.mory.user.dto.UserProfileResponse;
 import com.muicochay.mory.user.entity.User;
 import com.muicochay.mory.user.entity.UserProfile;
 import com.muicochay.mory.user.mapper.UserMapper;
 import com.muicochay.mory.user.repositoriy.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,9 +54,12 @@ public class ConnectionService {
     private final ConnectionRequestMapper connectionRequestMapper;
     private final ConnectionMapper connectionMapper;
     private final ConversationService conversationService;
+    private final CacheManager cacheManager;
 
     private final InviteRedisService inviteRedisService;
 
+    private final ConnectionNotificationService notificationService;
+    private final UserConnectionCacheService userConnectionCacheService;
 
     public InviteLinkResponse getOrCreateInviteLink(UUID requesterId) {
         return InviteLinkResponse.builder()
@@ -68,6 +77,9 @@ public class ConnectionService {
 
     @Transactional
     public ConnectionRequestResponse sendConnectRequest(UUID senderId, SendConnectRequestDto request) {
+        if (senderId.equals(request.getRecipientId())) {
+            throw new InvalidConnectionRequestEx("Cannot send request to yourself");
+        }
         Integer maxCount = ConnectionType.FRIEND.getMaxCount();
 
         long count = connectionRepository.countByUserIdAndStatus(
@@ -82,20 +94,16 @@ public class ConnectionService {
                             .build()
             );
         }
-        User recipient;
+        User recipient = userRepository.findWithProfileById(request.getRecipientId())
+                .orElseThrow(() -> new ResourcesNotFoundEx("Recipient not found with id " + request.getRecipientId()));
         List<User> mutualConnections = userRepository.findMutualUsersByStatus(senderId, request.getRecipientId(), ConnectionStatus.CONNECTED);
         boolean hasMutualConnection = !mutualConnections.isEmpty();
 
-        if (hasMutualConnection) {
-            recipient = userRepository.findWithProfileById(request.getRecipientId())
-                    .orElseThrow(() -> new ResourcesNotFoundEx("Recipient not found with id " + request.getRecipientId()));
-        } else {
-            recipient = inviteRedisService.verifyInvite(request.getRecipientId(), request.getCode());
+        if (!hasMutualConnection) {
+            inviteRedisService.verifyInvite(request.getRecipientId(), request.getCode());
         }
 
-        if (recipient.getId().equals(senderId)) {
-            throw new InvalidConnectionRequestEx("Cannot send request to yourself");
-        }
+
 
         UUID connectionId = ConnectionUtils.generateConnectionId(senderId, recipient.getId());
 
@@ -106,7 +114,8 @@ public class ConnectionService {
             }
         });
 
-        User sender = userRepository.getReferenceById(senderId);
+        User sender = userRepository.findWithProfileById(senderId)
+                .orElseThrow(() -> new ResourcesNotFoundEx("User not found with id " + senderId));
 
         if (connectionRequestRepository.existsBetweenUsersAndStatusesAndOldConnectionTypeIsNull(
                 recipient.getId(),
@@ -118,7 +127,7 @@ public class ConnectionService {
                     ConnectionRequestAlreadyExistsExResponse.builder()
                             .hasPendingRequest(true)
                             .build()
-                    );
+            );
         }
 
         ConnectionRequest connectionRequest = ConnectionRequest.builder()
@@ -129,13 +138,20 @@ public class ConnectionService {
                 .status(RequestStatus.PENDING)
                 .build();
         connectionRequestRepository.save(connectionRequest);
-        return buildConnectionRequestResponse(connectionRequest, mutualConnections);
+
+        notificationService.sendConnectRequest(
+                connectionRequest.getRecipient().getId(),
+                userMapper.toProfilePreview(sender)
+        );
+
+        return buildConnectionRequestResponse(connectionRequest, userMapper.toProfilePreviewList(mutualConnections));
     }
 
     @Transactional
     public ConnectionResponse acceptConnectRequest(UUID currentUserId, UUID connectionRequestId) {
         ConnectionRequest connectionRequest = connectionRequestRepository.findByIdWithUsers(connectionRequestId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Connection Request not found"));
+
         if (!currentUserId.equals(connectionRequest.getRecipient().getId())) {
             throw new ResourcesAccessDeniedEx("Only recipient can accept this request");
         }
@@ -181,6 +197,7 @@ public class ConnectionService {
                 connectionRequest.getRequester().getId(),
                 connectionRequest.getRecipient().getId()
         );
+
         Connection connection = connectionRepository.findByIdWithUsersAndProfiles(connectionId)
                 .orElseGet(() -> Connection.builder()
                         .id(connectionId)
@@ -206,6 +223,33 @@ public class ConnectionService {
                 connection.getUser2().getId(),
                 ConversationStatus.ACTIVE
         );
+
+        User recipient;
+        UUID requesterId;
+        if (connection.getUser1().getId() == currentUserId) {
+            recipient = connection.getUser1();
+            requesterId = connection.getUser2().getId();
+        } else {
+            recipient = connection.getUser2();
+            requesterId = connection.getUser1().getId();
+        }
+
+        userConnectionCacheService.addConnectionForBothUsers(
+                connection.getUser1().getId(),
+                connection.getUser2().getId(),
+                ConnectionType.FRIEND
+        );
+
+        notificationService.sendConnectAccepted(
+                requesterId,
+                userMapper.toProfilePreview(recipient)
+        );
+
+        String key = CacheKeys.getConversationWithMembersKey(connectionId);
+        Cache cache = cacheManager.getCache(CacheNames.CONVERSATION_WITH_MEMBERS_CACHE);
+        if (cache != null) {
+            cache.evict(key);
+        }
 
         return buildConnectionResponse(connection, mutualConnections);
     }
@@ -264,12 +308,27 @@ public class ConnectionService {
             connectionRequestRepository.save(changeTypRequest);
             List<User> mutualConnections = userRepository.findMutualUsersByStatus(requester.getId(), recipient.getId(), ConnectionStatus.CONNECTED);
 
-            return buildConnectionRequestResponse(changeTypRequest, mutualConnections);
+            notificationService.sendChangeConnectionTypeRequest(
+                    recipient.getId(),
+                    userMapper.toProfilePreview(requester),
+                    changeTypRequest.getOldConnectionType().name(),
+                    changeTypRequest.getNewConnectionType().name()
+            );
+
+            return buildConnectionRequestResponse(changeTypRequest, userMapper.toProfilePreviewList(mutualConnections));
         }
         checkConnectionLimit(requesterId, requesterId, request.getNewType());
         checkConnectionLimit(requesterId, request.getRecipientId(), request.getNewType());
         connection.setConnectionType(newType);
         connectionRepository.save(connection);
+
+        userConnectionCacheService.changeTypeForBothUsers(
+                connection.getUser1().getId(),
+                connection.getUser2().getId(),
+                currentType,
+                newType
+        );
+
         return buildConnectionResponse(connection, List.of());
     }
 
@@ -297,6 +356,20 @@ public class ConnectionService {
         connection.setConnectionType(newType);
         changeTypeRequest.setStatus(RequestStatus.ACCEPTED);
         connectionRequestRepository.save(changeTypeRequest);
+
+        userConnectionCacheService.changeTypeForBothUsers(
+                connection.getUser1().getId(),
+                connection.getUser2().getId(),
+                changeTypeRequest.getOldConnectionType(),
+                newType
+        );
+
+        notificationService.sendChangeConnectionTypeAccepted(
+                changeTypeRequest.getRequester().getId(),
+                userMapper.toProfilePreview(changeTypeRequest.getRecipient()),
+                changeTypeRequest.getOldConnectionType().name(),
+                changeTypeRequest.getNewConnectionType().name()
+        );
 
         return buildConnectionResponse(connection, List.of());
     }
@@ -343,23 +416,42 @@ public class ConnectionService {
                     connectionRequestRepository.save(req);
                 });
 
-        Connection connection = connectionRepository.findById(connectionId)
-                .orElseGet(() -> {
-                    Connection r = new Connection();
-                    r.setUser1(userRepository.getReferenceById(requesterId));
-                    r.setUser2(userRepository.getReferenceById(targetUserId));
-                    return r;
-                });
+        Optional<Connection> optional = connectionRepository.findById(connectionId);
+
+        boolean existed = optional.isPresent();
+
+        Connection connection = optional.orElseGet(() -> {
+            Connection r = new Connection();
+            r.setUser1(userRepository.getReferenceById(requesterId));
+            r.setUser2(userRepository.getReferenceById(targetUserId));
+            return r;
+        });
+
+        ConnectionType oldType = existed ? connection.getConnectionType() : null;
+
         connection.setConnectionType(ConnectionType.NO_RELATION);
         connection.setStatus(ConnectionStatus.BLOCKED);
+
+        connectionRepository.save(connection);
+
+        if (existed && oldType != null) {
+            userConnectionCacheService.removeConnectionForBothUsers(
+                    requesterId,
+                    targetUserId,
+                    oldType
+            );
+        }
 
         conversationService.createOrUpdatePrivateConversation(
                 connection.getUser1().getId(),
                 connection.getUser2().getId(),
                 ConversationStatus.BLOCKED
         );
-
-        connectionRepository.save(connection);
+        String key = CacheKeys.getConversationWithMembersKey(connectionId);
+        Cache cache = cacheManager.getCache(CacheNames.CONVERSATION_WITH_MEMBERS_CACHE);
+        if (cache != null) {
+            cache.evict(key);
+        }
     }
 
     @Transactional
@@ -376,6 +468,11 @@ public class ConnectionService {
                 connection.getUser2().getId(),
                 ConversationStatus.INACTIVE
         );
+        String key = CacheKeys.getConversationWithMembersKey(connectionId);
+        Cache cache = cacheManager.getCache(CacheNames.CONVERSATION_WITH_MEMBERS_CACHE);
+        if (cache != null) {
+            cache.evict(key);
+        }
 
         connection.setStatus(ConnectionStatus.INACTIVE);
     }
@@ -399,6 +496,8 @@ public class ConnectionService {
                     connectionRequestRepository.save(req);
                 });
 
+        ConnectionType oldType = connection.getConnectionType();
+
         connection.setStatus(ConnectionStatus.INACTIVE);
         connection.setConnectionType(ConnectionType.NO_RELATION);
 
@@ -407,18 +506,29 @@ public class ConnectionService {
                 connection.getUser2().getId(),
                 ConversationStatus.INACTIVE
         );
-    }
 
+        userConnectionCacheService.removeConnectionForBothUsers(
+                connection.getUser1().getId(),
+                connection.getUser2().getId(),
+                oldType
+        );
+
+        String key = CacheKeys.getConversationWithMembersKey(connectionId);
+        Cache cache = cacheManager.getCache(CacheNames.CONVERSATION_WITH_MEMBERS_CACHE);
+        if (cache != null) {
+            cache.evict(key);
+        }
+    }
 
     @Transactional(readOnly = true)
     public ConnectionPageResponse getUserConnections(UUID requesterId,
-                                                       UUID userId,
-                                                       Instant cursorCreatedAt,
-                                                       UUID cursorId,
-                                                       int size,
-                                                       ConnectionType type,
-                                                       ConnectionStatus status,
-                                                       String order) {
+                                                     UUID userId,
+                                                     Instant cursorCreatedAt,
+                                                     UUID cursorId,
+                                                     int size,
+                                                     ConnectionType type,
+                                                     ConnectionStatus status,
+                                                     String order) {
         if (!requesterId.equals(userId)) {
             UUID connectionId = ConnectionUtils.generateConnectionId(requesterId, userId);
             boolean connected = connectionRepository.existsDirectOrMutualConnection(
@@ -432,6 +542,7 @@ public class ConnectionService {
             }
         }
         boolean asc = "ASC".equalsIgnoreCase(order);
+
         List<UUID> connectionIds =
                 connectionRepository.findIdsKeyset(
                         userId,
@@ -444,6 +555,7 @@ public class ConnectionService {
                 );
 
         List<Connection> unOrderedConnections = connectionRepository.findAllWithUsersAndProfiles(connectionIds);
+
         Map<UUID, Connection> map = unOrderedConnections.stream()
                 .collect(Collectors.toMap(Connection::getId, r -> r));
 
@@ -573,26 +685,32 @@ public class ConnectionService {
         Instant nextCursorCreatedAt = hasNext ? connectionRequests.getLast().getCreatedAt() : null;
         UUID nextCursorId = hasNext ? connectionRequests.getLast().getId() : null;
 
-        List<UUID> recipientIds = connectionRequests.stream()
-                .map(req -> req.getRecipient().getId())
-                .toList();
+        Set<UUID> allIds = new HashSet<>();
+        connectionRequests.forEach(r -> {
+            Set<UUID> mutualIds =
+                    userConnectionCacheService.getMutualConnectedUserIds(
+                            requesterId,
+                            r.getRecipient().getId()
+                    );
+            allIds.addAll(mutualIds);
+        });
 
-        List<Object[]> rawMutualConnections = userRepository.findMutualConnectionsBatch(
-                requesterId, recipientIds, ConnectionStatus.CONNECTED
-        );
+        List<User> users = userRepository.findAllWithProfileByIds(allIds);
 
-        Map<UUID, List<User>> mutualMap = rawMutualConnections.stream()
-                .collect(Collectors.groupingBy(
-                        row -> (UUID) row[2],
-                        Collectors.mapping(row -> (User) row[0], Collectors.toList())
-                ));
+        Map<UUID, UserPreviewResponse> userPreviewMap = users.stream()
+                .collect(Collectors.toMap(User::getId, userMapper::toProfilePreview));
 
         List<ConnectionRequestResponse> responses = connectionRequests.stream()
-                .map(req -> {
-                    UUID recipientId = req.getRecipient().getId();
-                    List<User> mutualConnections = mutualMap.getOrDefault(recipientId, List.of());
-                    return buildConnectionRequestResponse(req, mutualConnections.stream().toList());
-                })
+                .map(req ->  buildConnectionRequestResponse(
+                        req,
+                        userConnectionCacheService
+                                .getMutualConnectedUserIds(
+                                        req.getRequester().getId(),
+                                        req.getRecipient().getId()
+                                ).stream()
+                                .map(userPreviewMap::get)
+                                .toList()
+                ))
                 .toList();
 
         return SentRequestsPageResponse.builder()
@@ -635,32 +753,34 @@ public class ConnectionService {
         Instant nextCursorCreatedAt = hasNext ? connectionRequests.getLast().getCreatedAt() : null;
         UUID nextCursorId = hasNext ? connectionRequests.getLast().getId() : null;
 
-        List<UUID> requesterIds = connectionRequests.stream()
-                .map(req -> req.getRequester().getId())
-                .toList();
+        Set<UUID> allIds = new HashSet<>();
+        connectionRequests.forEach(r -> {
+            Set<UUID> mutualIds =
+                    userConnectionCacheService.getMutualConnectedUserIds(
+                            r.getRequester().getId(),
+                            recipientId
+                    );
+            allIds.addAll(mutualIds);
+        });
 
-        List<Object[]> rawMutualConnections = userRepository.findMutualConnectionsBatch(
-                recipientId, requesterIds, ConnectionStatus.CONNECTED
-        );
+        List<User> users = userRepository.findAllWithProfileByIds(allIds);
 
-        Map<UUID, List<User>> mutualMap = rawMutualConnections.stream()
-                .collect(Collectors.groupingBy(
-                        row -> (UUID) row[2],
-                        Collectors.mapping(row -> (User) row[0], Collectors.toList())
-                ));
+        Map<UUID, UserPreviewResponse> userPreviewMap = users.stream()
+                .collect(Collectors.toMap(User::getId, userMapper::toProfilePreview));
 
         List<ConnectionRequestResponse> responses = connectionRequests.stream()
-                .map(req -> {
-                    UUID requesterId = req.getRequester().getId();
-                    List<User> mutualConnections =
-                            mutualMap.getOrDefault(requesterId, List.of());
-                    return buildConnectionRequestResponse(
+                .map(req ->
+                        buildConnectionRequestResponse(
                             req,
-                            mutualConnections.stream().limit(50).toList()
-                    );
-                })
+                            userConnectionCacheService
+                                    .getMutualConnectedUserIds(
+                                            req.getRequester().getId(),
+                                            req.getRecipient().getId()
+                                    ).stream()
+                                    .map(userPreviewMap::get)
+                                    .toList()
+                    ))
                 .toList();
-
 
         return ReceivedRequestPageResponse.builder()
                 .requests(responses)
@@ -672,58 +792,55 @@ public class ConnectionService {
     }
 
     @Transactional(readOnly = true)
-    public SuggestedConnectionsPageResponse getSuggestedConnections(UUID userId, Instant cursorCreatedAt, UUID cursorId, int size) {
-        List<UUID> suggestedIds = userRepository.findSuggestedConnectionIdsKeyset(
-                userId, cursorCreatedAt, cursorId, size + 1
-        );
+    public SuggestedConnectionsPageResponse getSuggestedConnections(UUID userId, int size) {
+        Map<UUID, Integer> suggestedWithScore =
+                userConnectionCacheService
+                        .getSuggestedUserIdsWithScore(userId, size * 3);
 
-        List<User> unOrderedUsers = userRepository.findAllWithProfileByIds(suggestedIds);
+        if (suggestedWithScore.isEmpty()) {
+            return SuggestedConnectionsPageResponse.builder()
+                    .suggestions(List.of())
+                    .build();
+        }
 
-        Map<UUID, User> userMap = unOrderedUsers.stream()
-                .collect(Collectors.toMap(User::getId, u -> u));
-
-        List<User> suggestions = suggestedIds.stream()
-                .map(userMap::get)
-                .filter(Objects::nonNull)
+        List<UUID> candidateIds = suggestedWithScore.keySet().stream()
+                .limit(size)
                 .toList();
 
-        boolean hasNext = suggestions.size() > size;
-        if (hasNext) suggestions = suggestions.subList(0, size);
-        Instant nextCursorCreatedAt = hasNext ? suggestions.getLast().getCreatedAt() : null;
-        UUID nextCursorId = hasNext ? suggestions.getLast().getId() : null;
+        Set<UUID> allIds = new HashSet<>(candidateIds);
 
+        candidateIds.forEach(id -> {
+            Set<UUID> mutualIds =
+                    userConnectionCacheService.getMutualConnectedUserIds(
+                            userId,
+                            id
+                    );
+            allIds.addAll(mutualIds);
+        });
 
-        List<Object[]> rawMutualConnections = userRepository.findMutualConnectionsBatch(
-                userId,
-                suggestedIds,
-                ConnectionStatus.CONNECTED
-        );
+        List<User> users = userRepository.findAllWithProfileByIds(allIds);
 
-        Map<UUID, List<User>> mutualMap = rawMutualConnections.stream()
-                .collect(Collectors.groupingBy(
-                        row -> (UUID) row[2],
-                        Collectors.mapping(row -> (User) row[0], Collectors.toList())
-                ));
+        Map<UUID, UserPreviewResponse> userPreviewMap = users.stream()
+                .collect(Collectors.toMap(User::getId, userMapper::toProfilePreview));
 
-
-        List<UserPreviewWithMutualConnectionResponse> suggestionResponses = suggestions.stream()
-                .map(suggestedUser -> {
-                    List<User> mutualConnections =
-                            mutualMap.getOrDefault(suggestedUser.getId(), List.of());
-                    return UserPreviewWithMutualConnectionResponse.builder()
-                            .user(userMapper.toProfilePreview(suggestedUser))
-                            .mutualConnections(userMapper.toProfilePreviewList(
-                                    mutualConnections
-                            ))
-                            .build();
-                })
-                .toList();
+        List<UserPreviewWithMutualConnectionResponse> responses =
+                candidateIds.stream()
+                        .map(id -> UserPreviewWithMutualConnectionResponse.builder()
+                                .user(userPreviewMap.get(id))
+                                .mutualConnections(
+                                        userConnectionCacheService
+                                                .getMutualConnectedUserIds(userId, id)
+                                                .stream()
+                                                .map(userPreviewMap::get)
+                                                .filter(Objects::nonNull)
+                                                .toList()
+                                )
+                                .build()
+                        )
+                        .toList();
 
         return SuggestedConnectionsPageResponse.builder()
-                .suggestions(suggestionResponses)
-                .hasNext(hasNext)
-                .nextCursorCreatedAt(nextCursorCreatedAt)
-                .nextCursorId(nextCursorId)
+                .suggestions(responses)
                 .build();
     }
 
@@ -804,9 +921,42 @@ public class ConnectionService {
         return response;
     }
 
-    private ConnectionRequestResponse buildConnectionRequestResponse(ConnectionRequest request, List<User> mutualConnections) {
+    private ConnectionRequestResponse buildConnectionRequestResponse(ConnectionRequest request, List<UserPreviewResponse> mutualConnections) {
         ConnectionRequestResponse response = connectionRequestMapper.toResponse(request);
-        response.setMutualConnections(userMapper.toProfilePreviewList(mutualConnections));
+        response.setMutualConnections(mutualConnections);
         return response;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
 }

@@ -19,7 +19,8 @@ public class ConversationResponse {
     private UUID id;
     private ConversationType type;
     private ConversationStatus status;
-    private String lastMessageId;
+    private String title;
+    private ChatMessageResponse lastMessage;
     private Instant lastMessageSentAt;
     private List<ConversationMemberDto> members;
 }

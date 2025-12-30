@@ -92,9 +92,7 @@ public class JwtTokenHelper {
     public TokenType getTokenTypeFromToken(String token) {
         try {
             boolean isRefreshToken = getTokenIdFromToken(token) != null;
-            if (isRefreshToken) {
-                return TokenType.REFRESH;
-            }
+            if (isRefreshToken) return TokenType.REFRESH;
             return TokenType.ACCESS;
         } catch (Exception e) {
             return null;
@@ -109,6 +107,7 @@ public class JwtTokenHelper {
             return null;
         }
     }
+
 
     public String getRoleCodeFromToken(String token) {
         try {
@@ -152,28 +151,22 @@ public class JwtTokenHelper {
     }
 
     public boolean validateToken(String token, TokenType expectedType) {
-        if (isTokenExpired(token)) {
-            return false;
-        }
+        if (isTokenExpired(token)) return false;
         TokenType tokenType = getTokenTypeFromToken(token);
         return expectedType == tokenType;
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         Date expireDate = getExpireDate(token);
-        if (expireDate == null) {
-            return false;
-        }
+        if (expireDate == null) return false;
         return expireDate.before(new Date());
     }
 
-    private Date getExpireDate(String token) {
+    public Date getExpireDate(String token) {
         Date expireDate;
         try {
             final Claims claims = this.getAllClaimsFromToken(token);
-            if (claims == null) {
-                return null;
-            }
+            if (claims == null) return null;
             expireDate = claims.getExpiration();
         } catch (Exception e) {
             expireDate = null;
@@ -206,9 +199,7 @@ public class JwtTokenHelper {
         UUID userId;
         try {
             final Claims claims = this.getAllClaimsFromToken(authToken);
-            if (claims == null) {
-                return null;
-            }
+            if (claims == null) return null;
             userId = UUID.fromString(claims.getSubject());
         } catch (Exception e) {
             userId = null;

@@ -12,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class UserPreviewWithMutualConnectionResponse {
-
     private UserPreviewResponse user;
     private List<UserPreviewResponse> mutualConnections;
 }

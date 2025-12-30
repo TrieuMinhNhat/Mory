@@ -11,7 +11,7 @@ public class SwaggerConfig {
     public OpenAPI customOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Olyne API")
+                        .title("Mory API")
                         .version("1.0.0"));
     }
 }

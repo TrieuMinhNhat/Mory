@@ -27,7 +27,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AdminUserService {
-
     private final AdminUserRepository adminUserRepository;
     private final AdminUserMapper adminUserMapper;
 
@@ -126,9 +125,9 @@ public class AdminUserService {
 
         return rows.stream()
                 .map(row -> new UserDailyCount(
-                ((java.sql.Date) row[0]).toLocalDate(),
-                ((Number) row[1]).longValue()
-        ))
+                        ((java.sql.Date) row[0]).toLocalDate(),
+                        ((Number) row[1]).longValue()
+                ))
                 .toList();
     }
 }

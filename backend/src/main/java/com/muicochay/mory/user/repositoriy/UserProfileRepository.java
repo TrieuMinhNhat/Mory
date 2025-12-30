@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, UUID> {
-
     Optional<UserProfile> findByUserId(UUID userId);
 
     @Query("""
@@ -38,6 +37,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, UUID> 
             @Param("connectionStatus") ConnectionStatus status,
             @Param("connectionId") UUID connectionId
     );
+
 
     @EntityGraph(attributePaths = {"user"})
     @Query("SELECT p FROM UserProfile p WHERE p.user.id IN :userIds")
