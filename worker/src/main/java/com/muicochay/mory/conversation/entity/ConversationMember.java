@@ -41,8 +41,5 @@ public class ConversationMember {
 
     @Column(name = "cleared_at")
     private Instant clearedAt;
-
-    @Column(nullable = false)
-    private int unreadCount = 0;
 }
 
