@@ -23,6 +23,12 @@
     "same_password": "Mật khẩu mới không được trung với mật khẩu cũ!",
     "error": "Cập nhật mật khẩu thất bại!"
   },
+  "change_password": {
+    "success": "Cập nhật mật khẩu thành công!",
+    "same_password": "Mật khẩu mới không được trùng với mật khẩu hiện tại!",
+    "current_password_not_match": "Mật khẩu hiện tại không chính xác!",
+    "error": "Cập nhật mật khẩu thất bại!"
+  },
   "complete_information": {
     "success": "Cập nhật thông tin thành công!",
     "error": "Cập nhật thông tin thất bại!"
@@ -177,6 +183,10 @@
         "success": "Đã tải hình ảnh xuống!",
         "error": "Tải hình ảnh xuống thất bại!",
         "no_image": "Không có hình ảnh để tải xuống!"
+      },
+      "reply_moment": {
+        "success": "Gửi tin nhắn thành công!",
+        "error": "Gửi tin nhắn thất bại!"
       }
     }
   },

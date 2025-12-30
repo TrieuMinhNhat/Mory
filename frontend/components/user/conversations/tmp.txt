@@ -1,0 +1,509 @@
+"use client"
+
+import React, {useCallback, useEffect, useMemo, useState} from "react";
+import {useTranslation} from "next-i18next";
+import {shallow} from "zustand/vanilla/shallow";
+import {useParams, useRouter} from "next/navigation";
+import {useCurrentConversationStore} from "@/store/conversation/useCurrentConversationStore";
+import ConversationAvatars, {
+    getOtherUserFromPrivateConversation
+} from "@/components/user/conversations/ConversationAvatars";
+import {ChevronLeft, CircleArrowDown} from "lucide-react";
+import {useAuthStore} from "@/store/useAuthStore";
+import {ChatMessage, Conversation, ConversationType, MessageLoadDirection} from "@/types/conversations";
+import {toast} from "sonner";
+import {useWS} from "@/hooks/useWs";
+import {Input} from "@/components/ui/input";
+import Send from "@/components/user/conversations/icons/Send";
+import SmileFace from "@/components/user/conversations/icons/SmileFace";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch} from "@/components/ui/emoji-picker";
+import {UserPreview} from "@/types/user";
+import Cancel from "@/components/user/moment/icons/Cancel";
+import MyMessage from "@/components/user/conversations/MyMessage";
+import OtherMessage from "@/components/user/conversations/OtherMessage";
+
+const SCROLL_TOP_THRESHOLD = 100;
+const SCROLL_BOTTOM_THRESHOLD = 100;
+
+const AUTO_SCROLL_BOTTOM_THRESHOLD = 100;
+
+const UPDATE_LAST_READ_SCROLL_BOTTOM_THRESHOLD = 50;
+
+const ChatListPage = () => {
+    const {t: u} = useTranslation("user");
+
+    const { sendMessage, updateLastReadState } = useWS();
+
+    const router = useRouter();
+    const params = useParams();
+    const conversationId = params?.id as string;
+
+    const user = useAuthStore((state) => state.user);
+
+    const {
+        currentConversation,
+        fetchConversation,
+        messages,
+        newMessages,
+        resetNewMessages,
+        anchorMessageId,
+        hasScrolledToAnchorOnce,
+        setScrolledToAnchor,
+        messagesHasOlder,
+        messagesHasNewer,
+        messagesHasFetchedOnce,
+        isFetchingMessages,
+        fetchMessages,
+    } = useCurrentConversationStore(
+        (state) => ({
+            currentConversation: state.currentConversation,
+            fetchConversation: state.fetchConversation,
+            messages: state.messages,
+            newMessages: state.newMessages,
+            resetNewMessages: state.resetNewMessages,
+            anchorMessageId: state.anchorMessageId,
+            hasScrolledToAnchorOnce: state.hasScrolledToAnchorOnce,
+            setScrolledToAnchor: state.setScrolledToAnchor,
+            messagesHasOlder: state.messagesHasOlder,
+            messagesHasNewer: state.messagesHasNewer,
+            messagesHasFetchedOnce: state.messagesHasFetchedOnce,
+            isFetchingMessages: state.isFetchingMessages,
+            fetchMessages: state.fetchMessages,
+        }),
+        shallow
+    )
+
+    useEffect(() => {
+        if (currentConversation && conversationId === currentConversation.id) return;
+        void fetchConversation(conversationId);
+    }, [conversationId, currentConversation, fetchConversation]);
+
+    useEffect(() => {
+        if (isFetchingMessages || messagesHasFetchedOnce || anchorMessageId) return;
+        void fetchMessages(
+            conversationId,
+            {
+                direction: MessageLoadDirection.OLDER
+            });
+        console.log("init load")
+    }, [anchorMessageId, conversationId, fetchMessages, isFetchingMessages, messagesHasFetchedOnce]);
+
+    const myMember = currentConversation?.members.find(member => member.user.id === user?.id);
+
+    useEffect(() => {
+        if (
+            !messagesHasFetchedOnce ||
+            !anchorMessageId ||
+            hasScrolledToAnchorOnce
+        ) {
+            return;
+        }
+
+        const el = document.getElementById(`message-${anchorMessageId}`);
+        if (!el) return;
+
+        const rect = el.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const offset =
+            absoluteTop - window.innerHeight / 2 + rect.height / 2;
+
+        window.scrollTo({
+            top: offset,
+            behavior: "instant",
+        });
+
+        setScrolledToAnchor();
+
+    }, [messagesHasFetchedOnce, anchorMessageId, hasScrolledToAnchorOnce, setScrolledToAnchor]);
+
+
+    useEffect(() => {
+        if (!messagesHasFetchedOnce) return;
+        if (anchorMessageId) return;
+
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "instant",
+        });
+    }, [anchorMessageId, hasScrolledToAnchorOnce, messagesHasFetchedOnce]);
+
+    const [hasNewMessage, setHasNewMessage] = useState(false);
+
+
+    const updateLastRead = useCallback(() => {
+        if (!myMember || !messages || messages.length === 0 || !currentConversation) return;
+        if (messagesHasNewer) return;
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.id === myMember.lastReadMessageId) return;
+        console.log("update last read hehe")
+
+        updateLastReadState(currentConversation.id, lastMessage.id);
+    }, [currentConversation, messages, messagesHasNewer, myMember, updateLastReadState])
+
+    const handleScroll = useCallback(() => {
+        // if (!isUserScrollingRef.current) return;
+        if (isFetchingMessages) return;
+        const scrollTop = window.scrollY;
+
+        const windowHeight = window.innerHeight;
+        const scrollHeight = document.documentElement.scrollHeight;
+
+        const isNearTop = scrollTop <= SCROLL_TOP_THRESHOLD;
+        const isNearBottom =
+            scrollHeight - (scrollTop + windowHeight) <= SCROLL_BOTTOM_THRESHOLD;
+
+        if (isNearTop && messagesHasOlder) {
+            void fetchMessages(conversationId, {
+                direction: MessageLoadDirection.OLDER,
+            });
+            console.log("fetching older")
+            return;
+        }
+
+        if (isNearBottom && messagesHasNewer) {
+            void fetchMessages(conversationId, {
+                direction: MessageLoadDirection.NEWER,
+            });
+            console.log("fetching newer")
+        }
+
+        if (hasNewMessage && !messagesHasNewer) {
+            if (scrollHeight - (scrollTop + windowHeight) <= UPDATE_LAST_READ_SCROLL_BOTTOM_THRESHOLD) {
+                setHasNewMessage(false);
+                resetNewMessages();
+            }
+        }
+        if (scrollHeight - (scrollTop + windowHeight) <= UPDATE_LAST_READ_SCROLL_BOTTOM_THRESHOLD) {
+            updateLastRead()
+        }
+    }, [isFetchingMessages, messagesHasOlder, messagesHasNewer, hasNewMessage, fetchMessages, conversationId, resetNewMessages, updateLastRead]);
+
+    useEffect(() => {
+        updateLastRead();
+    }, [messages, updateLastRead]);
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, [handleScroll]);
+
+    useEffect(() => {
+        if (!messagesHasFetchedOnce) return;
+        if (messagesHasNewer) return;
+
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const scrollHeight = document.documentElement.scrollHeight;
+
+        if (scrollHeight - scrollPosition <= AUTO_SCROLL_BOTTOM_THRESHOLD) {
+            window.scrollTo({ top: scrollHeight, behavior: "smooth" });
+        } else {
+            setHasNewMessage(true);
+        }
+    }, [messages, messagesHasFetchedOnce, messagesHasNewer]);
+
+    useEffect(() => {
+        if (newMessages.length > 0) {
+            setHasNewMessage(true);
+        }
+    }, [newMessages]);
+
+    const [text, setText] = useState("");
+
+    const handleSendMessage = async (e: { preventDefault: () => void; }) => {
+        e.preventDefault();
+        if (!currentConversation) return;
+        if (!text.trim()) return;
+        try {
+            const content = {
+                conversationId: currentConversation.id,
+                text: text.trim(),
+                replyToMessageId: replyingMessage?.id
+            }
+            sendMessage(content);
+            console.log("message sent");
+            setText("")
+            setIsEmojiPickerOpen(false)
+            setReplyingMessage(null);
+        } catch (error) {
+            toast.error("Fail to send message")
+            console.log("Fail to send message", error);
+        }
+    }
+
+    const shouldShowAvatar = useCallback(
+        (index: number) => {
+            if (!messages) return false;
+            const message = messages[index];
+            const nextMessage = messages[index + 1];
+            if (!nextMessage) return true;
+            return message.senderId !== nextMessage.senderId;
+        }, [messages]);
+
+    const shouldShowSenderName = useCallback(
+        (index: number) => {
+            if (!currentConversation || !messages) return false;
+            if (index === 0) return true;
+            const message = messages[index];
+            const previousMessage = messages[index - 1];
+            if (!previousMessage) return true;
+
+            return message.senderId !== previousMessage.senderId;
+        }, [currentConversation, messages]
+    )
+
+    const messageReadersMap = useMemo(() => {
+        if (!currentConversation) return new Map<string, UserPreview[]>();
+        return getMessageIdToReadersMap(currentConversation, user?.id);
+    }, [currentConversation, user?.id]);
+
+    const findLastReadMessageIndexFromMap = (
+        messages: ChatMessage[],
+        messageReadersMap: Map<string, UserPreview[]>
+    ): number => {
+        for (let i = messages.length - 1; i >= 0; i--) {
+            if (messageReadersMap.has(messages[i].id)) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    const lastReadMessageIndex = useMemo(() => {
+        if (!messages || !currentConversation) return -1;
+        return findLastReadMessageIndexFromMap(messages, messageReadersMap);
+    }, [messages, currentConversation, messageReadersMap]);
+
+    const handleSearchRepliedMessage = useCallback((messageId: string) => {
+        const exists = messages.some(m => m.id === messageId);
+        if (!exists) {
+            void fetchMessages(conversationId, {
+                direction: MessageLoadDirection.OLDER,
+                messageId,
+            });
+            return;
+        }
+        requestAnimationFrame(() => {
+            const el = document.getElementById(`message-${messageId}`);
+            if (!el) return;
+
+            el.scrollIntoView({
+                block: "center",
+                behavior: "instant",
+            });
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    el.classList.remove("message-highlight");
+                    void el.offsetWidth;
+                    el.classList.add("message-highlight");
+                });
+            });
+        });
+        }, [conversationId, fetchMessages, messages]);
+
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+
+    const [replyingMessage, setReplyingMessage] = useState<ChatMessage | null>(null);
+
+    const handleReply = (message: ChatMessage) => {
+        setReplyingMessage(message);
+    };
+
+    const cancelReply = () => {
+        setReplyingMessage(null);
+    };
+
+    if (!currentConversation) return;
+    if (!user) return;
+    const otherUser = getOtherUserFromPrivateConversation(currentConversation, user.id)
+
+    const findSender = (senderId: string) =>
+        currentConversation.members.find((m) => m.user.id === senderId)?.user;
+
+    return (
+        <div className={"h-full flex flex-col w-full"}>
+            <div className={"fixed z-50 px-2 flex flex-col gap-1 md:px-6 md:pt-[1px] lg:max-w-[650px] md:max-w-[600px] w-full"}>
+                <div className={"flex rounded-right-full w-full bg-background flex-row items-center gap-2 py-2 h-fit justify-between"}>
+                    <button
+                        className={"main-header-button"}
+                        onClick={() => router.back()}
+                    >
+                        <ChevronLeft className={"size-7 mx-auto"}/>
+                    </button>
+                    <ConversationAvatars conversation={currentConversation}/>
+                    <h2 className="flex-1 truncate font-medium text-left">
+                        {currentConversation.type === ConversationType.PRIVATE
+                            ? otherUser?.displayName
+                            : currentConversation.title
+                        }
+                    </h2>
+                </div>
+                {hasNewMessage && (
+                    <button className={"self-center flex flex-row items-center shadow-md gap-1 px-2 py-1 bg-background-200 ring-foreground-200 rounded-full"}>
+                        <CircleArrowDown className={"size-4"}/>
+                        <p>
+                            {u("chat.message.new_messages_arrived")}
+                        </p>
+
+                    </button>
+                )}
+            </div>
+            <div
+                className={`flex-1 flex px-2 md:px-6 pt-20 flex-col gap-0.5 ${replyingMessage ? "pb-32" : "pb-16"}`}
+            >
+                {messages?.map((message, index) => {
+                    const sender = findSender(message.senderId);
+                    if (!sender) return;
+
+                    const readers = messageReadersMap.get(message.id) ?? [];
+
+                    const showAvatar = shouldShowAvatar(index);
+                    const showSenderName = shouldShowSenderName(index);
+
+                    const repliedMessage = message.repliedMessage;
+                    const repliedMessageOwner = repliedMessage ? findSender(repliedMessage.senderId) : undefined;
+
+                    const repliedMoment = message.repliedMoment;
+                    const repliedMomentOwner = message.repliedMoment ? findSender(message.repliedMoment.userId) : undefined;
+
+                    if (sender.id  === user.id) {
+                        return (
+                            <MyMessage
+                                key={message.id}
+                                message={message}
+                                sender={sender}
+                                repliedMoment={repliedMoment}
+                                repliedMomentOwner={repliedMomentOwner}
+                                repliedMessage={repliedMessage}
+                                repliedMessageOwner={repliedMessageOwner}
+                                showAvatar={showAvatar}
+                                showSenderName={showSenderName}
+                                messagesLength={messages.length}
+                                index={index}
+                                lastReadMessageIndex={lastReadMessageIndex}
+                                readers={readers}
+                                handleReply={handleReply}
+                                handleSearchRepliedMessage={handleSearchRepliedMessage}
+                            />
+                        )
+                    }
+                    return (
+                        <OtherMessage
+                            key={message.id}
+                            message={message}
+                            conversationType={currentConversation.type}
+                            sender={sender}
+                            repliedMoment={repliedMoment}
+                            repliedMomentOwner={repliedMomentOwner}
+                            repliedMessage={repliedMessage}
+                            repliedMessageOwner={repliedMessageOwner}
+                            showAvatar={showAvatar}
+                            showSenderName={showSenderName}
+                            messagesLength={messages.length}
+                            index={index}
+                            lastReadMessageIndex={lastReadMessageIndex}
+                            readers={readers}
+                            handleReply={handleReply}
+                            handleSearchRepliedMessage={handleSearchRepliedMessage}
+                        />
+                    )})
+                }
+            </div>
+            <div className={"fixed bottom-0 flex flex-col px-2 md:px-6 gap-0.5 lg:max-w-[650px] md:max-w-[600px] w-full"}>
+                {replyingMessage && (
+                    <div className={"w-full flex flex-row items-center bg-background-200 z-30 ring-1 ring-foreground-200 rounded-full px-4 py-1"}>
+                        <div className={"flex-1 min-w-0 flex flex-col"}>
+                            <div className={"overflow-hidden"}>
+                                <p className={"truncate"}>
+                                    {replyingMessage.senderId === user.id
+                                        ? u("chat.message.reply_self")
+                                        : u('chat.message.replying_to', { name: findSender(replyingMessage.senderId)?.displayName ?? "" })
+                                    }
+                                </p>
+                            </div>
+                            <div className={"overflow-hidden"}>
+                                <p className={"truncate text-sm text-foreground-200"}>
+                                    {replyingMessage.text}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            className={"shrink-0 p-1 rounded-full hover:bg-background-300"}
+                            onClick={() => cancelReply()}
+                        >
+                            <Cancel className={"size-4"}/>
+                        </button>
+                    </div>
+
+                )}
+                <form onSubmit={handleSendMessage} className="w-full bg-background flex flex-row items-center gap-2">
+                    <div className="relative w-full h-fit py-2">
+                        <Input
+                            type="text"
+                            placeholder="Type a message..."
+                            className={"shadow-none ring-1 ring-transparent focus:!ring-foreground text-base font-normal px-5 pl-5 pr-10 text-foreground border-background-m bg-background-200 placeholder:text-foreground-200 w-full rounded-full h-10"}
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                        />
+                        <Popover onOpenChange={setIsEmojiPickerOpen} open={isEmojiPickerOpen}>
+                            <PopoverTrigger asChild>
+                                <button
+                                    type={"button"}
+                                    className={`rounded-full absolute right-3 top-1/2 -translate-y-1/2 text-foreground`}
+                                >
+                                    <SmileFace className={"size-6"} />
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-fit p-0 bg-background-200 border-none" align={"end"}>
+                                <EmojiPicker
+                                    className="h-[342px]"
+                                    onEmojiSelect={({ emoji }) => {
+                                        setText(prev => prev + emoji);
+                                        console.log(emoji);
+                                    }}
+                                >
+                                    <EmojiPickerSearch />
+                                    <EmojiPickerContent/>
+                                    <EmojiPickerFooter />
+                                </EmojiPicker>
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                    <div className={`shrink-0 h-10 border border-background-m bg-background-200 rounded-full w-10 flex items-center justify-center ${(text.trim().length > 0 && !isEmojiPickerOpen) && "ring-1 ring-foreground"}`}>
+                        <button
+                            type="submit"
+                            className={`rounded-full text-foreground ${(!text.trim()) && "cursor-not-allowed  opacity-60"}`}
+                            disabled={!text.trim()}
+                        >
+                            <Send className={"size-6"} />
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
+}
+
+function getMessageIdToReadersMap(conversation: Conversation, currentUserId: string | undefined): Map<string, UserPreview[]> {
+    const map = new Map<string, UserPreview[]>();
+
+    conversation.members.forEach(member => {
+        const messageId = member.lastReadMessageId;
+        if (!messageId) return;
+
+        if (member.user.id === currentUserId) return;
+
+        if (!map.has(messageId)) {
+            map.set(messageId, []);
+        }
+        map.get(messageId)!.push(member.user);
+    });
+
+    return map;
+}
+
+
+export default ChatListPage;

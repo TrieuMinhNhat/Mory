@@ -8,10 +8,9 @@ export const ROUTES = {
         RESET_PASSWORDS: "/password",
     },
     HOME: "/home",
-    HOME_GRID: "/home/grid",
     STORY: {
-        ROOT: "/story",
-        DETAILS: (id: string) => `/story/${id}`
+        ROOT: "/stories",
+        DETAILS: (id: string) => `/stories/${id}`
     },
     PROFILE: {
         ME: {
@@ -31,7 +30,11 @@ export const ROUTES = {
         LISTS: "/connections/lists",
         BLOCKED: "/connections/blocked",
     },
-
+    CHAT: {
+        ROOT: "/chat",
+        CONVERSATION: (id: string) => `/chat/${id}`,
+    },
+    NOTIFICATIONS: "/notifications",
     ADMIN: {
         ROOT: "/admin",
         USERS: "/admin/users",

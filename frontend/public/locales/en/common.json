@@ -8,5 +8,62 @@
   "get_started": "Get Started",
   "button": {
     "reload": "Reload"
+  },
+  "landing": {
+    "hero_title": "Store moments.\nBuild stories.\nStay connected.",
+    "hero_subtitle": "Mory is a social platform designed to help users capture personal moments, organize them into meaningful stories, and maintain lasting connections.",
+    "hero_prompt": "Start your personal space today",
+
+    "features": {
+      "moments_title": "Capture moments",
+      "moments_desc": "Record and preserve everyday moments as personal entries.",
+      "stories_title": "Build stories",
+      "stories_desc": "Organize moments into meaningful personal or shared stories.",
+      "connections_title": "Connect with friends",
+      "connections_desc": "Build connections and interact with people you care about.",
+      "chat_title": "Chat & collaborate",
+      "chat_desc": "Chat with friends and contribute moments together in shared stories."
+    },
+
+    "how_title": "How Mory works",
+    "how": {
+      "connect_title": "Connect with people",
+      "connect_desc": "Find and connect with friends to start sharing moments and building stories together.",
+
+      "capture_title": "Capture moments",
+      "capture_desc": "Quickly record everyday moments and thoughts as personal entries in your timeline.",
+
+      "story_title": "Create stories",
+      "story_desc": "Organize moments into personal or shared stories to preserve meaningful memories.",
+
+      "collab_title": "Collaborate with friends",
+      "collab_desc": "Invite friends to contribute moments to shared stories, creating memories together."
+    },
+
+    "cta_title": "Create your shared memory space",
+    "cta_desc": "Mory helps you capture moments, build stories, and create meaningful memories together with people you care about.",
+    "cta_primary": "Get started for free",
+    "cta_secondary": "Sign in",
+    "cta_note": "No credit card required. Start building your story today.",
+
+
+    "preferences_title": "Personalize your experience",
+
+    "language_title": "Language",
+    "language_desc": "Choose the language you are most comfortable with.",
+
+    "theme_title": "Appearance",
+    "theme_desc": "Select a theme that suits your preference and environment.",
+
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_system": "System"
+  },
+  "nav": {
+    "features": "Features",
+    "how_it_works": "How it works"
+  },
+  "auth": {
+    "sign_in": "Sign in"
   }
 }

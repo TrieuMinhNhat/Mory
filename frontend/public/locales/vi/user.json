@@ -141,6 +141,11 @@
         "keep_as_independent_moments": "Giữ lại dưới dạng các khoảnh khắc riêng lẻ",
         "remove_moments": "Xóa các khoảnh khắc",
         "create_personal_story": "Tạo câu chuyện cá nhân mới từ các khoảnh khắc"
+      },
+      "delete_story_prompt": "Bạn muốn xử lý các khoảnh khắc khi xóa story này như thế nào?",
+      "delete_story_action": {
+        "delete_moments": "Xóa story và toàn bộ khoảnh khắc",
+        "detach_moments": "Xóa story nhưng giữ lại các khoảnh khắc"
       }
     },
     "empty": "Chưa có câu chuyện nào",
@@ -303,12 +308,16 @@
   },
   "time": {
     "just_now": "vừa xong",
-    "minutes_ago_one": "{{count}} phút trước",
-    "minutes_ago_other": "{{count}} phút trước",
-    "hours_ago_one": "{{count}} giờ trước",
-    "hours_ago_other": "{{count}} giờ trước",
-    "days_ago_one": "{{count}} ngày trước",
-    "days_ago_other": "{{count}} ngày trước"
+    "minutes_ago_one": "{{count}} phút",
+    "minutes_ago_other": "{{count}} phút",
+    "hours_ago_one": "{{count}} giờ",
+    "hours_ago_other": "{{count}} giờ",
+    "days_ago_one": "{{count}} ngày",
+    "days_ago_other": "{{count}} ngày",
+    "months_ago_one": "{{count}} tháng",
+    "months_ago_other": "{{count}} tháng",
+    "years_ago_one": "{{count}} năm",
+    "years_ago_other": "{{count}} năm"
   },
   "user": {
     "connection_type": {
@@ -316,6 +325,49 @@
       "close_friend": "Bạn thân",
       "friend": "Bạn bè"
     }
+  },
+  "chat": {
+    "title": "Tin nhắn",
+    "empty": "Chưa có cuộc trò chuyện nào",
+    "message": {
+      "no_messages_yet": "Hãy bắt đầu cuộc trò chuyện!",
+      "new_messages_arrived": "Có tin nhắn mới",
+      "new_messages": "tin nhắn mới",
+      "replying_to": "Đang trả lời {{name}}",
+      "reply_self": "Đang trả lời chính mình",
+      "replied": {
+        "self_to_self": "Bạn đã trả lời chính mình",
+        "self_to_other": "Bạn đã trả lời {{name}}",
+        "other_to_self": "{{name}} đã trả lời bạn",
+        "other_to_other": "{{from}} đã trả lời {{to}}"
+      }
+    },
+    "moment": {
+      "replying_to": "Đang trả lời khoảnh khắc của {{name}}"
+    }
+  },
+  "notification": {
+    "title": "Thông báo",
+    "empty": "Chưa có thông báo nào",
+    "connection": {
+      "request": {
+        "sent": {
+          "connect": {
+            "message": "đã gửi cho bạn một lời mời kết nối"
+          },
+          "change_type": {
+            "message": "đề xuất thay đổi mối quan hệ với bạn thành {{toType}}"
+          }
+        },
+        "accepted": {
+          "connect": {
+            "message": "đã chấp nhận lời mời kết nối của bạn. Bạn và {{name}} hiện đã là bạn bè"
+          },
+          "change_type": {
+            "message": "đã chấp nhận thay đổi mối quan hệ. Mối quan hệ hiện tại của bạn với họ là {{currentType}}"
+          }
+        }
+      }
+    }
   }
-
 }

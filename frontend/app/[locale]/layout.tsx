@@ -5,6 +5,7 @@ import {Montserrat} from "next/font/google";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {ThemeProvider} from "@/components/shared/ThemeProvider";
 import ThemeToaster from "@/components/shared/ThemeToaster";
+import {Locale} from "@/lib/i18n/locales";
 
 const getDirection = (locale: string) => {
     return ["ar", "he", "fa"].includes(locale) ? "rtl" : "ltr";
@@ -22,22 +23,22 @@ export default async function LocaleLayout({
                                                params,
                                            }: {
     children: ReactNode;
-    params: { locale: string } | Promise<{ locale: string }>;
+    params: Promise<{ locale: Locale }>;
 }) {
     const { locale } = await params;
     const resources = await initServerI18n(locale);
     return (
         <html lang={locale} dir={getDirection(locale)} className={"light"}>
-            <body className={`${montserrat.variable} font-montserrat antialiased bg-background-100`}>
-                <I18nProvider locale={locale} resources={resources}>
-                    <ThemeProvider>
-                        <TooltipProvider>
-                            <ThemeToaster/>
-                            {children}
-                        </TooltipProvider>
-                    </ThemeProvider>
-                </I18nProvider>
-            </body>
+        <body className={`${montserrat.variable} font-montserrat antialiased bg-background-100`}>
+        <I18nProvider locale={locale} resources={resources}>
+            <ThemeProvider>
+                <TooltipProvider>
+                    <ThemeToaster/>
+                    {children}
+                </TooltipProvider>
+            </ThemeProvider>
+        </I18nProvider>
+        </body>
         </html>
     );
 }

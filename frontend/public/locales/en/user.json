@@ -141,6 +141,11 @@
         "keep_as_independent_moments": "Keep as independent moments",
         "remove_moments": "Remove moments",
         "create_personal_story": "Add moments to new personal story"
+      },
+      "delete_story_prompt": "What do you want to do with the moments in this story?",
+      "delete_story_action": {
+        "delete_moments": "Delete the story and all moments",
+        "detach_moments": "Delete the story but keep the moments"
       }
     },
     "empty": "No stories available",
@@ -266,10 +271,17 @@
     },
     "action_menu": {
       "edit_profile": "Edit profile",
-      "set_password": "Set password"
+      "set_password": "Set password",
+      "change_password": "Change password"
+    },
+    "edit_profile": {
+      "title": "Edit profile"
     },
     "set_password": {
       "title": "Set password"
+    },
+    "change_password": {
+      "title": "Change password"
     },
     "access_denied": "You don't have access to view this profile"
   },
@@ -303,12 +315,16 @@
   },
   "time": {
     "just_now": "just now",
-    "minutes_ago_one": "{{count}} minute ago",
-    "minutes_ago_other": "{{count}} minutes ago",
-    "hours_ago_one": "{{count}} hour ago",
-    "hours_ago_other": "{{count}} hours ago",
-    "days_ago_one": "{{count}} day ago",
-    "days_ago_other": "{{count}} days ago"
+    "minutes_ago_one": "{{count}} minute",
+    "minutes_ago_other": "{{count}} minutes",
+    "hours_ago_one": "{{count}} hour",
+    "hours_ago_other": "{{count}} hours",
+    "days_ago_one": "{{count}} day",
+    "days_ago_other": "{{count}} days",
+    "months_ago_one": "{{count}} month",
+    "months_ago_other": "{{count}} months",
+    "years_ago_one": "{{count}} year",
+    "years_ago_other": "{{count}} years"
   },
   "user": {
     "connection_type": {
@@ -316,5 +332,50 @@
       "close_friend": "Close friend",
       "friend": "Friend"
     }
+  },
+  "chat": {
+    "title": "Message",
+    "empty": "No conversations yet",
+    "message": {
+      "no_messages_yet": "Start the conversation!",
+      "new_messages_arrived": "New messages",
+      "new_messages": "new messages",
+      "replying_to": "Replying to {{name}}",
+      "reply_self": "Replying to yourself",
+      "replied": {
+        "self_to_self": "You replied to yourself",
+        "self_to_other": "You replied to {{name}}",
+        "other_to_self": "{{name}} replied to you",
+        "other_to_other": "{{from}} replied to {{to}}"
+      }
+    },
+    "moment": {
+      "replying_to": "Replying to {{name}}'s moment"
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "connection": {
+      "request": {
+        "sent": {
+          "connect": {
+            "message": "sent you a connection request"
+          },
+          "change_type": {
+            "message": "suggested changing your connection with them to {{toType}}"
+          }
+        },
+        "accepted": {
+          "connect": {
+            "message": "accepted your connection request. You are now Friends with {{name}}"
+          },
+          "change_type": {
+            "message": "accepted the connection change. Your connection with them is now {{currentType}}"
+          }
+        }
+      }
+    }
+
   }
 }
