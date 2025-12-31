@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @Builder
 public class UpdateUserProfileRequest {
-
     private String displayName;
     private String avatarImageUrl;
 }

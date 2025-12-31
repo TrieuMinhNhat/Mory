@@ -52,6 +52,13 @@ public interface ConnectionRequestRepository extends JpaRepository<ConnectionReq
     @Query("select r from ConnectionRequest r where r.id = :id")
     Optional<ConnectionRequest> findByIdWithUsers(@Param("id") UUID id);
 
+    @EntityGraph(attributePaths = {"requester", "recipient", "requester.profile", "recipient.profile"})
+    @Query("""
+            SELECT r FROM ConnectionRequest r
+            WHERE r.id IN :ids
+            """)
+    List<ConnectionRequest> findAllWithUserAndProfileByIds(@Param("ids") List<UUID> ids);
+
     @Query(value = """
             SELECT id
             FROM connection_requests r
@@ -95,13 +102,6 @@ public interface ConnectionRequestRepository extends JpaRepository<ConnectionReq
             @Param("status") String status,
             @Param("limit") int limit
     );
-
-    @EntityGraph(attributePaths = {"requester", "recipient", "requester.profile", "recipient.profile"})
-    @Query("""
-            SELECT r FROM ConnectionRequest r
-            WHERE r.id IN :ids
-            """)
-    List<ConnectionRequest> findAllWithUserAndProfileByIds(@Param("ids") List<UUID> ids);
 
     @Query("""
     SELECT r

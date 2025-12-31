@@ -11,7 +11,6 @@ import org.springframework.http.ResponseCookie;
 @AllArgsConstructor
 @Builder
 public class CookiePair {
-
     private ResponseCookie accessCookie;
     private ResponseCookie refreshCookie;
 }

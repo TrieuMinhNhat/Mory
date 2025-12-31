@@ -10,9 +10,8 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 /**
- * Represents the user information returned after a successful authentication
- * request. This DTO is typically used to populate the frontend user profile
- * upon login.
+ * Represents the user information returned after a successful authentication request.
+ * This DTO is typically used to populate the frontend user profile upon login.
  */
 @Data
 @AllArgsConstructor

@@ -1,5 +1,7 @@
 export const API_BASE_URL = "/api/backend";
 
+export const WS_URL = process.env.NEXT_PUBLIC_WS_URL!;
+
 export const API_ENDPOINTS = {
     AUTH: {
         EMAIL_PASSWORD_SIGN_IN: "/api/auth/email-password/sign-in",
@@ -12,6 +14,7 @@ export const API_ENDPOINTS = {
         FORGOT_PASSWORD: "/api/auth/forgot-password",
         RESET_PASSWORD: "/api/auth/reset-password",
         SET_PASSWORD: "/api/auth/set-password",
+        CHANGE_PASSWORD: "/api/auth/change-password",
         REFRESH_TOKEN: "/api/auth/refresh",
         CHECK_AUTH: "/api/auth/me",
         CHECK_EMAIL: "/api/auth/check-email"
@@ -85,10 +88,35 @@ export const API_ENDPOINTS = {
                 KICK: (storyId: string) => `/api/stories/${storyId}/kick-members`,
                 LEAVE: (storyId: string) => `/api/stories/${storyId}/leave`,
             },
-            DISSOLVE: (storyId: string) => `/api/stories/${storyId}/dissolve`,
             UPDATE: (storyId: string) => `/api/stories/${storyId}`,
             DELETE: (storyId: string) => `/api/stories/${storyId}`,
         },
+        CONVERSATIONS: {
+            FETCH_CONVERSATIONS: "/api/conversations",
+            FETCH_CONVERSATION: (id: string) => `/api/conversations/${id}`,
+            FETCH_MESSAGES: (conversationId: string) => `/api/conversations/${conversationId}/messages`,
+        },
+        NOTIFICATIONS: {
+            FETCH_NOTIFICATIONS: "/api/notifications",
+        },
         UPLOAD: "/api/media/signature"
     }
+}
+
+export const WS_ENDPOINTS = {
+    USER: {
+        MESSAGES: "/user/queue/messages",
+        NOTIFICATIONS: "/user/queue/notifications",
+        LAST_READ_STATUS: "/user/queue/lastReadStatus"
+    },
+};
+
+export const WS_SEND = {
+    CHAT: {
+        SEND_MESSAGE: "/app/chat/messages",
+        UPDATE_LAST_READ_STATUS: "/app/chat/lastReadStatus",
+    },
+    NOTIFICATION: {
+        MARK_SEEN: "/app/notification.markSeen",
+    },
 }

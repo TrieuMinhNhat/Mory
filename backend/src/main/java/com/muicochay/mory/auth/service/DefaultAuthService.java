@@ -37,7 +37,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class DefaultAuthService {
-
     private final JwtTokenHelper jwtTokenHelper;
     private final AuthUserRepository authUserRepository;
 
@@ -53,7 +52,7 @@ public class DefaultAuthService {
     public AuthUserResponse checkAuth(UUID userId, AuthProvider authProvider) {
         User user = authUserRepository.findById(userId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("User not found with Id: " + userId));
-        boolean isVerified = authProvider != AuthProvider.EMAIL_PASSWORD || user.isPasswordVerified();
+        boolean isVerified = authProvider != AuthProvider.EMAIL_PASSWORD|| user.isPasswordVerified();
         return buildAuthUserResponse(user, isVerified);
     }
 

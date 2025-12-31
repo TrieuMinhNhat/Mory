@@ -29,7 +29,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class EmailOtpAuthService {
-
     private final AuthUserRepository authUserRepository;
     private final BlockedUserService blockedUserService;
     private final JwtTokenHelper jwtTokenHelper;

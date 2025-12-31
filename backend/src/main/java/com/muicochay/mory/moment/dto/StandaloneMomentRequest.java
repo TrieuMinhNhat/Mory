@@ -18,6 +18,5 @@ public class StandaloneMomentRequest {
     private String audioUrl;
     private String caption;
     private boolean milestone;
-    private List<UUID> taggedUserIds;
     private Visibility visibility;
 }

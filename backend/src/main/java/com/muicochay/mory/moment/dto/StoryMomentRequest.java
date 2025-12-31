@@ -17,5 +17,4 @@ public class StoryMomentRequest {
     private String audioUrl;
     private String caption;
     private boolean milestone;
-    private List<UUID> taggedUserIds;
 }

@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class AdminTopicResponse {
-
     private Integer id;
     private String nameEN;
     private String nameVI;

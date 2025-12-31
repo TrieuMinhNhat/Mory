@@ -38,7 +38,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue = [];
 };
 
-const rawAxios = axios.create({
+export const rawAxios = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true,
 });

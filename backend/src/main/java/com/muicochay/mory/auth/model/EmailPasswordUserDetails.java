@@ -18,24 +18,19 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * A custom {@link UserDetails} implementation used for traditional
- * email/password authentication.
+ * A custom {@link UserDetails} implementation used for traditional email/password authentication.
  *
- * <p>
- * This class loads full user details from the database and is used in the
- * authentication process when logging in via email and password (form-based
- * login).</p>
+ * <p>This class loads full user details from the database and is used in the authentication process
+ * when logging in via email and password (form-based login).</p>
  *
- * <p>
- * It includes additional metadata fields (e.g. username, full name, onboarding
- * status) that may be useful post-login or for personalization.</p>
+ * <p>It includes additional metadata fields (e.g. username, full name, onboarding status)
+ * that may be useful post-login or for personalization.</p>
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class EmailPasswordUserDetails implements UserDetails {
-
     private UUID id;
     private String email;
     private String password;
@@ -61,9 +56,7 @@ public class EmailPasswordUserDetails implements UserDetails {
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (roleCode == null) {
-            return List.of();
-        }
+        if (roleCode == null) return List.of();
         return List.of(() -> roleCode.name());
     }
 

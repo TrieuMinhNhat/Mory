@@ -17,7 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class ConnectionRequestResponse {
-
     private UUID id;
     private ConnectionType newConnectionType;
     private ConnectionType oldConnectionType;

@@ -1,59 +1,108 @@
 package com.muicochay.mory.moment.service;
 
-import com.muicochay.mory.moment.document.MomentReaction;
+import com.muicochay.mory.moment.dto.MomentReactionSummary;
+import com.muicochay.mory.moment.entity.MomentReaction;
 import com.muicochay.mory.moment.repository.MomentReactionRepository;
 import com.muicochay.mory.shared.enums.ReactionType;
+import com.muicochay.mory.shared.exception.global.InvalidArgumentEx;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MomentReactionService {
-    private final MomentReactionRepository momentReactionRepository;
+
+    private final MomentReactionRepository reactionRepository;
 
     @Transactional
-    public MomentReaction toggleReaction(UUID userId, ObjectId momentId, ReactionType reactionType) {
-        MomentReaction doc = momentReactionRepository.findByMomentId(momentId)
-                .orElseGet(() -> MomentReaction.builder()
-                        .momentId(momentId)
-                        .userReactions(new HashMap<>())
-                        .build()
-                );
-        Map<UUID, ReactionType> userReactions =
-                Optional.ofNullable(doc.getUserReactions()).orElseGet(HashMap::new);
-
-        ReactionType oldReaction = userReactions.get(userId);
-
-        if (oldReaction != null) {
-            if (oldReaction.equals(reactionType)) {
-                userReactions.remove(userId);
-            } else {
-                userReactions.put(userId, reactionType);
-            }
-        } else {
-            userReactions.put(userId, reactionType);
+    public ReactionType toggleReaction(
+            UUID userId,
+            UUID momentId,
+            ReactionType reactionType
+    ) {
+        if (reactionType == null) {
+            throw new InvalidArgumentEx("Reaction type must not be null");
         }
-        doc.setUserReactions(userReactions);
-        return momentReactionRepository.save(doc);
+
+        Optional<MomentReaction> existingOpt =
+                reactionRepository.findByMomentIdAndUserId(momentId, userId);
+
+        if (existingOpt.isPresent()) {
+            MomentReaction existing = existingOpt.get();
+
+            if (existing.getReactionType() == reactionType) {
+                reactionRepository.delete(existing);
+                return null;
+            }
+
+            existing.setReactionType(reactionType);
+            reactionRepository.save(existing);
+            return reactionType;
+        }
+
+        MomentReaction created = MomentReaction.builder()
+                .momentId(momentId)
+                .userId(userId)
+                .reactionType(reactionType)
+                .build();
+
+        reactionRepository.save(created);
+        return reactionType;
     }
 
+    /**
+     * Lấy reaction của 1 moment
+     */
     @Transactional(readOnly = true)
-    public MomentReaction getMomentReactions(ObjectId momentId) {
-        return momentReactionRepository.findByMomentId(momentId).orElse(null);
+    public MomentReactionSummary getMomentReactions(UUID momentId) {
+        List<MomentReaction> reactions =
+                reactionRepository.findAllByMomentId(momentId);
+
+        Map<UUID, ReactionType> userReactions = reactions.stream()
+                .collect(Collectors.toMap(
+                        MomentReaction::getUserId,
+                        MomentReaction::getReactionType
+                ));
+
+        return new MomentReactionSummary(momentId, userReactions);
     }
 
+    /**
+     * Lấy reaction cho nhiều moment (feed)
+     */
     @Transactional(readOnly = true)
-    public List<MomentReaction> getReactionsForMoments(List<ObjectId> momentIds) {
-        if (momentIds == null || momentIds.isEmpty()) return Collections.emptyList();
-        return momentReactionRepository.findAllByMomentIdIn(momentIds);
+    public List<MomentReactionSummary> getReactionsForMoments(List<UUID> momentIds) {
+        if (momentIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<MomentReaction> reactions =
+                reactionRepository.findAllByMomentIdIn(momentIds);
+
+        Map<UUID, Map<UUID, ReactionType>> grouped =
+                reactions.stream()
+                        .collect(Collectors.groupingBy(
+                                MomentReaction::getMomentId,
+                                Collectors.toMap(
+                                        MomentReaction::getUserId,
+                                        MomentReaction::getReactionType
+                                )
+                        ));
+
+        return grouped.entrySet().stream()
+                .map(e -> new MomentReactionSummary(e.getKey(), e.getValue()))
+                .toList();
     }
 
+    /**
+     * Xóa toàn bộ reaction khi xóa moment
+     */
     @Transactional
-    public void deleteReactionsByMoment(ObjectId momentId) {
-        momentReactionRepository.deleteByMomentId(momentId);
+    public void deleteReactionsByMoment(UUID momentId) {
+        reactionRepository.deleteAllByMomentId(momentId);
     }
 }

@@ -41,7 +41,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class EmailPasswordAuthService {
-
     private final PasswordEncoder passwordEncoder;
     private final AuthUserRepository authUserRepository;
     private final OtpService otpService;
@@ -63,8 +62,13 @@ public class EmailPasswordAuthService {
             String userAgent
     ) {
         try {
+<<<<<<< HEAD
             EmailPasswordUserDetails user
                     = (EmailPasswordUserDetails) emailPasswordUserDetailsService
+=======
+            EmailPasswordUserDetails user =
+                    (EmailPasswordUserDetails) emailPasswordUserDetailsService
+>>>>>>> 5e2b780400989663f53519c44db549a553a43b1c
                             .loadUserByUsername(username);
 
             if (!passwordEncoder.matches(password, user.getPassword())) {
@@ -77,7 +81,13 @@ public class EmailPasswordAuthService {
                 throw new BlockedAccountEx("Account blocked", blockInfoResponse);
             }
 
+<<<<<<< HEAD
             if (!user.getProviders().contains(AuthProvider.EMAIL_PASSWORD)) {
+=======
+            if (
+                    !user.getProviders().contains(AuthProvider.EMAIL_PASSWORD)
+            ) {
+>>>>>>> 5e2b780400989663f53519c44db549a553a43b1c
                 throw new EmailPasswordLoginEx("Wrong email or password");
             }
             TokenPair tokenPair = jwtTokenHelper.generateTokenPair(

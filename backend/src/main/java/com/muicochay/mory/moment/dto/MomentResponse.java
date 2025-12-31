@@ -3,6 +3,7 @@ package com.muicochay.mory.moment.dto;
 
 import com.muicochay.mory.shared.enums.ReactionType;
 import com.muicochay.mory.shared.enums.Visibility;
+import com.muicochay.mory.story.dto.StoryPreviewDto;
 import com.muicochay.mory.user.dto.UserPreviewResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,8 +19,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class MomentResponse {
-    private String id;
-    private MomentStoryDto story;
+    private UUID id;
+    private StoryPreviewDto story;
     private UserPreviewResponse user;
     private String mediaUrl;
     private String audioUrl;

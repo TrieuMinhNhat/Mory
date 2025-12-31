@@ -5,6 +5,7 @@ import com.muicochay.mory.user.entity.User;
 import com.muicochay.mory.user.mapper.UserProfileMapper;
 import org.mapstruct.*;
 
+
 @Mapper(componentModel = "spring", uses = {UserProfileMapper.class})
 public interface AdminUserMapper {
 

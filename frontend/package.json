@@ -62,6 +62,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@stomp/stompjs": "^7.2.1",
     "@types/lodash.get": "^4.4.9",
     "@types/matter-js": "^0.20.0",
     "@types/node": "^20",

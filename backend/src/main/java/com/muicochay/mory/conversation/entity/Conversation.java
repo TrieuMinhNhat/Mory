@@ -29,11 +29,14 @@ public class Conversation extends BaseAuditEntity {
     @Column(nullable = false)
     private ConversationStatus status;
 
-    @Column(length = 40)
-    private String lastMessageId;
+    private String title;
+
+    private UUID lastMessageId;
 
     private Instant lastMessageSentAt;
 
     @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ConversationMember> members;
+
+    private Instant deletedAt;
 }

@@ -7,7 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class TokenPair {
-
     private String accessToken;
     private String refreshToken;
     private String refreshTokenId;

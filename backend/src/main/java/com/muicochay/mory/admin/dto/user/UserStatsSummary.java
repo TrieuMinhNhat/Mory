@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserStatsSummary {
-
     private StatsWithDiff totalUsers;
     private StatsWithDiff activeUsers;
     private StatsWithDiff pendingUsers;

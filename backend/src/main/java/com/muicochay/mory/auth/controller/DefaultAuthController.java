@@ -30,11 +30,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class DefaultAuthController {
-
     private final DefaultAuthService defaultAuthService;
     private final CookieBuilder cookieBuilder;
 
@@ -109,6 +109,10 @@ public class DefaultAuthController {
                 .build();
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, jsession.toString());
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5e2b780400989663f53519c44db549a553a43b1c
         CookiePair cookiePair = cookieBuilder.getZeroMaxAgeCookiePair();
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookiePair.getRefreshCookie().toString());
@@ -232,5 +236,23 @@ public class DefaultAuthController {
                 ApiResponse.success(null, "Password changed successfully")
         );
     }
+
+    @PostMapping("/change-password")
+    @RateLimit(
+            prefix = "auth::change-password:",
+            limit = 5,
+            windowSeconds = 60 * 60,
+            strategy = RateLimitKeyStrategy.PER_USER_ID
+    )
+    public ResponseEntity<ApiResponse<Object>> changePassword(
+            @AuthenticationPrincipal AuthUserPrincipal principal,
+            @RequestBody @Valid ChangePasswordRequest request
+    ) {
+        defaultAuthService.changePassword(principal.getId(), request);
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Password changed successfully")
+        );
+    }
+
 
 }

@@ -25,7 +25,6 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
-
     private final OAuth2Service oAuth2Service;
     private final CookieBuilder cookieBuilder;
     private final AppProperties appProperties;
@@ -80,3 +79,5 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         return query.toString();
     }
 }
+
+

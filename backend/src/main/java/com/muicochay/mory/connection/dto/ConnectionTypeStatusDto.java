@@ -16,7 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class ConnectionTypeStatusDto {
-
     private UUID userId;
     private ConnectionType connectionType;
     private ConnectionStatus status;

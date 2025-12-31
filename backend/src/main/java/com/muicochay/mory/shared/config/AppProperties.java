@@ -14,4 +14,5 @@ public class AppProperties {
     private String backendUrl;
     private String resetPasswordPath;
     private String appName;
+    private String oauth2RedirectBaseUrl;
 }

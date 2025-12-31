@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AdminUserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
-
     @Query("SELECT COUNT(u) FROM User u")
     long countAllUsers();
 
@@ -27,12 +26,14 @@ public interface AdminUserRepository extends JpaRepository<User, UUID>, JpaSpeci
               )
         """)
     long countActiveUsers(@Param("googleProvider") AuthProvider googleProvider,
-            @Param("otpProvider") AuthProvider otpProvider);
+                          @Param("otpProvider") AuthProvider otpProvider);
+
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NOT NULL")
     long countDeletedUsers();
 
     // ===== Last month stats =====
+
     @Query(value = """
         SELECT COUNT(*) FROM USERS u
         WHERE u.created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
@@ -61,6 +62,8 @@ public interface AdminUserRepository extends JpaRepository<User, UUID>, JpaSpeci
             AND u.deleted_at < DATE_TRUNC('month', CURRENT_DATE)
     """, nativeQuery = true)
     long countDeletedUsersLastMonth();
+
+
 
     @Query("""
     SELECT function('date', u.createdAt), COUNT(u)

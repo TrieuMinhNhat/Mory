@@ -13,9 +13,7 @@ public class AdminUserSpecification {
 
     public static Specification<User> hasKeyword(String keyword) {
         return ((root, query, criteriaBuilder) -> {
-            if (keyword == null || keyword.trim().isEmpty()) {
-                return null;
-            }
+            if (keyword == null || keyword.trim().isEmpty()) return null;
 
             String like = "%" + keyword.toLowerCase() + "%";
             Join<Object, Object> profileJoin = root.join("profile", JoinType.LEFT);
@@ -29,9 +27,7 @@ public class AdminUserSpecification {
 
     public static Specification<User> hasRole(RoleCode role) {
         return (root, query, criteriaBuilder) -> {
-            if (role == null) {
-                return null;
-            }
+            if (role == null) return null;
 
             return criteriaBuilder.equal(root.get("roleCode"), role);
         };
@@ -39,18 +35,14 @@ public class AdminUserSpecification {
 
     public static Specification<User> excludeUser(UUID userId) {
         return (root, query, criteriaBuilder) -> {
-            if (userId == null) {
-                return null;
-            }
+            if (userId == null) return null;
             return criteriaBuilder.notEqual(root.get("id"), userId);
         };
     }
 
     public static Specification<User> isActive(Boolean active) {
         return (root, query, cb) -> {
-            if (active == null) {
-                return null;
-            }
+            if (active == null) return null;
 
             // join providers collection
             Join<Object, Object> providers = root.join("providers", JoinType.LEFT);

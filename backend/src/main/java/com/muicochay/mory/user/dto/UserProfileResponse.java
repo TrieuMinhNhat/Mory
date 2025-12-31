@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserProfileResponse {
-
     private String displayName;
     private String avatarUrl;
     private Integer connectionCount;

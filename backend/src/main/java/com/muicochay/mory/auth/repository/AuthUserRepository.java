@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AuthUserRepository extends JpaRepository<User, UUID> {
-
     @EntityGraph(attributePaths = {"providers", "profile"})
     Optional<User> findByEmail(String email);
 

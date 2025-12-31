@@ -233,14 +233,10 @@ public class ConnectionController {
     )
     public ResponseEntity<ApiResponse<SuggestedConnectionsPageResponse>> getSuggestedConnections(
             @AuthenticationPrincipal AuthUserPrincipal principal,
-            @RequestParam(name = "cursorCreatedAt", required = false) Instant cursorCreatedAt,
-            @RequestParam(name = "cursorId", required = false) UUID cursorId,
             @RequestParam(defaultValue = "10") int size
     ) {
         SuggestedConnectionsPageResponse response = connectionService.getSuggestedConnections(
                 principal.getId(),
-                cursorCreatedAt,
-                cursorId,
                 size
         );
         return ResponseEntity.ok(ApiResponse.success(response, "Fetched suggested connections successfully"));

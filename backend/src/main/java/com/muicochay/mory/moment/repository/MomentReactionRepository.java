@@ -1,16 +1,18 @@
 package com.muicochay.mory.moment.repository;
 
-import com.muicochay.mory.moment.document.MomentReaction;
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import com.muicochay.mory.moment.entity.MomentReaction;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface MomentReactionRepository extends MongoRepository<MomentReaction, ObjectId> {
-    Optional<MomentReaction> findByMomentId(ObjectId momentId);
+public interface MomentReactionRepository extends JpaRepository<MomentReaction, UUID> {
+    Optional<MomentReaction> findByMomentIdAndUserId(UUID momentId, UUID userId);
 
-    List<MomentReaction> findAllByMomentIdIn(List<ObjectId> momentIds);
+    List<MomentReaction> findAllByMomentId(UUID momentId);
 
-    void deleteByMomentId(ObjectId momentId);
+    List<MomentReaction> findAllByMomentIdIn(List<UUID> momentIds);
+
+    void deleteAllByMomentId(UUID momentId);
 }

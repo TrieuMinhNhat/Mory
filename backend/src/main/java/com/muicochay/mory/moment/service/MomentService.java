@@ -1,21 +1,19 @@
 package com.muicochay.mory.moment.service;
 
 import com.muicochay.mory.connection.entity.Connection;
-import com.muicochay.mory.connection.enums.ConnectionStatus;
 import com.muicochay.mory.connection.enums.ConnectionType;
-import com.muicochay.mory.connection.repository.ConnectionRepository;
-import com.muicochay.mory.connection.utils.ConnectionUtils;
-import com.muicochay.mory.moment.document.Moment;
-import com.muicochay.mory.moment.document.MomentReaction;
 import com.muicochay.mory.moment.dto.*;
-import com.muicochay.mory.moment.repository.MomentRepository;
+import com.muicochay.mory.moment.entity.Moment;
+import com.muicochay.mory.moment.interfaces.ChallengeProgressProjection;
 import com.muicochay.mory.shared.dto.UpdateVisibilityRequest;
 import com.muicochay.mory.shared.enums.ReactionType;
 import com.muicochay.mory.shared.enums.Visibility;
-import com.muicochay.mory.shared.exception.global.InvalidArgumentEx;
-import com.muicochay.mory.shared.exception.global.InvalidResourceStateEx;
-import com.muicochay.mory.shared.exception.global.ResourcesAccessDeniedEx;
-import com.muicochay.mory.shared.exception.global.ResourcesNotFoundEx;
+import com.muicochay.mory.moment.repository.MomentRepository;
+import com.muicochay.mory.connection.enums.ConnectionStatus;
+import com.muicochay.mory.connection.repository.ConnectionRepository;
+import com.muicochay.mory.connection.utils.ConnectionUtils;
+import com.muicochay.mory.shared.exception.global.*;
+import com.muicochay.mory.story.dto.StoryPreviewDto;
 import com.muicochay.mory.story.entity.Story;
 import com.muicochay.mory.story.enums.StoryType;
 import com.muicochay.mory.story.repository.StoryRepository;
@@ -26,7 +24,8 @@ import com.muicochay.mory.user.mapper.UserMapper;
 import com.muicochay.mory.user.repositoriy.UserProfileRepository;
 import com.muicochay.mory.user.repositoriy.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MomentService {
     private final MomentRepository momentRepository;
@@ -51,19 +51,19 @@ public class MomentService {
     private final UserProfileRepository userProfileRepository;
     private final UserMapper userMapper;
 
-
     @Transactional
     public MomentResponse createStandaloneMoment(UUID userId, StandaloneMomentRequest request) {
         if (request.getMediaUrl().isBlank()) {
             throw new InvalidArgumentEx("MediaUrl is empty");
         }
+
         User user = userRepository.findWithProfileById(userId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("User not found with Id: " + userId));
 
         Moment moment = buildStandaloneMoment(user, request);
         momentRepository.save(moment);
 
-        return toResponse(moment, user, null);
+        return toResponse(moment);
     }
 
     @Transactional
@@ -75,7 +75,7 @@ public class MomentService {
         User user = userRepository.findWithProfileById(userId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("User not found with Id: " + userId));
 
-        Story story = storyRepository.findActiveById(storyId)
+        Story story = storyRepository.findByIdWithMembers(storyId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Story not found with Id: " + storyId));
 
         boolean allowed = switch (story.getType()) {
@@ -87,49 +87,28 @@ public class MomentService {
             throw new ResourcesAccessDeniedEx("You are not allowed to post in this story");
         }
 
+        String timezone = user.getProfile().getTimezone();
+
         Moment moment = switch (story.getType()) {
             case BEFORE_AFTER -> buildBeforeAfterMoment(user, story, request);
-            case JOURNEY      -> buildJourneyMoment(user, story, request);
-            case CHALLENGE    -> buildChallengeMoment(user, story, request);
+            case JOURNEY      -> buildJourneyMoment(user, timezone, story, request);
+            case CHALLENGE    -> buildChallengeMoment(user, timezone, story, request);
             case ALBUM        -> buildAlbumMoment(user, story, request);
         };
         momentRepository.save(moment);
-        story.setLatestMomentId(moment.getId());
-        story.setLatestMomentCreatedAt(moment.getCreatedAt());
-        return toResponse(moment, user, story);
+
+        return toResponse(moment);
     }
 
     private Moment buildStandaloneMoment(User user, StandaloneMomentRequest request) {
-        Moment moment = Moment.builder()
-                .userId(user.getId())
+        return Moment.builder()
+                .user(user)
                 .mediaUrl(request.getMediaUrl())
                 .audioUrl(request.getAudioUrl())
                 .caption(request.getCaption())
                 .visibility(request.getVisibility() != null ? request.getVisibility() : Visibility.ALL_FRIENDS)
-                .milestone(request.isMilestone())
-                .tags(new ArrayList<>())
+                .isMilestone(request.isMilestone())
                 .build();
-
-        attachTags(moment, user.getId(), request.getTaggedUserIds());
-        return moment;
-    }
-
-    private void attachTags(Moment moment, UUID creatorId, List<UUID> taggedUserIds) {
-        if (taggedUserIds == null || taggedUserIds.isEmpty()) return;
-
-        Set<UUID> existingIds = new HashSet<>(moment.getTags());
-
-        Set<UUID> newIds = taggedUserIds.stream()
-                .filter(Objects::nonNull)
-                .filter(id -> !existingIds.contains(id))
-                .collect(Collectors.toSet());
-
-        if (newIds.isEmpty()) return;
-
-        Set<UUID> allowedIds = connectionRepository.findConnectedUserIds(
-                creatorId, newIds, List.of(ConnectionStatus.CONNECTED)
-        );
-        allowedIds.forEach(userId -> moment.getTags().add(userId));
     }
 
     private Moment buildBeforeAfterMoment(User user, Story story, StoryMomentRequest request) {
@@ -138,8 +117,8 @@ public class MomentService {
         }
 
         Moment moment = Moment.builder()
-                .storyId(story.getId())
-                .userId(user.getId())
+                .story(story)
+                .user(user)
                 .mediaUrl(request.getMediaUrl())
                 .audioUrl(request.getAudioUrl())
                 .visibility(story.getVisibility())
@@ -147,20 +126,18 @@ public class MomentService {
                 .position(!story.isHasBefore() ? 0 : 1)
                 .build();
 
-        attachTags(moment, user.getId(), request.getTaggedUserIds());
-
         if (!story.isHasBefore()) {
             story.setHasBefore(true);
         } else {
             story.setHasAfter(true);
         }
 
-        momentRepository.save(moment);
+
         return moment;
     }
 
-    private Moment buildJourneyMoment(User user, Story story, StoryMomentRequest request) {
-        LocalDate today = LocalDate.now(ZoneId.of(user.getProfile().getTimezone()));
+    private Moment buildJourneyMoment(User user, String timezone, Story story, StoryMomentRequest request) {
+        LocalDate today = LocalDate.now(ZoneId.of(timezone));
 
         if (today.isBefore(story.getStartDate())) {
             throw new InvalidResourceStateEx("Journey has not started yet.");
@@ -171,25 +148,19 @@ public class MomentService {
 
         int dayIndex = (int) ChronoUnit.DAYS.between(story.getStartDate(), today) + 1;
 
-        Moment moment = Moment.builder()
-                .storyId(story.getId())
-                .userId(user.getId())
+        return Moment.builder()
+                .story(story)
+                .user(user)
                 .mediaUrl(request.getMediaUrl())
                 .audioUrl(request.getAudioUrl())
                 .visibility(story.getVisibility())
                 .caption(request.getCaption())
                 .dayIndex(dayIndex)
                 .build();
-
-        attachTags(moment, user.getId(), request.getTaggedUserIds());
-
-        momentRepository.save(moment);
-
-        return moment;
     }
 
-    private Moment buildChallengeMoment(User user, Story story, StoryMomentRequest request) {
-        ZoneId zoneId = ZoneId.of(user.getProfile().getTimezone());
+    private Moment buildChallengeMoment(User user, String timezone, Story story, StoryMomentRequest request) {
+        ZoneId zoneId = ZoneId.of(timezone);
         LocalDate today = LocalDate.now(zoneId);
 
         if (today.isBefore(story.getStartDate())) {
@@ -199,8 +170,10 @@ public class MomentService {
             throw new InvalidResourceStateEx("Challenge has already ended.");
         }
 
-        int count = momentRepository.countByStoryIdAndUserIdAndDeletedAtIsNull(story.getId(), user.getId());
-        boolean existsToday = momentRepository.existsByStoryIdAndUserIdAndDateAndDeletedAtIsNull(story.getId(), user.getId(), today);
+        ChallengeProgressProjection progress = momentRepository.getChallengeProgress(story.getId(), user.getId(), today);
+
+        int count = (int) progress.getTotal();
+        boolean existsToday = progress.getExistsToday();
 
         int dayIndex = count + 1;
         if (dayIndex > story.getDuration()) {
@@ -210,9 +183,10 @@ public class MomentService {
             throw new InvalidResourceStateEx("You already posted a moment today.");
         }
 
-        Moment moment = Moment.builder()
-                .storyId(story.getId())
-                .userId(user.getId())
+
+        return Moment.builder()
+                .story(story)
+                .user(user)
                 .mediaUrl(request.getMediaUrl())
                 .audioUrl(request.getAudioUrl())
                 .visibility(story.getVisibility())
@@ -220,56 +194,44 @@ public class MomentService {
                 .dayIndex(dayIndex)
                 .date(today)
                 .build();
-
-        attachTags(moment, user.getId(), request.getTaggedUserIds());
-
-        momentRepository.save(moment);
-
-        return moment;
     }
 
     private Moment buildAlbumMoment(User user, Story story, StoryMomentRequest request) {
-        Moment moment = Moment.builder()
-                .storyId(story.getId())
-                .userId(user.getId())
+        return Moment.builder()
+                .story(story)
+                .user(user)
                 .mediaUrl(request.getMediaUrl())
                 .audioUrl(request.getAudioUrl())
                 .visibility(story.getVisibility())
                 .caption(request.getCaption())
                 .build();
-
-        attachTags(moment, user.getId(), request.getTaggedUserIds());
-
-        momentRepository.save(moment);
-
-        return moment;
     }
 
     @Transactional
-    public void deleteMoment(UUID userId, ObjectId momentId) {
+    public void deleteMoment(UUID userId, UUID momentId) {
         Moment moment = momentRepository.findByIdAndDeletedAtIsNull(momentId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Moment not found with Id: " + momentId));
 
-        if (!moment.getUserId().equals(userId)) {
+        if (!moment.getUser().getId().equals(userId)) {
             throw new ResourcesAccessDeniedEx("You cannot delete someone else's moment");
         }
 
-        if (moment.getStoryId() != null) {
-            Story story = storyRepository.findById(moment.getStoryId())
-                    .orElseThrow(() -> new ResourcesNotFoundEx("Story not found with Id: " + moment.getStoryId()));
-            if (story.getType() == StoryType.BEFORE_AFTER) throw new ResourcesAccessDeniedEx("Cannot delete moment in BEFORE/AFTER story.");
+        if (moment.getStory() != null
+                && moment.getStory().getType() == StoryType.BEFORE_AFTER) {
+            throw new ResourcesAccessDeniedEx("Cannot delete moment in BEFORE/AFTER story.");
+
         }
 
+        // Soft delete
         moment.setDeletedAt(Instant.now());
-        momentRepository.save(moment);
     }
 
     @Transactional
-    public MomentResponse updateMomentMilestone(UUID userId, ObjectId momentId, boolean milestone) {
+    public MomentResponse updateMomentMilestone(UUID userId, UUID momentId, boolean milestone) {
         Moment moment = momentRepository.findByIdAndDeletedAtIsNull(momentId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Moment not found with Id: " + momentId));
 
-        if (!moment.getUserId().equals(userId)) {
+        if (!moment.getUser().getId().equals(userId)) {
             throw new ResourcesAccessDeniedEx("You cannot update someone else's moment");
         }
 
@@ -282,22 +244,23 @@ public class MomentService {
         }
 
         moment.setMilestone(milestone);
-        momentRepository.save(moment);
+
         return MomentResponse.builder()
+                .id(moment.getId())
                 .milestone(moment.isMilestone())
                 .build();
     }
 
     @Transactional
-    public MomentResponse updateMomentVisibility(UUID userId, ObjectId momentId, UpdateVisibilityRequest request) {
+    public MomentResponse updateMomentVisibility(UUID userId, UUID momentId, UpdateVisibilityRequest request) {
         Moment moment = momentRepository.findByIdAndDeletedAtIsNull(momentId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Moment not found with Id: " + momentId));
 
-        if (!moment.getUserId().equals(userId)) {
+        if (!moment.getUser().getId().equals(userId)) {
             throw new ResourcesAccessDeniedEx("You cannot update someone else's moment");
         }
 
-        if (moment.getStoryId() != null) {
+        if (moment.getStory() != null) {
             throw new InvalidResourceStateEx("Cannot change visibility of a moment that belongs to a story");
         }
 
@@ -306,40 +269,10 @@ public class MomentService {
         }
 
         moment.setVisibility(request.getVisibility());
-        momentRepository.save(moment);
 
         return MomentResponse.builder()
+                .id(moment.getId())
                 .visibility(moment.getVisibility())
-                .build();
-    }
-
-    @Transactional
-    public MomentResponse addTags(UUID userId, ObjectId momentId, List<UUID> taggedUserIds) {
-        Moment moment = momentRepository.findByIdAndDeletedAtIsNull(momentId)
-                .orElseThrow(() -> new ResourcesNotFoundEx("Moment not found"));
-
-        if (!moment.getUserId().equals(userId)) {
-            throw new ResourcesAccessDeniedEx("You cannot modify someone else's moment");
-        }
-
-        attachTags(moment, userId, taggedUserIds);
-
-        return MomentResponse.builder()
-                .tags(moment.getTags())
-                .build();
-    }
-
-    @Transactional
-    public MomentResponse removeTags(UUID userId, ObjectId momentId, List<UUID> tagIds) {
-        Moment moment = momentRepository.findByIdAndDeletedAtIsNull(momentId)
-                .orElseThrow(() -> new ResourcesNotFoundEx("Moment not found"));
-
-        if (!moment.getUserId().equals(userId)) {
-            throw new ResourcesAccessDeniedEx("You cannot modify someone else's moment");
-        }
-        moment.getTags().removeIf(tagIds::contains);
-        return MomentResponse.builder()
-                .tags(moment.getTags())
                 .build();
     }
 
@@ -348,14 +281,14 @@ public class MomentService {
             UUID requesterId,
             UUID userId,
             Instant cursorCreatedAt,
-            ObjectId cursorId,
+            UUID cursorId,
             String order,
             int size
     ) {
-        List<Moment> moments;
+        List<UUID> momentIds;
         boolean asc = "ASC".equalsIgnoreCase(order);
         if (requesterId.equals(userId)) {
-            moments = momentRepository.findMomentsKeyset(userId, cursorCreatedAt, cursorId, asc,size + 1);
+            momentIds = momentRepository.findMomentIdsKeyset(userId, cursorCreatedAt, cursorId, asc, size + 1);
         } else {
             UUID connectionId = ConnectionUtils.generateConnectionId(requesterId, userId);
             Connection connection = connectionRepository.findById(connectionId)
@@ -364,72 +297,59 @@ public class MomentService {
                 throw new ResourcesAccessDeniedEx("Connection not found or you do not have access");
             }
             List<Visibility> allowedVisibilities = connection.getConnectionType().getAllowedVisibilities();
-            moments = momentRepository.findVisibleMomentsKeyset(
-                    userId,
-                    requesterId,
-                    allowedVisibilities,
-                    cursorCreatedAt,
-                    cursorId,
-                    asc,
-                    size + 1
-            );
+            List<String> allowedVisibilityStrings = allowedVisibilities.stream().map(Enum::name).toList();
+            momentIds = momentRepository.findVisibleIdsKeyset(userId, allowedVisibilityStrings, cursorCreatedAt, cursorId, asc, size + 1);
         }
+
+        List<Moment> unOrderedMoments = momentIds.isEmpty()
+                ? List.of()
+                : momentRepository.findAllByIdInWithUserAndStory(momentIds);
+
+
+        Map<UUID, Moment> momentMap = unOrderedMoments.stream()
+                .collect(Collectors.toMap(Moment::getId, m -> m));
+
+        List<Moment> moments = momentIds.stream()
+                .map(momentMap::get)
+                .filter(Objects::nonNull)
+                .toList();
 
         boolean hasNext = moments.size() > size;
         if (hasNext) moments = moments.subList(0, size);
         Instant nextCursorCreatedAt = hasNext ? moments.getLast().getCreatedAt() : null;
-        ObjectId nextCursorId = hasNext ? moments.getLast().getId() : null;
+        UUID nextCursorId = hasNext ? moments.getLast().getId() : null;
 
-        List<UUID> storyIds = moments.stream()
-                .map(Moment::getStoryId)
-                .filter(Objects::nonNull)
+        Set<UUID> allUserIds = new HashSet<>();
+        Map<UUID, List<UUID>> momentIdToUserIds = new HashMap<>();
+
+        List<UUID> momentIdsForReaction = moments.stream()
+                .map(Moment::getId)
                 .toList();
 
-        List<Story> stories = storyRepository.findAllById(storyIds);
-        Map<UUID, Story> storyMap = stories.stream()
-                .collect(Collectors.toMap(Story::getId, story -> story));
+        List<MomentReactionSummary> reactions = momentReactionService.getReactionsForMoments(momentIdsForReaction);
 
-        User user = userRepository.findWithProfileById(userId)
-                .orElseThrow(() -> new ResourcesNotFoundEx("User not found with id: " + userId));
+        Map<UUID, MomentReactionSummary> reactionMap = reactions.stream()
+                .collect(Collectors.toMap(MomentReactionSummary::getMomentId, r -> r));
 
-        List<MomentResponse> responses = moments.stream()
-                .map(m -> toResponse(
-                        m,
-                        user,
-                        storyMap.get(m.getStoryId())
-                ))
-                .toList();
-
-        List<ObjectId> momentIdsForReaction = responses.stream()
-                .map(m -> new ObjectId(m.getId()))
-                .toList();
-
-        List<MomentReaction> reactions = momentReactionService.getReactionsForMoments(momentIdsForReaction);
-
-        Map<ObjectId, MomentReaction> reactionMap = reactions.stream()
-                .collect(Collectors.toMap(MomentReaction::getMomentId, r -> r));
-
-        Map<ObjectId, ReactionType> myReactionMap = new HashMap<>();
-        for (MomentReaction r : reactions) {
+        Map<UUID, ReactionType> myReactionMap = new HashMap<>();
+        for (MomentReactionSummary r : reactions) {
             ReactionType myReaction = r.getUserReactions() != null ? r.getUserReactions().get(requesterId) : null;
             if (myReaction != null) {
                 myReactionMap.put(r.getMomentId(), myReaction);
             }
-        }
 
-        Set<UUID> allUserIds = new HashSet<>();
-        Map<ObjectId, List<UUID>> momentIdToUserIds = new HashMap<>();
+            if (r.getUserReactions() == null) continue;
 
-        for (MomentReaction reaction : reactions) {
-            List<UUID> userReactionIds = reaction.getUserReactions().keySet().stream()
+            List<UUID> userReactionIds = r.getUserReactions().keySet().stream()
                     .limit(3)
                     .toList();
-            momentIdToUserIds.put(reaction.getMomentId(), userReactionIds);
+            momentIdToUserIds.put(r.getMomentId(), userReactionIds);
             allUserIds.addAll(userReactionIds);
         }
 
-
-        List<UserProfile> profiles = userProfileRepository.findAllByUserIds(new ArrayList<>(allUserIds));
+        List<UserProfile> profiles = allUserIds.isEmpty()
+                ? List.of()
+                : userProfileRepository.findAllByUserIds(new ArrayList<>(allUserIds));
 
         Map<UUID, UserPreviewResponse> userPreviewMap = profiles.stream()
                 .collect(Collectors.toMap(
@@ -441,38 +361,46 @@ public class MomentService {
                                 .build()
                 ));
 
+        List<MomentResponse> responses = moments.stream().map(
+                m -> {
+                    MomentResponse response = toResponse(
+                            m
+                    );
+                    UUID momentId = response.getId();
 
-        responses.forEach(response -> {
-            ObjectId momentId = new ObjectId(response.getId());
+                    if (response.getUser().getId().equals(requesterId)) {
+                        MomentReactionSummary doc = reactionMap.get(momentId);
+                        if (doc != null) {
+                            response.setTotalReactions(doc.getTotalReactions());
 
-            if (response.getUser().getId().equals(requesterId)) {
-                MomentReaction doc = reactionMap.get(momentId);
-                if (doc != null) {
-                    response.setTotalReactions(doc.getTotalReactions());
+                            List<UUID> userIdsForReaction = momentIdToUserIds.getOrDefault(momentId, List.of());
+                            List<ReactionPreviewDto> previews = userIdsForReaction.stream()
+                                    .map(userPreviewMap::get)
+                                    .filter(Objects::nonNull)
+                                    .map(userPreview -> ReactionPreviewDto.builder()
+                                            .user(userPreview)
+                                            .reactionType(doc.getUserReactions().get(userPreview.getId()))
+                                            .build())
+                                    .toList();
 
-                    List<UUID> userIdsForReaction = momentIdToUserIds.getOrDefault(momentId, List.of());
-                    List<ReactionPreviewDto> previews = userIdsForReaction.stream()
-                            .map(userPreviewMap::get)
-                            .filter(Objects::nonNull)
-                            .map(userPreview -> ReactionPreviewDto.builder()
-                                    .user(userPreview)
-                                    .reactionType(doc.getUserReactions().get(userPreview.getId()))
-                                    .build())
-                            .toList();
+                            response.setReactionPreviews(previews);
+                        } else {
+                            response.setTotalReactions(0);
+                            response.setReactionPreviews(Collections.emptyList());
+                        }
+                        response.setMyReaction(null);
+                    } else {
+                        response.setTotalReactions(0);
+                        response.setReactionPreviews(Collections.emptyList());
 
-                    response.setReactionPreviews(previews);
-                } else {
-                    response.setTotalReactions(0);
-                    response.setReactionPreviews(Collections.emptyList());
+                        response.setMyReaction(myReactionMap.get(momentId));
+                    }
+
+                    return response;
+
                 }
-                response.setMyReaction(null);
-            } else {
-                response.setTotalReactions(0);
-                response.setReactionPreviews(Collections.emptyList());
+        ).toList();
 
-                response.setMyReaction(myReactionMap.get(momentId));
-            }
-        });
         return MomentPageResponse.builder()
                 .moments(responses)
                 .hasNext(hasNext)
@@ -485,66 +413,114 @@ public class MomentService {
     public MomentPageResponse getHomeFeedMoments(
             UUID requesterId,
             Instant cursorCreatedAt,
-            ObjectId cursorId,
-            String order,
+            UUID cursorId,
             int size,
             UUID targetUserId
     ) {
-        boolean asc = "ASC".equalsIgnoreCase(order);
-        List<Moment> moments = targetUserId == null
-                ? momentRepository.findFeedsKeyset(
-                    requesterId, cursorCreatedAt, cursorId, asc, size + 1)
-                : momentRepository.findFeedsByTargetUserKeyset(requesterId, targetUserId, cursorCreatedAt, cursorId, asc, size + 1);
+//        Set<UUID> allFriends = connectionCacheService
+//                .getConnectedUserIdsByType(requesterId, ConnectionType.FRIEND);
+//        Set<UUID> closeFriends = connectionCacheService
+//                .getConnectedUserIdsByType(requesterId, ConnectionType.CLOSE_FRIEND);
+//        Set<UUID> partners = connectionCacheService
+//                .getConnectedUserIdsByType(requesterId, ConnectionType.SPECIAL);
+//
+//        // Visibility hierarchy:
+//
+//        Set<UUID> visibleAllFriends = new HashSet<>();
+//        visibleAllFriends.addAll(allFriends);
+//        visibleAllFriends.addAll(closeFriends);
+//        visibleAllFriends.addAll(partners);
+//
+//        Set<UUID> visibleCloseFriends = new HashSet<>();
+//        visibleCloseFriends.addAll(closeFriends);
+//        visibleCloseFriends.addAll(partners);
+//
+//        Set<UUID> visiblePartners = partners;
+
+//        List<UUID> momentIds = targetUserId == null
+//                ? momentRepository.findFeedsKeyset(
+//                requesterId,
+//                cursorCreatedAt,
+//                cursorId,
+//                size + 1
+//                visibleAllFriends.toArray(UUID[]::new),
+//                visibleCloseFriends.toArray(UUID[]::new),
+//                visiblePartners.toArray(UUID[]::new)
+//                )
+//                : momentRepository.findFeedsByTargetUser(targetUserId, cursorCreatedAt, cursorId, size + 1);
+
+        List<UUID> momentIds;
+        if (targetUserId == null) {
+            momentIds = momentRepository.findFeedsKeyset(
+                    requesterId,
+                    cursorCreatedAt,
+                    cursorId,
+                    size + 1
+            );
+        } else if (targetUserId.equals(requesterId)){
+            momentIds = momentRepository.findFeedsMe(
+                    targetUserId,
+                    cursorCreatedAt,
+                    cursorId,
+                    size + 1
+            );
+        } else {
+            UUID connectionId = ConnectionUtils.generateConnectionId(requesterId, targetUserId);
+            Connection connection = connectionRepository.findById(connectionId)
+                    .orElseThrow(() -> new ResourcesAccessDeniedEx("Connection not found or you do not have access"));
+            if (connection.getConnectionType() == ConnectionType.NO_RELATION || connection.getStatus() != ConnectionStatus.CONNECTED) {
+                throw new ResourcesAccessDeniedEx("Connection not found or you do not have access");
+            }
+            List<Visibility> allowedVisibilities = connection.getConnectionType().getAllowedVisibilities();
+            List<String> allowedVisibilityStrings = allowedVisibilities.stream().map(Enum::name).toList();
+            momentIds = momentRepository.findFeedsByTargetUser(
+                    targetUserId,
+                    allowedVisibilityStrings,
+                    cursorCreatedAt,
+                    cursorId,
+                    size + 1
+            );
+
+        }
+
+        List<Moment> unOrderedMoments = momentIds.isEmpty()
+                ? List.of()
+                : momentRepository.findAllByIdInWithUserAndStory(momentIds);
+
+        Map<UUID, Moment> momentMap = unOrderedMoments.stream()
+                .collect(Collectors.toMap(Moment::getId, m -> m));
+
+
+        List<Moment> moments = momentIds.stream()
+                .map(momentMap::get)
+                .filter(Objects::nonNull)
+                .toList();
 
         boolean hasNext = moments.size() > size;
         if (hasNext) moments = moments.subList(0, size);
         Instant nextCursorCreatedAt = hasNext ? moments.getLast().getCreatedAt() : null;
-        ObjectId nextCursorId = hasNext ? moments.getLast().getId() : null;
+        UUID nextCursorId = hasNext ? moments.getLast().getId() : null;
 
-        List<UUID> storyIds = moments.stream()
-                .map(Moment::getStoryId)
-                .filter(Objects::nonNull)
-                .toList();
+        Map<UUID, UUID> momentIdToOwnerId = moments.stream()
+                .collect(Collectors.toMap(Moment::getId, r -> r.getUser().getId()));
 
-        List<Story> stories = storyRepository.findAllById(storyIds);
-        Map<UUID, Story> storyMap = stories.stream()
-                .collect(Collectors.toMap(Story::getId, story -> story));
-
-        List<UUID> userIds = moments.stream()
-                .map(Moment::getUserId)
-                .toList();
-
-        List<User> users = userRepository.findAllWithProfileByIds(userIds);
-        Map<UUID, User> userMap = users.stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
-
-
-        List<MomentResponse> responses = moments.stream()
-                .map(m -> toResponse(
-                        m,
-                        userMap.get(m.getUserId()),
-                        storyMap.get(m.getStoryId())
-                ))
-                .toList();
-        Map<ObjectId, UUID> momentIdToOwnerId = moments.stream()
-                .collect(Collectors.toMap(Moment::getId, Moment::getUserId));
-
-        // Lấy reactions 1 lần cho tất cả moment
-        List<ObjectId> allMomentIds = moments.stream().map(Moment::getId).toList();
-
-        List<MomentReaction> allReactions = allMomentIds.isEmpty()
-                ? List.of()
-                : momentReactionService.getReactionsForMoments(allMomentIds);
-
-        Map<ObjectId, MomentReaction> reactionMap = allReactions.stream()
-                .collect(Collectors.toMap(MomentReaction::getMomentId, r -> r));
-
-        Map<ObjectId, ReactionType> myReactionMap = new HashMap<>();
         Set<UUID> allUserIds = new HashSet<>();
-        Map<ObjectId, List<UUID>> momentIdToUserIds = new HashMap<>();
+        Map<UUID, List<UUID>> momentIdToUserIds = new HashMap<>();
 
-        for (MomentReaction reaction : allReactions) {
-            ObjectId momentId = reaction.getMomentId();
+        List<UUID> momentIdsForReaction = moments.stream()
+                .map(Moment::getId)
+                .toList();
+
+        List<MomentReactionSummary> reactions = momentIdsForReaction.isEmpty()
+                ? List.of()
+                : momentReactionService.getReactionsForMoments(momentIdsForReaction);
+
+        Map<UUID, MomentReactionSummary> reactionMap = reactions.stream()
+                .collect(Collectors.toMap(MomentReactionSummary::getMomentId, r -> r));
+
+        Map<UUID, ReactionType> myReactionMap = new HashMap<>();
+        for (MomentReactionSummary reaction : reactions) {
+            UUID momentId = reaction.getMomentId();
             UUID ownerId = momentIdToOwnerId.get(momentId);
 
             if (reaction.getUserReactions() != null) {
@@ -577,38 +553,42 @@ public class MomentService {
                                 .build()
                 ));
 
-        // Gán dữ liệu cho response
-        responses.forEach(response -> {
-            ObjectId momentId = new ObjectId(response.getId());
+        List<MomentResponse> responses = moments.stream().map(
+                m -> {
+                    MomentResponse response = toResponse(
+                            m
+                    );
+                    UUID momentId = response.getId();
+                    if (response.getUser().getId().equals(requesterId)) {
+                        MomentReactionSummary doc = reactionMap.get(momentId);
+                        if (doc != null) {
+                            response.setTotalReactions(doc.getTotalReactions());
 
-            if (response.getUser().getId().equals(requesterId)) {
-                MomentReaction doc = reactionMap.get(momentId);
-                if (doc != null) {
-                    response.setTotalReactions(doc.getTotalReactions());
+                            List<UUID> userIdsForReaction = momentIdToUserIds.getOrDefault(momentId, List.of());
+                            List<ReactionPreviewDto> previews = userIdsForReaction.stream()
+                                    .map(userPreviewMap::get)
+                                    .filter(Objects::nonNull)
+                                    .map(userPreview -> ReactionPreviewDto.builder()
+                                            .user(userPreview)
+                                            .reactionType(doc.getUserReactions().get(userPreview.getId()))
+                                            .build())
+                                    .toList();
 
-                    List<UUID> userIdsForReaction = momentIdToUserIds.getOrDefault(momentId, List.of());
-                    List<ReactionPreviewDto> previews = userIdsForReaction.stream()
-                            .map(userPreviewMap::get)
-                            .filter(Objects::nonNull)
-                            .map(userPreview -> ReactionPreviewDto.builder()
-                                    .user(userPreview)
-                                    .reactionType(doc.getUserReactions().get(userPreview.getId()))
-                                    .build())
-                            .toList();
+                            response.setReactionPreviews(previews);
+                        } else {
+                            response.setTotalReactions(0);
+                            response.setReactionPreviews(Collections.emptyList());
+                        }
+                        response.setMyReaction(null);
+                    } else {
+                        response.setTotalReactions(0);
+                        response.setReactionPreviews(Collections.emptyList());
 
-                    response.setReactionPreviews(previews);
-                } else {
-                    response.setTotalReactions(0);
-                    response.setReactionPreviews(Collections.emptyList());
+                        response.setMyReaction(myReactionMap.get(momentId));
+                    }
+                    return response;
                 }
-                response.setMyReaction(null);
-            } else {
-                response.setTotalReactions(0);
-                response.setReactionPreviews(Collections.emptyList());
-
-                response.setMyReaction(myReactionMap.get(momentId));
-            }
-        });
+        ).toList();
 
         return MomentPageResponse.builder()
                 .moments(responses)
@@ -623,7 +603,7 @@ public class MomentService {
             UUID requesterId,
             UUID storyId,
             Instant cursorCreatedAt,
-            ObjectId cursorId,
+            UUID cursorId,
             String order,
             int size
     ) {
@@ -655,54 +635,49 @@ public class MomentService {
         }
 
         boolean asc = "ASC".equalsIgnoreCase(order);
+        // query momentIds theo storyId
+        List<UUID> momentIds = momentRepository.findIdsByStoryIdKeyset(storyId, cursorCreatedAt, cursorId, asc, size + 1);
 
-        List<Moment> moments = momentRepository.findByStoryIdKeySet(storyId, cursorCreatedAt, cursorId, asc, size + 1);
+        List<Moment> unOrderedMoments = momentIds.isEmpty()
+                ? List.of()
+                : momentRepository.findAllByIdInWithUserAndStory(momentIds);
+
+        Map<UUID, Moment> momentMap = unOrderedMoments.stream()
+                .collect(Collectors.toMap(Moment::getId, m -> m));
+
+
+
+        List<Moment> moments = momentIds.stream()
+                .map(momentMap::get)
+                .filter(Objects::nonNull)
+                .toList();
 
         boolean hasNext = moments.size() > size;
         if (hasNext) moments = moments.subList(0, size);
         Instant nextCursorCreatedAt = hasNext ? moments.getLast().getCreatedAt() : null;
-        ObjectId nextCursorId = hasNext ? moments.getLast().getId() : null;
+        UUID nextCursorId = hasNext ? moments.getLast().getId() : null;
 
-        List<UUID> storyIds = moments.stream()
-                .map(Moment::getStoryId)
-                .filter(Objects::nonNull)
-                .toList();
+        Map<UUID, UUID> momentIdToOwnerId = moments.stream()
+                .collect(Collectors.toMap(Moment::getId, r -> r.getUser().getId()));
 
-        List<UUID> userIds = moments.stream()
-                .map(Moment::getUserId)
-                .toList();
-
-        List<User> users = userRepository.findAllWithProfileByIds(userIds);
-        Map<UUID, User> userMap = users.stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
-
-
-        List<MomentResponse> responses = moments.stream()
-                .map(m -> toResponse(
-                        m,
-                        userMap.get(m.getUserId()),
-                        null
-                ))
-                .toList();
-
-        Map<ObjectId, UUID> momentIdToOwnerId = responses.stream()
-                .collect(Collectors.toMap(r -> new ObjectId(r.getId()), r -> r.getUser().getId()));
-
-        // Lấy reactions 1 lần cho tất cả moment
-        List<ObjectId> allMomentIds = responses.stream().map(m -> new ObjectId(m.getId())).toList();
-        List<MomentReaction> allReactions = allMomentIds.isEmpty()
-                ? List.of()
-                : momentReactionService.getReactionsForMoments(allMomentIds);
-
-        Map<ObjectId, MomentReaction> reactionMap = allReactions.stream()
-                .collect(Collectors.toMap(MomentReaction::getMomentId, r -> r));
-
-        Map<ObjectId, ReactionType> myReactionMap = new HashMap<>();
         Set<UUID> allUserIds = new HashSet<>();
-        Map<ObjectId, List<UUID>> momentIdToUserIds = new HashMap<>();
+        Map<UUID, List<UUID>> momentIdToUserIds = new HashMap<>();
 
-        for (MomentReaction reaction : allReactions) {
-            ObjectId momentId = reaction.getMomentId();
+        List<UUID> momentIdsForReaction = moments.stream()
+                .map(Moment::getId)
+                .toList();
+
+        List<MomentReactionSummary> reactions = momentIdsForReaction.isEmpty()
+                ? List.of()
+                : momentReactionService.getReactionsForMoments(momentIdsForReaction);
+
+        Map<UUID, MomentReactionSummary> reactionMap = reactions.stream()
+                .collect(Collectors.toMap(MomentReactionSummary::getMomentId, r -> r));
+
+        Map<UUID, ReactionType> myReactionMap = new HashMap<>();
+
+        for (MomentReactionSummary reaction : reactions) {
+            UUID momentId = reaction.getMomentId();
             UUID ownerId = momentIdToOwnerId.get(momentId);
 
             if (reaction.getUserReactions() != null) {
@@ -735,38 +710,42 @@ public class MomentService {
                                 .build()
                 ));
 
-        // Gán dữ liệu cho response
-        responses.forEach(response -> {
-            ObjectId momentId = new ObjectId(response.getId());
+        List<MomentResponse> responses = moments.stream().map(
+                m -> {
+                    MomentResponse response = toResponse(
+                            m
+                    );
+                    UUID momentId = response.getId();
+                    if (response.getUser().getId().equals(requesterId)) {
+                        MomentReactionSummary doc = reactionMap.get(momentId);
+                        if (doc != null) {
+                            response.setTotalReactions(doc.getTotalReactions());
 
-            if (response.getUser().getId().equals(requesterId)) {
-                MomentReaction doc = reactionMap.get(momentId);
-                if (doc != null) {
-                    response.setTotalReactions(doc.getTotalReactions());
+                            List<UUID> userIdsForReaction = momentIdToUserIds.getOrDefault(momentId, List.of());
+                            List<ReactionPreviewDto> previews = userIdsForReaction.stream()
+                                    .map(userPreviewMap::get)
+                                    .filter(Objects::nonNull)
+                                    .map(userPreview -> ReactionPreviewDto.builder()
+                                            .user(userPreview)
+                                            .reactionType(doc.getUserReactions().get(userPreview.getId()))
+                                            .build())
+                                    .toList();
 
-                    List<UUID> userIdsForReaction = momentIdToUserIds.getOrDefault(momentId, List.of());
-                    List<ReactionPreviewDto> previews = userIdsForReaction.stream()
-                            .map(userPreviewMap::get)
-                            .filter(Objects::nonNull)
-                            .map(userPreview -> ReactionPreviewDto.builder()
-                                    .user(userPreview)
-                                    .reactionType(doc.getUserReactions().get(userPreview.getId()))
-                                    .build())
-                            .toList();
+                            response.setReactionPreviews(previews);
+                        } else {
+                            response.setTotalReactions(0);
+                            response.setReactionPreviews(Collections.emptyList());
+                        }
+                        response.setMyReaction(null);
+                    } else {
+                        response.setTotalReactions(0);
+                        response.setReactionPreviews(Collections.emptyList());
 
-                    response.setReactionPreviews(previews);
-                } else {
-                    response.setTotalReactions(0);
-                    response.setReactionPreviews(Collections.emptyList());
+                        response.setMyReaction(myReactionMap.get(momentId));
+                    }
+                    return response;
                 }
-                response.setMyReaction(null);
-            } else {
-                response.setTotalReactions(0);
-                response.setReactionPreviews(Collections.emptyList());
-
-                response.setMyReaction(myReactionMap.get(momentId));
-            }
-        });
+        ).toList();
 
         return MomentPageResponse.builder()
                 .moments(responses)
@@ -777,25 +756,28 @@ public class MomentService {
     }
 
     @Transactional
-    public MomentReactionDto toggleReaction(UUID userId, ObjectId momentId, ReactionType reactionType) {
+    public MomentReactionDto toggleReaction(UUID userId, UUID momentId, ReactionType reactionType) {
         Moment moment = momentRepository.findByIdAndDeletedAtIsNull(momentId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Moment not found with Id: " + momentId));
+        log.info("moment found");
 
-        if (moment.getUserId().equals(userId)) {
+        if (moment.getUser().getId().equals(userId)) {
             throw new InvalidResourceStateEx("You cannot react to your own moment");
         }
 
-        UUID connectionId = ConnectionUtils.generateConnectionId(moment.getUserId(), userId);
+        UUID connectionId = ConnectionUtils.generateConnectionId(moment.getUser().getId(), userId);
         Connection connection = connectionRepository.findById(connectionId)
                 .orElseThrow(() -> new ResourcesAccessDeniedEx("Access denied: no connection found"));
         if (connection.getConnectionType() == ConnectionType.NO_RELATION || connection.getStatus() != ConnectionStatus.CONNECTED) {
             throw new ResourcesAccessDeniedEx("Access denied: no connection found");
         }
 
-        MomentReaction updated = momentReactionService.toggleReaction(userId, momentId, reactionType);
+        log.info("connection found");
 
-        ReactionType userReaction = updated.getUserReactions().get(userId);
+        ReactionType userReaction = momentReactionService.toggleReaction(userId, momentId, reactionType);
 
+
+        log.info("reacted");
         return MomentReactionDto.builder()
                 .momentId(momentId)
                 .userReaction(userReaction)
@@ -803,15 +785,15 @@ public class MomentService {
     }
 
     @Transactional(readOnly = true)
-    public MomentReactionResponse getMomentReaction(UUID userId, ObjectId momentId) {
+    public MomentReactionResponse getMomentReaction(UUID userId, UUID momentId) {
         Moment moment = momentRepository.findByIdAndDeletedAtIsNull(momentId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("Moment not found with Id: " + momentId));
 
-        if (!moment.getUserId().equals(userId)) {
+        if (!moment.getUser().getId().equals(userId)) {
             throw new ResourcesAccessDeniedEx("You do not have access to this moment");
         }
 
-        MomentReaction reactions = momentReactionService.getMomentReactions(momentId);
+        MomentReactionSummary reactions = momentReactionService.getMomentReactions(momentId);
         if (reactions == null || reactions.getUserReactions() == null || reactions.getUserReactions().isEmpty()) {
             return MomentReactionResponse.builder()
                     .reactions(List.of())
@@ -852,24 +834,13 @@ public class MomentService {
     }
 
 
+    private MomentResponse toResponse(Moment moment) {
 
-    private MomentResponse toResponse(Moment moment, User user, Story story) {
-        MomentStoryDto storyDto = story != null
-                ? MomentStoryDto.builder()
-                .id(story.getId())
-                .type(story.getType())
-                .scope(story.getScope())
-                .title(story.getTitle())
-                .duration(story.getDuration())
-                .build()
-                : null;
-
-        UserPreviewResponse userDto = userMapper.toProfilePreview(user);
 
         return MomentResponse.builder()
-                .id(moment.getId().toHexString())
-                .story(storyDto)
-                .user(userDto)
+                .id(moment.getId())
+                .story(moment.getStory() != null ? toStoryPreviewDto(moment.getStory()) : null)
+                .user(userMapper.toProfilePreview(moment.getUser()))
                 .mediaUrl(moment.getMediaUrl())
                 .audioUrl(moment.getAudioUrl())
                 .visibility(moment.getVisibility())
@@ -878,8 +849,17 @@ public class MomentService {
                 .dayIndex(moment.getDayIndex())
                 .createdAt(moment.getCreatedAt())
                 .lastModifiedAt(moment.getLastModifiedAt())
-                .tags(Collections.emptyList())
                 .milestone(moment.isMilestone())
+                .build();
+    }
+
+    private StoryPreviewDto toStoryPreviewDto(Story story) {
+        return StoryPreviewDto.builder()
+                .id(story.getId())
+                .type(story.getType())
+                .title(story.getTitle())
+                .scope(story.getScope())
+                .duration(story.getDuration())
                 .build();
     }
 }

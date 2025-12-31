@@ -33,6 +33,73 @@ public interface ConnectionRepository extends JpaRepository<Connection, UUID> {
             value = """
                 SELECT
                     CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM connections c
+                            WHERE c.status = :status
+                              AND (
+                                    (c.user1_id = :userA AND c.user2_id = :userB)
+                                 OR (c.user1_id = :userB AND c.user2_id = :userA)
+                              )
+                        )
+                        THEN TRUE
+                        ELSE FALSE
+                    END
+                """,
+            nativeQuery = true
+    )
+    boolean existsDirectConnection(
+            @Param("userA") UUID userA,
+            @Param("userB") UUID userB,
+            @Param("status") String status
+    );
+
+    @Query(
+            value = """
+                SELECT
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM (
+                                SELECT
+                                    CASE
+                                        WHEN user1_id = :userA THEN user2_id
+                                        ELSE user1_id
+                                    END AS mutual_user
+                                FROM connections
+                                WHERE :userA IN (user1_id, user2_id)
+                                  AND status = :status
+                            ) a
+                            JOIN (
+                                SELECT
+                                    CASE
+                                        WHEN user1_id = :userB THEN user2_id
+                                        ELSE user1_id
+                                    END AS mutual_user
+                                FROM connections
+                                WHERE :userB IN (user1_id, user2_id)
+                                  AND status = :status
+                            ) b
+                              ON a.mutual_user = b.mutual_user
+                             AND a.mutual_user NOT IN (:userA, :userB)
+                        )
+                        THEN TRUE
+                        ELSE FALSE
+                    END
+                """,
+            nativeQuery = true
+    )
+    boolean existsMutualConnection(
+            @Param("userA") UUID userA,
+            @Param("userB") UUID userB,
+            @Param("status") String status
+    );
+
+
+    @Query(
+            value = """
+                SELECT
+                    CASE
                         WHEN
                             EXISTS (
                                 SELECT 1
@@ -84,6 +151,18 @@ public interface ConnectionRepository extends JpaRepository<Connection, UUID> {
     boolean existsAnyConnectionByIds(@Param("connectionIds") List<UUID> connectionIds,
                                         @Param("statuses") Collection<String> statuses);
 
+    @EntityGraph(attributePaths = {"user1", "user1.profile", "user2", "user2.profile"})
+    @Query("SELECT c FROM Connection c WHERE c.id IN :ids ORDER BY c.createdAt ASC")
+    List<Connection> findAllWithUsersAndProfiles(@Param("ids") List<UUID> ids);
+
+    @EntityGraph(attributePaths = {"user1", "user2"})
+    @Query("SELECT c FROM Connection c WHERE c.id IN :ids ORDER BY c.createdAt ASC")
+    List<Connection> findAllWithUsers(@Param("ids") List<UUID> ids);
+
+    @EntityGraph(attributePaths = {"user1", "user1.profile", "user2", "user2.profile"})
+    @Query("SELECT c FROM Connection c WHERE c.id = :id")
+    Optional<Connection> findByIdWithUsersAndProfiles(@Param("id") UUID id);
+
     @Query(value = """
             SELECT id
             FROM connections c
@@ -116,18 +195,6 @@ public interface ConnectionRepository extends JpaRepository<Connection, UUID> {
             @Param("asc") boolean asc,
             @Param("limit") int limit);
 
-    @EntityGraph(attributePaths = {"user1", "user1.profile", "user2", "user2.profile"})
-    @Query("SELECT c FROM Connection c WHERE c.id IN :ids ORDER BY c.createdAt ASC")
-    List<Connection> findAllWithUsersAndProfiles(@Param("ids") List<UUID> ids);
-
-    @EntityGraph(attributePaths = {"user1", "user2"})
-    @Query("SELECT c FROM Connection c WHERE c.id IN :ids ORDER BY c.createdAt ASC")
-    List<Connection> findAllWithUsers(@Param("ids") List<UUID> ids);
-
-    @EntityGraph(attributePaths = {"user1", "user1.profile", "user2", "user2.profile"})
-    @Query("SELECT c FROM Connection c WHERE c.id = :id")
-    Optional<Connection> findByIdWithUsersAndProfiles(@Param("id") UUID id);
-
     @Query("SELECT c.connectionType FROM Connection c WHERE c.id = :id")
     Optional<ConnectionType> findTypeById(@Param("id") UUID id);
 
@@ -156,6 +223,40 @@ public interface ConnectionRepository extends JpaRepository<Connection, UUID> {
     List<ConnectedUserProjection> findConnectedUsersWithTypeByCreatorAndStatus(
             @Param("creatorId") UUID creatorId,
             @Param("status") ConnectionStatus status
+    );
+
+    @Query("""
+        select c from Connection c
+        where (c.user1.id = :userId or c.user2.id = :userId)
+          and c.status = :status
+    """)
+    List<Connection> findAllByUserAndStatus(
+            UUID userId,
+            ConnectionStatus status
+    );
+
+    @Query("""
+        select c from Connection c
+        where (c.user1.id = :userId or c.user2.id = :userId)
+          and c.connectionType = :type
+          and c.status = :status
+    """)
+    List<Connection> findAllByUserAndTypeAndStatus(
+            UUID userId,
+            ConnectionType type,
+            ConnectionStatus status
+    );
+
+    @Query("""
+            select c from Connection c
+            where (c.user1.id = :userId or c.user2.id = :userId)
+              and c.status = :status
+              and c.connectionType in :types
+        """)
+    List<Connection> findAllByUserAndStatusAndTypes(
+            UUID userId,
+            ConnectionStatus status,
+            Set<ConnectionType> types
     );
 
 }

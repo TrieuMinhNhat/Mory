@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserProfileDto {
-
     private String displayName;
     private String avatarUrl;
     private boolean onboarded;

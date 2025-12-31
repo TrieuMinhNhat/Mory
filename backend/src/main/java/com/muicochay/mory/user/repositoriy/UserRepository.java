@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
               )
         """)
     List<User> findUnverifiedEmailPasswordOnlyUsers(@Param("cutoff") Instant cutoff,
-            @Param("emailPassword") AuthProvider emailPassword);
+                                                    @Param("emailPassword") AuthProvider emailPassword);
 
     @EntityGraph(attributePaths = {"profile"})
     @Query("""
@@ -61,6 +62,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("userId2") UUID userId2,
             @Param("status") ConnectionStatus status
     );
+
 
     @EntityGraph(attributePaths = {"profile"})
     @Query("""
@@ -108,6 +110,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("status") ConnectionStatus status
     );
 
+
     @Query(value = """
         SELECT u.id
         FROM users u
@@ -150,7 +153,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @EntityGraph(attributePaths = {"profile"})
     @Query("SELECT u FROM User u WHERE u.id IN :ids")
-    List<User> findAllWithProfileByIds(@Param("ids") List<UUID> ids);
+    List<User> findAllWithProfileByIds(@Param("ids") Collection<UUID> ids);
 
     @Query("""
             SELECT
@@ -169,5 +172,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("connectionStatus") ConnectionStatus status,
             @Param("authProvider") AuthProvider authProvider
     );
+
+    @Query("SELECT u.id FROM User u WHERE u.id IN :ids")
+    List<UUID> findExistingUserIdsByIds(@Param("ids") Collection<UUID> ids);
+
 
 }

@@ -1,16 +1,17 @@
 package com.muicochay.mory.conversation.controller;
 
 import com.muicochay.mory.auth.model.AuthUserPrincipal;
+import com.muicochay.mory.conversation.dto.ChatMessagePageResponse;
 import com.muicochay.mory.conversation.dto.ConversationPageResponse;
+import com.muicochay.mory.conversation.dto.ConversationResponse;
+import com.muicochay.mory.conversation.enums.MessageLoadDirection;
+import com.muicochay.mory.conversation.service.ChatMessageService;
 import com.muicochay.mory.conversation.service.ConversationService;
 import com.muicochay.mory.shared.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,22 +21,57 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ConversationController {
     private final ConversationService conversationService;
+    private final ChatMessageService messageService;
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<ConversationPageResponse>> getUserConversation(
+    public ResponseEntity<ApiResponse<ConversationPageResponse>> getUserConversations(
             @AuthenticationPrincipal AuthUserPrincipal principal,
             @RequestParam(name = "cursorLastSentAt", required = false) Instant cursorLastSentAt,
             @RequestParam(name = "cursorId", required = false) UUID cursorId,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(name = "order", defaultValue = "DESC") String order
+            @RequestParam(defaultValue = "20") int size
     ) {
         ConversationPageResponse response = conversationService.getConversationsByUser(
                 principal.getId(),
                 cursorLastSentAt,
                 cursorId,
-                order,
                 size
         );
         return ResponseEntity.ok(ApiResponse.success(response, "Fetch user conversations successfully"));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ConversationResponse>> getConversation(
+            @AuthenticationPrincipal AuthUserPrincipal principal,
+            @PathVariable(name = "id") UUID conversationId
+    ) {
+        ConversationResponse response = conversationService.getConversation(
+                conversationId,
+                principal.getId()
+        );
+        return ResponseEntity.ok(ApiResponse.success(response, "Fetch conversation successfully"));
+    }
+
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<ApiResponse<ChatMessagePageResponse>> getMessages(
+            @AuthenticationPrincipal AuthUserPrincipal principal,
+            @PathVariable("id") UUID conversationId,
+            @RequestParam(name = "cursorCreatedAt", required = false) Instant cursorCreatedAt,
+            @RequestParam(name = "cursorId", required = false) UUID cursorId,
+            @RequestParam(defaultValue = "OLDER") MessageLoadDirection direction,
+            @RequestParam(required = false) UUID messageId,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        ChatMessagePageResponse response =
+                messageService.getChatMessagesByConversationId(
+                        conversationId,
+                        principal.getId(),
+                        cursorCreatedAt,
+                        cursorId,
+                        messageId,
+                        direction,
+                        size
+                );
+
+        return ResponseEntity.ok(ApiResponse.success(response, "Fetch messages successfully"));
     }
 }

@@ -1,15 +1,24 @@
 package com.muicochay.mory.shared.exception;
 
 import com.muicochay.mory.shared.dto.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ApiResponse<Object>> handleBaseEx(BaseException ex) {
+
+        log.warn(
+                "[BUSINESS_EXCEPTION] status={}, message={}",
+                ex.getStatus(),
+                ex.getMessage()
+        );
+
         ApiResponse<Object> response = ex.getData() == null
                 ? ApiResponse.fail(ex.getMessage())
                 : ApiResponse.failWithData(ex.getData(), ex.getMessage());
@@ -19,6 +28,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleAllOther(Exception ex) {
+        log.error("[UNEXPECTED_EXCEPTION]", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail("Internal Server Error"));

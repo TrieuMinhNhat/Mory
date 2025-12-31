@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class EmailOtpSignInRequest {
-
     private String email;
     private String inputOtp;
 }

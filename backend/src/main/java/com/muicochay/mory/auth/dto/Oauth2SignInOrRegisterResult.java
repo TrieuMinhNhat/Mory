@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Oauth2SignInOrRegisterResult {
-
     private BlockInfoResponse blockInfoResponse;
     private TokenPair tokenPair;
 }

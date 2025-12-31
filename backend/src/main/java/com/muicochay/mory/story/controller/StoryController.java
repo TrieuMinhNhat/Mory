@@ -5,6 +5,7 @@ import com.muicochay.mory.shared.dto.ApiResponse;
 import com.muicochay.mory.shared.ratelimit.RateLimit;
 import com.muicochay.mory.shared.ratelimit.RateLimitKeyStrategy;
 import com.muicochay.mory.story.dto.*;
+import com.muicochay.mory.story.enums.StoryMomentHandling;
 import com.muicochay.mory.story.enums.StoryType;
 import com.muicochay.mory.story.service.StoryService;
 import lombok.RequiredArgsConstructor;
@@ -66,13 +67,9 @@ public class StoryController {
             @RequestParam(name = "cursorCreatedAt", required = false) Instant cursorCreatedAt,
             @RequestParam(name = "cursorId", required = false) UUID cursorId,
             @RequestParam(name = "order", defaultValue = "DESC") String order,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestHeader(value = "X-User-Timezone", required = false) String timezoneHeader
+            @RequestParam(defaultValue = "20") int size
     ) {
-        String timezone = (timezoneHeader != null && !timezoneHeader.isBlank())
-                ? timezoneHeader
-                : "Asia/Ho_Chi_Minh";
-        StoryPageResponse response = storyService.getStoriesByUser(principal.getId(), userId, type, cursorCreatedAt, cursorId, order, size, timezone);
+        StoryPageResponse response = storyService.getStoriesByUser(principal.getId(), userId, type, cursorCreatedAt, cursorId, order, size);
 
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Fetched stories successfully")
@@ -91,14 +88,12 @@ public class StoryController {
             @RequestParam(required = false) StoryType type,
             @RequestParam(name = "cursorCreatedAt", required = false) Instant cursorCreatedAt,
             @RequestParam(name = "cursorId", required = false) UUID cursorId,
-            @RequestParam(name = "order", defaultValue = "DESC") String order,
             @RequestParam(defaultValue = "20") int size
     ) {
         StoryPageResponse response = storyService.getAvailableStoriesForAddMoment(
                 principal.getId(),
                 cursorCreatedAt,
                 cursorId,
-                order,
                 size,
                 type
         );
@@ -158,7 +153,6 @@ public class StoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Members removed successfully"));
     }
 
-
     @PostMapping("/{storyId}/leave")
     @RateLimit(
             prefix = "story::leave:",
@@ -175,7 +169,6 @@ public class StoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "You left the story"));
     }
 
-
     @DeleteMapping("/{storyId}")
     @RateLimit(
             prefix = "story::delete:",
@@ -183,27 +176,22 @@ public class StoryController {
             windowSeconds = 60,
             strategy = RateLimitKeyStrategy.PER_USER_ID
     )
-    public ResponseEntity<ApiResponse<DeletedStoryResponse>> deleteStory(
+    public ResponseEntity<ApiResponse<DeleteStoryResponse>> deleteStory(
             @AuthenticationPrincipal AuthUserPrincipal principal,
-            @PathVariable UUID storyId
+            @PathVariable UUID storyId,
+            @RequestParam(
+                    value = "momentHandling",
+                    defaultValue = "DELETE"
+            ) StoryMomentHandling momentHandling
     ) {
-        DeletedStoryResponse response = storyService.deleteStory(principal.getId(), storyId);
-        return ResponseEntity.ok(ApiResponse.success(response, "Story deleted"));
-    }
+        DeleteStoryResponse response = storyService.deleteStory(
+                principal.getId(),
+                storyId,
+                momentHandling
+        );
 
-
-    @PostMapping("/{storyId}/dissolve")
-    @RateLimit(
-            prefix = "story::dissolve:",
-            limit = 20,
-            windowSeconds = 60,
-            strategy = RateLimitKeyStrategy.PER_USER_ID
-    )
-    public ResponseEntity<ApiResponse<DissolvedStoryResponse>> dissolveStory(
-            @AuthenticationPrincipal AuthUserPrincipal principal,
-            @PathVariable UUID storyId
-    ) {
-        DissolvedStoryResponse response = storyService.dissolveStory(principal.getId(), storyId);
-        return ResponseEntity.ok(ApiResponse.success(response, "Story dissolved"));
+        return ResponseEntity.ok(
+                ApiResponse.success(response, "Story deleted")
+        );
     }
 }

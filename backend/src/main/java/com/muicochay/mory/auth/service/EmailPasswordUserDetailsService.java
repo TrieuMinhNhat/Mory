@@ -10,28 +10,23 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of {@link UserDetailsService} used for authenticating users
- * via email and password.
+ * Implementation of {@link UserDetailsService} used for authenticating users via email and password.
  * <p>
- * This service loads user-specific data during Spring Security's authentication
- * process. It retrieves a {@link User} entity from the
- * {@link AuthUserRepository} using the provided email, and wraps it in a
- * {@link EmailPasswordUserDetails} for use by Spring Security.
+ * This service loads user-specific data during Spring Security's authentication process.
+ * It retrieves a {@link User} entity from the {@link AuthUserRepository} using the provided email,
+ * and wraps it in a {@link EmailPasswordUserDetails} for use by Spring Security.
  * </p>
  */
 @Service
 @RequiredArgsConstructor
 public class EmailPasswordUserDetailsService implements UserDetailsService {
-
     private final AuthUserRepository authUserRepository;
 
     /**
-     * Loads the user by their email address and wraps it in a custom
-     * {@link EmailPasswordUserDetails}.
+     * Loads the user by their email address and wraps it in a custom {@link EmailPasswordUserDetails}.
      *
      * @param username the email address used for authentication
-     * @return a {@link EmailPasswordUserDetails} representing the authenticated
-     * user
+     * @return a {@link EmailPasswordUserDetails} representing the authenticated user
      * @throws ResourcesNotFoundEx if no user is found with the given email
      */
     @Override

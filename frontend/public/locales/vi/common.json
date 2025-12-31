@@ -3,10 +3,69 @@
 
   "landing_tagline": "Kết nối thật.\nKỷ niệm thật.",
   "landing_cta": "Bắt đầu hành trình của bạn.",
-  "landing_prompt": "Nhập email của bạn để tạo dựng những kết nối ý nghĩa và chia sẻ những khoảnh khắc đáng nhớ cùng nhau.",
+  "landing_prompt": "Nhập email của bạn để tạo dựng những kết nối ý nghĩa và cùng nhau lưu giữ những khoảnh khắc đáng nhớ.",
 
   "get_started": "Bắt đầu",
   "button": {
     "reload": "Tải lại"
+  },
+
+  "landing": {
+    "hero_title": "Lưu giữ khoảnh khắc.\nXây dựng câu chuyện.\nGắn kết lâu dài.",
+    "hero_subtitle": "Mory là nền tảng mạng xã hội được thiết kế để giúp người dùng ghi lại những khoảnh khắc cá nhân, sắp xếp chúng thành các câu chuyện có ý nghĩa và duy trì những kết nối bền vững.",
+    "hero_prompt": "Bắt đầu không gian cá nhân của bạn ngay hôm nay",
+
+    "features": {
+      "moments_title": "Ghi lại khoảnh khắc",
+      "moments_desc": "Lưu giữ những khoảnh khắc thường ngày như các dấu ấn cá nhân trong dòng thời gian của bạn.",
+      "stories_title": "Xây dựng câu chuyện",
+      "stories_desc": "Tổ chức các khoảnh khắc thành những câu chuyện cá nhân hoặc câu chuyện chia sẻ đầy ý nghĩa.",
+      "connections_title": "Kết nối bạn bè",
+      "connections_desc": "Xây dựng và duy trì kết nối với những người bạn quan tâm.",
+      "chat_title": "Trò chuyện & cộng tác",
+      "chat_desc": "Trò chuyện với bạn bè và cùng nhau đóng góp khoảnh khắc vào các câu chuyện chung."
+    },
+
+    "how_title": "Mory hoạt động như thế nào",
+    "how": {
+      "connect_title": "Kết nối với mọi người",
+      "connect_desc": "Tìm kiếm và kết nối với bạn bè để bắt đầu chia sẻ khoảnh khắc và xây dựng câu chuyện cùng nhau.",
+
+      "capture_title": "Ghi lại khoảnh khắc",
+      "capture_desc": "Nhanh chóng lưu lại những suy nghĩ và khoảnh khắc thường ngày dưới dạng các mục cá nhân.",
+
+      "story_title": "Tạo câu chuyện",
+      "story_desc": "Sắp xếp các khoảnh khắc thành những câu chuyện cá nhân hoặc câu chuyện chung để lưu giữ kỷ niệm.",
+
+      "collab_title": "Cùng nhau tạo dựng",
+      "collab_desc": "Mời bạn bè cùng đóng góp khoảnh khắc vào các câu chuyện chung, tạo nên những kỷ niệm tập thể."
+    },
+
+    "cta_title": "Tạo không gian kỷ niệm chung của bạn",
+    "cta_desc": "Mory giúp bạn ghi lại khoảnh khắc, xây dựng câu chuyện và tạo nên những kỷ niệm ý nghĩa cùng những người bạn trân trọng.",
+    "cta_primary": "Bắt đầu miễn phí",
+    "cta_secondary": "Đăng nhập",
+    "cta_note": "Không cần thẻ tín dụng. Hãy bắt đầu xây dựng câu chuyện của bạn ngay hôm nay.",
+
+    "preferences_title": "Cá nhân hóa trải nghiệm",
+
+    "language_title": "Ngôn ngữ",
+    "language_desc": "Chọn ngôn ngữ bạn cảm thấy thoải mái nhất.",
+
+    "theme_title": "Giao diện",
+    "theme_desc": "Chọn giao diện phù hợp với sở thích và môi trường sử dụng của bạn.",
+
+    "theme_light": "Sáng",
+    "theme_dark": "Tối",
+    "theme_system": "Theo hệ thống"
+  },
+
+  "nav": {
+    "features": "Tính năng",
+    "how_it_works": "Cách hoạt động"
+  },
+
+  "auth": {
+    "sign_in": "Đăng nhập"
   }
 }

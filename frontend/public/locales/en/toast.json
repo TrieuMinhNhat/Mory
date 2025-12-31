@@ -23,6 +23,12 @@
     "same_password": "The new password must not be the same as the current password!",
     "error": "Failed to update password!"
   },
+  "change_password": {
+    "success": "Password updated successful!",
+    "same_password": "The new password must not be the same as the current password!",
+    "current_password_not_match": "",
+    "error": "Failed to update password!"
+  },
   "complete_information": {
     "success": "Update Information successful!",
     "error": "Failed to update Information!"
@@ -177,6 +183,10 @@
         "error": "Failed to download image",
         "no_image": "No image to download"
       }
+    },
+    "reply_moment": {
+      "success": "Message sent",
+      "error": "Fail to send message"
     }
   },
   "copied_to_clipboard": "Copied to clipboard!",
