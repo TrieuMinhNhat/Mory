@@ -70,8 +70,8 @@ public class WebSecurityConfig {
                                 HttpMethod.PUT,
                                 "/api/auth/onboarding/complete"
                         ).authenticated()
-                        .requestMatchers("/oauth2/success").permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority(String.valueOf(RoleCode.ADMIN))
+                        .requestMatchers("/api/ws/**").permitAll()
                         .anyRequest().access(emailVerifiedAuthorizationManager)
                 )
                 .oauth2Login(oauth2
@@ -117,8 +117,7 @@ public class WebSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of(
-                appProperties.getFrontendUrl(),
-                "http://192.168.1.167:3000"
+                appProperties.getFrontendUrl()
         ));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfiguration.setAllowedHeaders(List.of(

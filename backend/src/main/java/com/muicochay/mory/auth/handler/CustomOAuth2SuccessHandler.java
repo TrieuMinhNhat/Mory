@@ -50,7 +50,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         if (oauth2SignInOrRegisterResult.getBlockInfoResponse() != null) {
             BlockInfoResponse blockInfoResponse = oauth2SignInOrRegisterResult.getBlockInfoResponse();
-            String redirectUrl = appProperties.getFrontendUrl()
+            String redirectUrl = appProperties.getOauth2RedirectBaseUrl()
                     + "/oauth2-blocked.html"
                     + buildBlockedQueryParams(blockInfoResponse);
 
@@ -69,7 +69,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         response.addHeader(HttpHeaders.SET_COOKIE, cookiePair.getRefreshCookie().toString());
         response.addHeader(HttpHeaders.SET_COOKIE, cookiePair.getAccessCookie().toString());
 
-        response.sendRedirect(appProperties.getFrontendUrl() + "/oauth2-success.html");
+        response.sendRedirect(appProperties.getOauth2RedirectBaseUrl() + "/oauth2-success.html");
     }
 
     private String buildBlockedQueryParams(BlockInfoResponse blockInfoResponse) {

@@ -38,12 +38,14 @@ public class User extends BaseAuditEntity {
     private Instant passwordVerifiedAt;
 
     public boolean isPasswordVerified() {
+
         return passwordVerifiedAt != null;
     }
 
     private Instant deletedAt;
 
     public boolean isDeleted() {
+
         return deletedAt != null;
     }
 
@@ -52,5 +54,6 @@ public class User extends BaseAuditEntity {
     private RoleCode roleCode;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+
     private UserProfile profile;
 }

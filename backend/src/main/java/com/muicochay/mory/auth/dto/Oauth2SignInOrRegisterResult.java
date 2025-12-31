@@ -1,7 +1,6 @@
 package com.muicochay.mory.auth.dto;
 
 import com.muicochay.mory.shared.dto.BlockInfoResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -8,5 +8,6 @@ import lombok.*;
 @Getter
 @Setter
 public class SignOutRequest {
+
     private String refreshToken;
 }

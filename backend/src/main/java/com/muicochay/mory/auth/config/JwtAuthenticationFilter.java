@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String path = Objects.requireNonNull(request).getRequestURI();
             HttpMethod method = HttpMethod.valueOf(request.getMethod());
-            if (isWhitelisted(path) && method == HttpMethod.POST) {
+            if (isWhitelisted(path)) {
                 if (filterChain != null) {
                     filterChain.doFilter(request, response);
                 }
@@ -83,8 +83,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     log.info("Token's info is missing");
                 }
-            } else {
-                log.info("Token is missing");
             }
             if (filterChain != null) {
                 filterChain.doFilter(request, response);

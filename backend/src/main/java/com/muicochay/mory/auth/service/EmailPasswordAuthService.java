@@ -1,35 +1,17 @@
 package com.muicochay.mory.auth.service;
 
-import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.muicochay.mory.auth.config.JwtTokenHelper;
 import com.muicochay.mory.auth.dto.AuthUserResponse;
 import com.muicochay.mory.auth.dto.CookiePair;
-import com.muicochay.mory.auth.dto.TokenPair;
 import com.muicochay.mory.auth.dto.signin.SignInResponse;
 import com.muicochay.mory.auth.dto.signup.RegistrationRequest;
+import com.muicochay.mory.auth.dto.TokenPair;
 import com.muicochay.mory.auth.dto.signup.VerifyEmailResponse;
 import com.muicochay.mory.auth.enums.AuthProvider;
-import com.muicochay.mory.auth.helper.AuthHelper;
 import com.muicochay.mory.auth.helper.CookieBuilder;
 import com.muicochay.mory.auth.model.EmailPasswordUserDetails;
+import com.muicochay.mory.auth.helper.AuthHelper;
 import com.muicochay.mory.auth.repository.AuthUserRepository;
-import com.muicochay.mory.cache.constants.CacheNames;
 import com.muicochay.mory.otp.dto.EmailJob;
 import com.muicochay.mory.otp.enums.EmailTemplateType;
 import com.muicochay.mory.otp.enums.OtpType;
@@ -47,22 +29,15 @@ import com.muicochay.mory.user.entity.User;
 import com.muicochay.mory.user.entity.UserProfile;
 import com.muicochay.mory.user.enums.RoleCode;
 import com.muicochay.mory.user.mapper.UserProfileMapper;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Service responsible for handling authentication and user registration using
- * email and password as credentials.
- * <p>
- * Includes functionalities such as:
- * <ul>
- * <li>User sign-in with token generation</li>
- * <li>Account creation with password hashing</li>
- * <li>Email OTP verification</li>
- * <li>Sending verification OTP via email</li>
- * </ul>
- * <p>
- */
+import java.time.Instant;
+import java.util.*;
+
 @Service
 @RequiredArgsConstructor
 public class EmailPasswordAuthService {
@@ -71,11 +46,11 @@ public class EmailPasswordAuthService {
     private final AuthUserRepository authUserRepository;
     private final OtpService otpService;
     private final UserProfileMapper userProfileMapper;
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenHelper jwtTokenHelper;
     private final CookieBuilder cookieBuilder;
 
     private final RefreshTokenRedisService refreshTokenRedisService;
+    private final EmailPasswordUserDetailsService emailPasswordUserDetailsService;
 
     private final EmailQueueService emailQueueService;
     private final BlockedUserService blockedUserService;
@@ -88,50 +63,49 @@ public class EmailPasswordAuthService {
             String userAgent
     ) {
         try {
-            Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(
-                    username, password
-            );
-            Authentication authenticationResponse = this.authenticationManager.authenticate(authentication);
-            if (!authenticationResponse.isAuthenticated()) {
-                throw new EmailPasswordLoginEx("Wrong password");
-            }
-            EmailPasswordUserDetails principal = (EmailPasswordUserDetails) authenticationResponse.getPrincipal();
+            EmailPasswordUserDetails user
+                    = (EmailPasswordUserDetails) emailPasswordUserDetailsService
+                            .loadUserByUsername(username);
 
-            boolean blocked = blockedUserService.isBlocked(principal.getId());
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                throw new EmailPasswordLoginEx("Wrong email or password");
+            }
+
+            boolean blocked = blockedUserService.isBlocked(user.getId());
             if (blocked) {
-                BlockInfoResponse blockInfoResponse = blockedUserService.getBlockInfo(principal.getId());
+                BlockInfoResponse blockInfoResponse = blockedUserService.getBlockInfo(user.getId());
                 throw new BlockedAccountEx("Account blocked", blockInfoResponse);
             }
 
-            if (!principal.getProviders().contains(AuthProvider.EMAIL_PASSWORD)) {
-                throw new EmailPasswordLoginEx("Wrong password");
+            if (!user.getProviders().contains(AuthProvider.EMAIL_PASSWORD)) {
+                throw new EmailPasswordLoginEx("Wrong email or password");
             }
             TokenPair tokenPair = jwtTokenHelper.generateTokenPair(
-                    principal.getId(),
-                    principal.isPasswordVerified(),
-                    AuthHelper.mapAuthoritiesToRoleCode(principal.getAuthorities()),
+                    user.getId(),
+                    user.isPasswordVerified(),
+                    AuthHelper.mapAuthoritiesToRoleCode(user.getAuthorities()),
                     AuthProvider.EMAIL_PASSWORD);
 
             refreshTokenRedisService.saveSession(
-                    principal.getId(),
+                    user.getId(),
                     tokenPair.getRefreshTokenId(),
                     ip,
                     userAgent
             );
 
             AuthUserResponse authUserResponse = AuthUserResponse.builder()
-                    .id(principal.getId())
-                    .email(principal.getEmail())
-                    .isVerified(principal.isPasswordVerified())
-                    .roleCode(principal.getRoleCode())
-                    .profile(userProfileMapper.toDto(principal.getProfile()))
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .isVerified(user.isPasswordVerified())
+                    .roleCode(user.getRoleCode())
+                    .profile(userProfileMapper.toDto(user.getProfile()))
                     .build();
             return SignInResponse.builder()
                     .accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken())
                     .user(authUserResponse)
                     .build();
-        } catch (AuthenticationException | IllegalArgumentException e) {
+        } catch (ResourcesNotFoundEx | IllegalArgumentException e) {
             throw new EmailPasswordLoginEx("Wrong email or password");
         }
     }
@@ -160,7 +134,6 @@ public class EmailPasswordAuthService {
     }
 
     @Transactional
-    @CacheEvict(value = CacheNames.AUTH_USER_CACHE, key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
     public VerifyEmailResponse verifyEmail(UUID userId, String inputOtp) {
         otpService.verifyOtp(
                 OtpType.REGISTRATION,

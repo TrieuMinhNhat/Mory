@@ -1,17 +1,8 @@
 package com.muicochay.mory.auth.service;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.muicochay.mory.auth.config.JwtTokenHelper;
 import com.muicochay.mory.auth.dto.AuthUserResponse;
+import com.muicochay.mory.auth.dto.ChangePasswordRequest;
 import com.muicochay.mory.auth.dto.CreatePasswordRequest;
 import com.muicochay.mory.auth.dto.TokenPair;
 import com.muicochay.mory.auth.dto.signin.BlockedAuthProviderResponse;
@@ -19,7 +10,6 @@ import com.muicochay.mory.auth.enums.AuthProvider;
 import com.muicochay.mory.auth.enums.TokenType;
 import com.muicochay.mory.auth.helper.AuthHelper;
 import com.muicochay.mory.auth.repository.AuthUserRepository;
-import com.muicochay.mory.cache.constants.CacheNames;
 import com.muicochay.mory.otp.dto.EmailJob;
 import com.muicochay.mory.otp.enums.EmailTemplateType;
 import com.muicochay.mory.otp.service.EmailQueueService;
@@ -32,9 +22,16 @@ import com.muicochay.mory.shared.exception.global.InvalidResourceStateEx;
 import com.muicochay.mory.shared.exception.global.ResourcesNotFoundEx;
 import com.muicochay.mory.user.entity.User;
 import com.muicochay.mory.user.mapper.UserProfileMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +50,6 @@ public class DefaultAuthService {
 
     private final AppProperties appProperties;
 
-    @Cacheable(value = CacheNames.AUTH_USER_CACHE, key = "T(com.muicochay.mory.cache.util.CacheKeys).checkAuthKey(#userId)")
     public AuthUserResponse checkAuth(UUID userId, AuthProvider authProvider) {
         User user = authUserRepository.findById(userId)
                 .orElseThrow(() -> new ResourcesNotFoundEx("User not found with Id: " + userId));
@@ -131,7 +127,6 @@ public class DefaultAuthService {
             throw new BlockedAuthProviderEx("", response);
         }
         String link = resetPasswordRedisService.generateTokenAndLink(email);
-        System.out.println("link: " + link);
         Map<String, Object> vars = new HashMap<>();
         vars.put("resetLink", link);
         EmailJob emailJob = EmailJob.builder()
@@ -164,6 +159,41 @@ public class DefaultAuthService {
         }
         resetPasswordRedisService.deleteToken(token);
         authUserRepository.save(user);
+    }
+
+    @Transactional
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        User user = authUserRepository.findById(userId)
+                .orElseThrow(() -> new ResourcesNotFoundEx("User not found with id: " + userId));
+
+        if (!user.getProviders().contains(AuthProvider.EMAIL_PASSWORD)) {
+            BlockedAuthProviderResponse response = BlockedAuthProviderResponse.builder()
+                    .blockedProvider(AuthProvider.EMAIL_PASSWORD)
+                    .build();
+            throw new BlockedAuthProviderEx("", response);
+        }
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidResourceStateEx("Current password is incorrect");
+        }
+
+        if (!AuthHelper.isStrongPassword(request.getNewPassword())) {
+            throw new WeakPasswordEx("Weak password");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new SamePasswordEx(
+                    "The new password must not be the same as the current password.",
+                    true
+            );
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPasswordVerifiedAt(Instant.now());
+
+        authUserRepository.save(user);
+
+        refreshTokenRedisService.revokeAllTokens(userId);
     }
 
     public boolean checkEmail(String email) {

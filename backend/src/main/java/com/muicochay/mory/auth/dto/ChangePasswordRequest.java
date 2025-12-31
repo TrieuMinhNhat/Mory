@@ -1,5 +1,6 @@
 package com.muicochay.mory.auth.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CheckEmailRequest {
+public class ChangePasswordRequest {
 
-    private String email;
+    @NotBlank
+    private String currentPassword;
+    @NotBlank
+    private String newPassword;
 }

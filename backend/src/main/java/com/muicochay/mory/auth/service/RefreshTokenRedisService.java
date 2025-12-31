@@ -171,6 +171,25 @@ public class RefreshTokenRedisService {
         }
     }
 
+    public void revokeAllTokens(UUID userId) {
+        String userKey = userSessionKey(userId);
+
+        Set<Object> allTokens = redisTemplate.opsForZSet().range(userKey, 0, -1);
+        if (allTokens == null || allTokens.isEmpty()) {
+            return;
+        }
+
+        for (Object tokenObj : allTokens) {
+            String tokenId = tokenObj.toString();
+            revokeToken(userId, tokenId);
+        }
+
+        // Cleanup user session set
+        redisTemplate.delete(userKey);
+
+        log.info("Revoked all refresh tokens for user {}", userId);
+    }
+
     /**
      * Validate whether a refresh token is still valid (not revoked, not
      * expired, still linked to user).
